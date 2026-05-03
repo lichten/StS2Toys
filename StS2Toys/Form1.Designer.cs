@@ -14,137 +14,249 @@ namespace StS2Toys
         private void InitializeComponent()
         {
             panelTop = new Panel();
-            btnOpen = new Button();
+            lblUpdateFlash = new Label();
+            lblLastUpdated = new Label();
+            btnToggleAuto = new Button();
+            panelFileControls = new Panel();
             txtFilePath = new TextBox();
+            btnOpen = new Button();
             panelInfo = new Panel();
             lblInfo = new Label();
             splitContainer = new SplitContainer();
-            lblDeckTitle = new Label();
             listViewDeck = new ListView();
             colCardName = new ColumnHeader();
             colCardNameJa = new ColumnHeader();
             colCardCount = new ColumnHeader();
-            lblRelicsTitle = new Label();
+            lblDeckTitle = new Label();
             listViewRelics = new ListView();
             colRelicName = new ColumnHeader();
             colRelicNameJa = new ColumnHeader();
-
+            lblRelicsTitle = new Label();
             panelTop.SuspendLayout();
+            panelFileControls.SuspendLayout();
             panelInfo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer).BeginInit();
             splitContainer.Panel1.SuspendLayout();
             splitContainer.Panel2.SuspendLayout();
             splitContainer.SuspendLayout();
             SuspendLayout();
-
+            // 
             // panelTop
-            panelTop.Controls.Add(txtFilePath);
-            panelTop.Controls.Add(btnOpen);
+            // 
+            panelTop.Controls.Add(lblUpdateFlash);
+            panelTop.Controls.Add(lblLastUpdated);
+            panelTop.Controls.Add(btnToggleAuto);
+            panelTop.Controls.Add(panelFileControls);
             panelTop.Dock = DockStyle.Top;
-            panelTop.Height = 44;
+            panelTop.Location = new Point(0, 0);
+            panelTop.Name = "panelTop";
             panelTop.Padding = new Padding(8, 8, 8, 4);
-
-            // btnOpen
-            btnOpen.Text = "ファイルを開く";
-            btnOpen.Width = 110;
-            btnOpen.Dock = DockStyle.Left;
-            btnOpen.Click += BtnOpen_Click;
-
+            panelTop.Size = new Size(800, 44);
+            panelTop.TabIndex = 2;
+            // 
+            // lblUpdateFlash
+            // 
+            lblUpdateFlash.Dock = DockStyle.Fill;
+            lblUpdateFlash.ForeColor = Color.ForestGreen;
+            lblUpdateFlash.Location = new Point(253, 8);
+            lblUpdateFlash.Name = "lblUpdateFlash";
+            lblUpdateFlash.Size = new Size(179, 32);
+            lblUpdateFlash.TabIndex = 0;
+            lblUpdateFlash.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // lblLastUpdated
+            // 
+            lblLastUpdated.Dock = DockStyle.Left;
+            lblLastUpdated.Location = new Point(98, 8);
+            lblLastUpdated.Name = "lblLastUpdated";
+            lblLastUpdated.Padding = new Padding(8, 0, 0, 0);
+            lblLastUpdated.Size = new Size(155, 32);
+            lblLastUpdated.TabIndex = 1;
+            lblLastUpdated.Text = "最終更新: --:--:--";
+            lblLastUpdated.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // btnToggleAuto
+            // 
+            btnToggleAuto.Dock = DockStyle.Left;
+            btnToggleAuto.Location = new Point(8, 8);
+            btnToggleAuto.Name = "btnToggleAuto";
+            btnToggleAuto.Size = new Size(90, 32);
+            btnToggleAuto.TabIndex = 2;
+            btnToggleAuto.Text = "○ 自動更新";
+            btnToggleAuto.Click += BtnToggleAuto_Click;
+            // 
+            // panelFileControls
+            // 
+            panelFileControls.Controls.Add(txtFilePath);
+            panelFileControls.Controls.Add(btnOpen);
+            panelFileControls.Dock = DockStyle.Right;
+            panelFileControls.Location = new Point(432, 8);
+            panelFileControls.Name = "panelFileControls";
+            panelFileControls.Padding = new Padding(4, 0, 0, 0);
+            panelFileControls.Size = new Size(360, 32);
+            panelFileControls.TabIndex = 3;
+            // 
             // txtFilePath
+            // 
             txtFilePath.Dock = DockStyle.Fill;
+            txtFilePath.Location = new Point(4, 0);
+            txtFilePath.Name = "txtFilePath";
             txtFilePath.ReadOnly = true;
-            txtFilePath.Margin = new Padding(4, 0, 0, 0);
-
+            txtFilePath.Size = new Size(246, 31);
+            txtFilePath.TabIndex = 0;
+            // 
+            // btnOpen
+            // 
+            btnOpen.Dock = DockStyle.Right;
+            btnOpen.Location = new Point(250, 0);
+            btnOpen.Name = "btnOpen";
+            btnOpen.Size = new Size(110, 32);
+            btnOpen.TabIndex = 1;
+            btnOpen.Text = "ファイルを開く";
+            btnOpen.Click += BtnOpen_Click;
+            // 
             // panelInfo
+            // 
+            panelInfo.BackColor = SystemColors.ControlLight;
             panelInfo.Controls.Add(lblInfo);
             panelInfo.Dock = DockStyle.Top;
-            panelInfo.Height = 52;
+            panelInfo.Location = new Point(0, 44);
+            panelInfo.Name = "panelInfo";
             panelInfo.Padding = new Padding(10, 6, 8, 4);
-            panelInfo.BackColor = SystemColors.ControlLight;
-
+            panelInfo.Size = new Size(800, 52);
+            panelInfo.TabIndex = 1;
+            // 
             // lblInfo
+            // 
             lblInfo.Dock = DockStyle.Fill;
-            lblInfo.Font = new Font("Segoe UI", 10f);
+            lblInfo.Font = new Font("Segoe UI", 10F);
+            lblInfo.Location = new Point(10, 6);
+            lblInfo.Name = "lblInfo";
+            lblInfo.Size = new Size(782, 42);
+            lblInfo.TabIndex = 0;
             lblInfo.Text = "ファイルを開くと、ランの情報を表示します。";
-
+            // 
             // splitContainer
+            // 
             splitContainer.Dock = DockStyle.Fill;
-            splitContainer.SplitterDistance = 420;
-
-            // splitContainer.Panel1 (deck)
+            splitContainer.Location = new Point(0, 96);
+            splitContainer.Name = "splitContainer";
+            // 
+            // splitContainer.Panel1
+            // 
             splitContainer.Panel1.Controls.Add(listViewDeck);
             splitContainer.Panel1.Controls.Add(lblDeckTitle);
-
-            // lblDeckTitle
-            lblDeckTitle.Dock = DockStyle.Top;
-            lblDeckTitle.Height = 26;
-            lblDeckTitle.Padding = new Padding(4, 4, 0, 0);
-            lblDeckTitle.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
-            lblDeckTitle.Text = "デッキ";
-
-            // listViewDeck
-            listViewDeck.Dock = DockStyle.Fill;
-            listViewDeck.View = View.Details;
-            listViewDeck.FullRowSelect = true;
-            listViewDeck.GridLines = true;
-            listViewDeck.Columns.Add(colCardName);
-            listViewDeck.Columns.Add(colCardNameJa);
-            listViewDeck.Columns.Add(colCardCount);
-
-            listViewDeck.ItemActivate += ListViewDeck_ItemActivate;
-
-            colCardName.Text = "カード名 (EN)";
-            colCardName.Width = 180;
-            colCardNameJa.Text = "カード名 (JP)";
-            colCardNameJa.Width = 160;
-            colCardCount.Text = "枚数";
-            colCardCount.Width = 55;
-            colCardCount.TextAlign = HorizontalAlignment.Right;
-
-            // splitContainer.Panel2 (relics)
+            // 
+            // splitContainer.Panel2
+            // 
             splitContainer.Panel2.Controls.Add(listViewRelics);
             splitContainer.Panel2.Controls.Add(lblRelicsTitle);
-
-            // lblRelicsTitle
-            lblRelicsTitle.Dock = DockStyle.Top;
-            lblRelicsTitle.Height = 26;
-            lblRelicsTitle.Padding = new Padding(4, 4, 0, 0);
-            lblRelicsTitle.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
-            lblRelicsTitle.Text = "レリック";
-
+            splitContainer.Size = new Size(800, 424);
+            splitContainer.SplitterDistance = 645;
+            splitContainer.TabIndex = 0;
+            // 
+            // listViewDeck
+            // 
+            listViewDeck.Columns.AddRange(new ColumnHeader[] { colCardName, colCardNameJa, colCardCount });
+            listViewDeck.Dock = DockStyle.Fill;
+            listViewDeck.FullRowSelect = true;
+            listViewDeck.GridLines = true;
+            listViewDeck.Location = new Point(0, 26);
+            listViewDeck.Name = "listViewDeck";
+            listViewDeck.Size = new Size(645, 398);
+            listViewDeck.TabIndex = 0;
+            listViewDeck.UseCompatibleStateImageBehavior = false;
+            listViewDeck.View = View.Details;
+            listViewDeck.ItemActivate += ListViewDeck_ItemActivate;
+            // 
+            // colCardName
+            // 
+            colCardName.Text = "カード名 (EN)";
+            colCardName.Width = 180;
+            // 
+            // colCardNameJa
+            // 
+            colCardNameJa.Text = "カード名 (JP)";
+            colCardNameJa.Width = 160;
+            // 
+            // colCardCount
+            // 
+            colCardCount.Text = "枚数";
+            colCardCount.TextAlign = HorizontalAlignment.Right;
+            colCardCount.Width = 55;
+            // 
+            // lblDeckTitle
+            // 
+            lblDeckTitle.Dock = DockStyle.Top;
+            lblDeckTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblDeckTitle.Location = new Point(0, 0);
+            lblDeckTitle.Name = "lblDeckTitle";
+            lblDeckTitle.Padding = new Padding(4, 4, 0, 0);
+            lblDeckTitle.Size = new Size(645, 26);
+            lblDeckTitle.TabIndex = 1;
+            lblDeckTitle.Text = "デッキ";
+            // 
             // listViewRelics
+            // 
+            listViewRelics.Columns.AddRange(new ColumnHeader[] { colRelicName, colRelicNameJa });
             listViewRelics.Dock = DockStyle.Fill;
-            listViewRelics.View = View.Details;
             listViewRelics.FullRowSelect = true;
             listViewRelics.GridLines = true;
-            listViewRelics.Columns.Add(colRelicName);
-            listViewRelics.Columns.Add(colRelicNameJa);
-
+            listViewRelics.Location = new Point(0, 26);
+            listViewRelics.Name = "listViewRelics";
+            listViewRelics.Size = new Size(151, 398);
+            listViewRelics.TabIndex = 0;
+            listViewRelics.UseCompatibleStateImageBehavior = false;
+            listViewRelics.View = View.Details;
             listViewRelics.ItemActivate += ListViewRelics_ItemActivate;
-
+            // 
+            // colRelicName
+            // 
             colRelicName.Text = "レリック名 (EN)";
             colRelicName.Width = 160;
+            // 
+            // colRelicNameJa
+            // 
             colRelicNameJa.Text = "レリック名 (JP)";
             colRelicNameJa.Width = 140;
-
+            // 
+            // lblRelicsTitle
+            // 
+            lblRelicsTitle.Dock = DockStyle.Top;
+            lblRelicsTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblRelicsTitle.Location = new Point(0, 0);
+            lblRelicsTitle.Name = "lblRelicsTitle";
+            lblRelicsTitle.Padding = new Padding(4, 4, 0, 0);
+            lblRelicsTitle.Size = new Size(151, 26);
+            lblRelicsTitle.TabIndex = 1;
+            lblRelicsTitle.Text = "レリック";
+            // 
             // Form1
+            // 
+            AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 520);
-            Text = "StS2 Deck Viewer";
             Controls.Add(splitContainer);
             Controls.Add(panelInfo);
             Controls.Add(panelTop);
-
-            panelTop.ResumeLayout();
-            panelInfo.ResumeLayout();
-            splitContainer.Panel1.ResumeLayout();
-            splitContainer.Panel2.ResumeLayout();
+            Name = "Form1";
+            Text = "StS2 Deck Viewer";
+            panelTop.ResumeLayout(false);
+            panelFileControls.ResumeLayout(false);
+            panelFileControls.PerformLayout();
+            panelInfo.ResumeLayout(false);
+            splitContainer.Panel1.ResumeLayout(false);
+            splitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer).EndInit();
-            splitContainer.ResumeLayout();
-            ResumeLayout();
+            splitContainer.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         private Panel panelTop;
+        private Panel panelFileControls;
+        private Button btnToggleAuto;
+        private Label lblLastUpdated;
+        private Label lblUpdateFlash;
         private Button btnOpen;
         private TextBox txtFilePath;
         private Panel panelInfo;

@@ -5,11 +5,17 @@ namespace StS2Toys
 {
     public partial class Form1 : Form
     {
+        private FileSystemWatcher? _watcher;
+        private readonly System.Windows.Forms.Timer _reloadTimer = new() { Interval = 500 };
+        private readonly System.Windows.Forms.Timer _flashTimer = new() { Interval = 2000 };
+
         public Form1()
         {
             InitializeComponent();
             Load += Form1_Load;
             FormClosing += Form1_FormClosing;
+            _reloadTimer.Tick += (_, _) => { _reloadTimer.Stop(); ReloadCurrentFile(); };
+            _flashTimer.Tick += (_, _) => { _flashTimer.Stop(); lblUpdateFlash.Text = ""; };
         }
 
         void Form1_Load(object? sender, EventArgs e)
@@ -23,6 +29,9 @@ namespace StS2Toys
         void Form1_FormClosing(object? sender, FormClosingEventArgs e)
         {
             SaveWindowSettings();
+            StopWatching();
+            _reloadTimer.Dispose();
+            _flashTimer.Dispose();
         }
 
         void RestoreWindowSettings()
@@ -64,6 +73,14 @@ namespace StS2Toys
                 OpenFile(dialog.FileName);
         }
 
+        void BtnToggleAuto_Click(object? sender, EventArgs e)
+        {
+            if (_watcher != null)
+                StopWatching();
+            else if (!string.IsNullOrEmpty(txtFilePath.Text))
+                StartWatching(txtFilePath.Text);
+        }
+
         void OpenFile(string path)
         {
             try
@@ -71,11 +88,63 @@ namespace StS2Toys
                 var data = SaveDataService.Load(path);
                 txtFilePath.Text = path;
                 DisplayData(data);
+                lblLastUpdated.Text = $"最終更新: {DateTime.Now:HH:mm:ss}";
+                StartWatching(path);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"読み込みエラー:\n{ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        void StartWatching(string path)
+        {
+            _watcher?.Dispose();
+            _watcher = new FileSystemWatcher(Path.GetDirectoryName(path)!, Path.GetFileName(path)!)
+            {
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size,
+                EnableRaisingEvents = true,
+            };
+            _watcher.Changed += OnFileChanged;
+            UpdateAutoButton(watching: true);
+        }
+
+        void StopWatching()
+        {
+            _watcher?.Dispose();
+            _watcher = null;
+            UpdateAutoButton(watching: false);
+        }
+
+        void OnFileChanged(object sender, FileSystemEventArgs e)
+        {
+            // FileSystemWatcher は非UIスレッドから発火するため Invoke が必要。
+            // 連続イベントをデバウンスするためタイマーをリセットする。
+            Invoke(() => { _reloadTimer.Stop(); _reloadTimer.Start(); });
+        }
+
+        void ReloadCurrentFile()
+        {
+            if (string.IsNullOrEmpty(txtFilePath.Text)) return;
+            try
+            {
+                var data = SaveDataService.Load(txtFilePath.Text);
+                DisplayData(data);
+                lblLastUpdated.Text = $"最終更新: {DateTime.Now:HH:mm:ss}";
+                lblUpdateFlash.Text = "✓ 更新しました";
+                _flashTimer.Stop();
+                _flashTimer.Start();
+            }
+            catch
+            {
+                // ゲームがファイルを書き込み中の場合は無視（次の変更イベントで再試行される）
+            }
+        }
+
+        void UpdateAutoButton(bool watching)
+        {
+            btnToggleAuto.Text = watching ? "● 監視中" : "○ 自動更新";
+            btnToggleAuto.ForeColor = watching ? Color.DarkGreen : SystemColors.ControlText;
         }
 
         void DisplayData(RunSaveData data)
