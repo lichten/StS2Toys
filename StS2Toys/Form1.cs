@@ -9,13 +9,46 @@ namespace StS2Toys
         {
             InitializeComponent();
             Load += Form1_Load;
+            FormClosing += Form1_FormClosing;
         }
 
         void Form1_Load(object? sender, EventArgs e)
         {
+            RestoreWindowSettings();
             var defaultPath = SaveDataService.GetDefaultSavePath();
             if (File.Exists(defaultPath))
                 OpenFile(defaultPath);
+        }
+
+        void Form1_FormClosing(object? sender, FormClosingEventArgs e)
+        {
+            SaveWindowSettings();
+        }
+
+        void RestoreWindowSettings()
+        {
+            var settings = WindowSettingsService.Load();
+            if (settings is null) return;
+
+            var savedBounds = new Rectangle(settings.X, settings.Y, settings.Width, settings.Height);
+            var isVisible = Screen.AllScreens.Any(s => s.WorkingArea.IntersectsWith(savedBounds));
+            if (!isVisible) return;
+
+            StartPosition = FormStartPosition.Manual;
+            Bounds = savedBounds;
+
+            if (settings.State == nameof(FormWindowState.Maximized))
+                WindowState = FormWindowState.Maximized;
+        }
+
+        void SaveWindowSettings()
+        {
+            // 最小化中に終了した場合は Normal として扱う
+            var state = WindowState == FormWindowState.Minimized ? FormWindowState.Normal : WindowState;
+            var bounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
+            WindowSettingsService.Save(new WindowSettings(
+                bounds.X, bounds.Y, bounds.Width, bounds.Height,
+                state.ToString()));
         }
 
         void BtnOpen_Click(object? sender, EventArgs e)
