@@ -9,6 +9,13 @@ namespace StS2Toys
         private readonly System.Windows.Forms.Timer _reloadTimer = new() { Interval = 500 };
         private readonly System.Windows.Forms.Timer _flashTimer = new() { Interval = 2000 };
 
+        // デッキリストのソート状態
+        private int _sortColumn = -1;
+        private bool _sortAscending = true;
+
+        // カラムヘッダーのベーステキスト（種別カラムは index 2、枚数は index 3）
+        private static readonly string[] DeckColumnTexts = ["カード名 (EN)", "カード名 (JP)", "種別", "枚数"];
+
         public Form1()
         {
             InitializeComponent();
@@ -211,6 +218,23 @@ namespace StS2Toys
             listViewRelics.EndUpdate();
         }
 
+        void ListViewDeck_ColumnClick(object? sender, ColumnClickEventArgs e)
+        {
+            if (_sortColumn == e.Column)
+                _sortAscending = !_sortAscending;
+            else
+            {
+                _sortColumn = e.Column;
+                _sortAscending = true;
+            }
+
+            for (int i = 0; i < listViewDeck.Columns.Count; i++)
+                listViewDeck.Columns[i].Text = DeckColumnTexts[i] +
+                    (i == _sortColumn ? (_sortAscending ? " ▲" : " ▼") : "");
+
+            listViewDeck.ListViewItemSorter = new DeckItemComparer(_sortColumn, _sortAscending);
+        }
+
         static string LocalizeType(string type) => type switch
         {
             "Attack" => "アタック",
@@ -236,6 +260,24 @@ namespace StS2Toys
             if (listViewRelics.SelectedItems[0].Tag is not string id) return;
             using var dlg = new CardDetailForm(id, isRelic: true);
             dlg.ShowDialog(this);
+        }
+    }
+
+    sealed class DeckItemComparer(int column, bool ascending) : System.Collections.IComparer
+    {
+        // 枚数カラム (index 3) は数値、それ以外は文字列比較
+        public int Compare(object? x, object? y)
+        {
+            var a = (ListViewItem)x!;
+            var b = (ListViewItem)y!;
+            string sa = column < a.SubItems.Count ? a.SubItems[column].Text : "";
+            string sb = column < b.SubItems.Count ? b.SubItems[column].Text : "";
+
+            int result = column == 3 && int.TryParse(sa, out int ia) && int.TryParse(sb, out int ib)
+                ? ia.CompareTo(ib)
+                : string.Compare(sa, sb, StringComparison.CurrentCulture);
+
+            return ascending ? result : -result;
         }
     }
 }

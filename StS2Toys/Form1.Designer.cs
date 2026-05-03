@@ -168,6 +168,7 @@ namespace StS2Toys
             listViewDeck.TabIndex = 0;
             listViewDeck.UseCompatibleStateImageBehavior = false;
             listViewDeck.View = View.Details;
+            listViewDeck.ColumnClick += ListViewDeck_ColumnClick;
             listViewDeck.ItemActivate += ListViewDeck_ItemActivate;
             // 
             // colCardName
