@@ -8,6 +8,7 @@ static class CardDatabaseService
     record Entry(string En, string Ja);
 
     static readonly Dictionary<string, Entry> _db = Load();
+    static readonly Dictionary<string, string> _types = LoadTypes();
 
     static Dictionary<string, Entry> Load()
     {
@@ -26,6 +27,27 @@ static class CardDatabaseService
             result[prop.Name] = new Entry(en, ja);
         }
         return result;
+    }
+
+    static Dictionary<string, string> LoadTypes()
+    {
+        var asm = Assembly.GetExecutingAssembly();
+        var name = asm.GetManifestResourceNames()
+            .FirstOrDefault(n => n.EndsWith("card_types.json"));
+        if (name is null) return new Dictionary<string, string>();
+
+        using var stream = asm.GetManifestResourceStream(name)!;
+        var doc = JsonDocument.Parse(stream);
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var prop in doc.RootElement.EnumerateObject())
+            result[prop.Name] = prop.Value.GetString() ?? "";
+        return result;
+    }
+
+    public static string GetCardType(string id)
+    {
+        _types.TryGetValue(id, out var type);
+        return type ?? "";
     }
 
     public static string GetName(string id, bool japanese = false)

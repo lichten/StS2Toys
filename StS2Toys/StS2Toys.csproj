@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\card_database.json" />
+    <EmbeddedResource Include="Resources\card_types.json" />
     <EmbeddedResource Include="..\tools\extracted\localization\eng\cards.json"
                       LogicalName="StS2Toys.localization.eng.cards.json" />
     <EmbeddedResource Include="..\tools\extracted\localization\jpn\cards.json"

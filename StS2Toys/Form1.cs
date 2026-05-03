@@ -175,6 +175,7 @@ namespace StS2Toys
                     Id:    g.Key,
                     En:    CardDatabaseService.GetName(g.Key, japanese: false),
                     Ja:    CardDatabaseService.GetName(g.Key, japanese: true),
+                    Type:  CardDatabaseService.GetCardType(g.Key),
                     Count: g.Count()))
                 .ToList();
 
@@ -182,10 +183,11 @@ namespace StS2Toys
 
             listViewDeck.BeginUpdate();
             listViewDeck.Items.Clear();
-            foreach (var (id, en, ja, count) in grouped)
+            foreach (var (id, en, ja, type, count) in grouped)
             {
                 var item = new ListViewItem(en);
                 item.SubItems.Add(ja);
+                item.SubItems.Add(LocalizeType(type));
                 item.SubItems.Add(count.ToString());
                 item.Tag = id;
                 listViewDeck.Items.Add(item);
@@ -208,6 +210,17 @@ namespace StS2Toys
             }
             listViewRelics.EndUpdate();
         }
+
+        static string LocalizeType(string type) => type switch
+        {
+            "Attack" => "アタック",
+            "Skill"  => "スキル",
+            "Power"  => "パワー",
+            "Status" => "状態",
+            "Curse"  => "呪い",
+            "Quest"  => "クエスト",
+            _        => type
+        };
 
         void ListViewDeck_ItemActivate(object? sender, EventArgs e)
         {
