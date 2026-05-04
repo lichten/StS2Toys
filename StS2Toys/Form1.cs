@@ -8,6 +8,10 @@ namespace StS2Toys
         private FileSystemWatcher? _watcher;
         private readonly System.Windows.Forms.Timer _reloadTimer = new() { Interval = 500 };
         private readonly System.Windows.Forms.Timer _flashTimer = new() { Interval = 2000 };
+        private CardImageViewerForm? _imageViewer;
+        private CardDetailForm? _detailViewer;
+        private SubWindowSettings? _imageViewerSettings;
+        private SubWindowSettings? _cardDetailSettings;
 
         // デッキリストのソート状態
         private int _sortColumn = -1;
@@ -39,32 +43,58 @@ namespace StS2Toys
             StopWatching();
             _reloadTimer.Dispose();
             _flashTimer.Dispose();
+            _imageViewer?.Close();
+            _detailViewer?.Close();
         }
 
         void RestoreWindowSettings()
         {
-            var settings = WindowSettingsService.Load();
-            if (settings is null) return;
+            var app = WindowSettingsService.Load();
+            _imageViewerSettings = app.ImageViewer;
+            _cardDetailSettings = app.CardDetail;
 
-            var savedBounds = new Rectangle(settings.X, settings.Y, settings.Width, settings.Height);
-            var isVisible = Screen.AllScreens.Any(s => s.WorkingArea.IntersectsWith(savedBounds));
-            if (!isVisible) return;
+            var main = app.Main;
+            if (main is null) return;
+
+            var savedBounds = new Rectangle(main.X, main.Y, main.Width, main.Height);
+            if (!Screen.AllScreens.Any(s => s.WorkingArea.IntersectsWith(savedBounds))) return;
 
             StartPosition = FormStartPosition.Manual;
             Bounds = savedBounds;
 
-            if (settings.State == nameof(FormWindowState.Maximized))
+            if (main.State == nameof(FormWindowState.Maximized))
                 WindowState = FormWindowState.Maximized;
         }
 
         void SaveWindowSettings()
         {
-            // 最小化中に終了した場合は Normal として扱う
+            if (_imageViewer is { IsDisposed: false })
+                _imageViewerSettings = BoundsToSub(_imageViewer.Bounds);
+            if (_detailViewer is { IsDisposed: false })
+                _cardDetailSettings = BoundsToSub(_detailViewer.Bounds);
+
             var state = WindowState == FormWindowState.Minimized ? FormWindowState.Normal : WindowState;
             var bounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
-            WindowSettingsService.Save(new WindowSettings(
-                bounds.X, bounds.Y, bounds.Width, bounds.Height,
-                state.ToString()));
+            var main = new WindowSettings(bounds.X, bounds.Y, bounds.Width, bounds.Height, state.ToString());
+            WindowSettingsService.Save(new AppSettings(main, _imageViewerSettings, _cardDetailSettings));
+        }
+
+        static SubWindowSettings BoundsToSub(Rectangle r) => new(r.X, r.Y, r.Width, r.Height);
+
+        void ApplySubWindowSettings(Form form, SubWindowSettings? s, Point defaultLocation)
+        {
+            form.StartPosition = FormStartPosition.Manual;
+            if (s is not null)
+            {
+                var bounds = new Rectangle(s.X, s.Y, s.Width, s.Height);
+                if (Screen.AllScreens.Any(sc => sc.WorkingArea.IntersectsWith(bounds)))
+                {
+                    form.Location = new Point(s.X, s.Y);
+                    form.Size = new Size(s.Width, s.Height);
+                    return;
+                }
+            }
+            form.Location = defaultLocation;
         }
 
         void BtnOpen_Click(object? sender, EventArgs e)
@@ -246,20 +276,92 @@ namespace StS2Toys
             _        => type
         };
 
-        void ListViewDeck_ItemActivate(object? sender, EventArgs e)
+        void BtnImageViewer_Click(object? sender, EventArgs e)
+        {
+            if (_imageViewer is null || _imageViewer.IsDisposed || !_imageViewer.Visible)
+            {
+                if (_imageViewer is null || _imageViewer.IsDisposed)
+                {
+                    _imageViewer = new CardImageViewerForm();
+                    ApplySubWindowSettings(_imageViewer, _imageViewerSettings, new Point(Right + 4, Top));
+                    _imageViewer.FormClosed += (_, _) =>
+                    {
+                        _imageViewerSettings = BoundsToSub(_imageViewer.Bounds);
+                        UpdateImageViewerButton(false);
+                    };
+                }
+                _imageViewer.Show(this);
+                UpdateImageViewerButton(true);
+
+                if (listViewDeck.SelectedItems.Count > 0 &&
+                    listViewDeck.SelectedItems[0].Tag is string id)
+                    _imageViewer.ShowCard(id);
+            }
+            else
+            {
+                _imageViewer.Hide();
+                UpdateImageViewerButton(false);
+            }
+        }
+
+        void UpdateImageViewerButton(bool visible)
+        {
+            btnImageViewer.Text = visible ? "● 画像ビューア" : "○ 画像ビューア";
+            btnImageViewer.ForeColor = visible ? Color.DarkBlue : SystemColors.ControlText;
+        }
+
+        void BtnCardDetail_Click(object? sender, EventArgs e)
+        {
+            if (_detailViewer is null || _detailViewer.IsDisposed || !_detailViewer.Visible)
+            {
+                if (_detailViewer is null || _detailViewer.IsDisposed)
+                {
+                    _detailViewer = new CardDetailForm();
+                    ApplySubWindowSettings(_detailViewer, _cardDetailSettings, new Point(Right + 4, Top));
+                    _detailViewer.FormClosed += (_, _) =>
+                    {
+                        _cardDetailSettings = BoundsToSub(_detailViewer.Bounds);
+                        UpdateCardDetailButton(false);
+                    };
+                }
+                _detailViewer.Show(this);
+                UpdateCardDetailButton(true);
+
+                if (listViewDeck.SelectedItems.Count > 0 && listViewDeck.SelectedItems[0].Tag is string deckId)
+                    _detailViewer.UpdateCard(deckId, isRelic: false);
+                else if (listViewRelics.SelectedItems.Count > 0 && listViewRelics.SelectedItems[0].Tag is string relicId)
+                    _detailViewer.UpdateCard(relicId, isRelic: true);
+            }
+            else
+            {
+                _detailViewer.Hide();
+                UpdateCardDetailButton(false);
+            }
+        }
+
+        void UpdateCardDetailButton(bool visible)
+        {
+            btnCardDetail.Text = visible ? "● カード詳細" : "○ カード詳細";
+            btnCardDetail.ForeColor = visible ? Color.DarkGreen : SystemColors.ControlText;
+        }
+
+        void ListViewDeck_SelectedIndexChanged(object? sender, EventArgs e)
         {
             if (listViewDeck.SelectedItems.Count == 0) return;
             if (listViewDeck.SelectedItems[0].Tag is not string id) return;
-            using var dlg = new CardDetailForm(id, isRelic: false);
-            dlg.ShowDialog(this);
+
+            if (_imageViewer is { IsDisposed: false } iv && iv.Visible)
+                iv.ShowCard(id);
+            if (_detailViewer is { IsDisposed: false } dv && dv.Visible)
+                dv.UpdateCard(id, isRelic: false);
         }
 
-        void ListViewRelics_ItemActivate(object? sender, EventArgs e)
+        void ListViewRelics_SelectedIndexChanged(object? sender, EventArgs e)
         {
+            if (_detailViewer is null || _detailViewer.IsDisposed || !_detailViewer.Visible) return;
             if (listViewRelics.SelectedItems.Count == 0) return;
             if (listViewRelics.SelectedItems[0].Tag is not string id) return;
-            using var dlg = new CardDetailForm(id, isRelic: true);
-            dlg.ShowDialog(this);
+            _detailViewer.UpdateCard(id, isRelic: true);
         }
     }
 

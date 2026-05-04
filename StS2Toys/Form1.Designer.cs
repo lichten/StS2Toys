@@ -16,6 +16,8 @@ namespace StS2Toys
             panelTop = new Panel();
             lblUpdateFlash = new Label();
             lblLastUpdated = new Label();
+            btnCardDetail = new Button();
+            btnImageViewer = new Button();
             btnToggleAuto = new Button();
             panelFileControls = new Panel();
             txtFilePath = new TextBox();
@@ -46,6 +48,8 @@ namespace StS2Toys
             // 
             panelTop.Controls.Add(lblUpdateFlash);
             panelTop.Controls.Add(lblLastUpdated);
+            panelTop.Controls.Add(btnCardDetail);
+            panelTop.Controls.Add(btnImageViewer);
             panelTop.Controls.Add(btnToggleAuto);
             panelTop.Controls.Add(panelFileControls);
             panelTop.Dock = DockStyle.Top;
@@ -59,22 +63,42 @@ namespace StS2Toys
             // 
             lblUpdateFlash.Dock = DockStyle.Fill;
             lblUpdateFlash.ForeColor = Color.ForestGreen;
-            lblUpdateFlash.Location = new Point(253, 8);
+            lblUpdateFlash.Location = new Point(463, 8);
             lblUpdateFlash.Name = "lblUpdateFlash";
-            lblUpdateFlash.Size = new Size(179, 32);
+            lblUpdateFlash.Size = new Size(0, 32);
             lblUpdateFlash.TabIndex = 0;
             lblUpdateFlash.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lblLastUpdated
             // 
             lblLastUpdated.Dock = DockStyle.Left;
-            lblLastUpdated.Location = new Point(98, 8);
+            lblLastUpdated.Location = new Point(308, 8);
             lblLastUpdated.Name = "lblLastUpdated";
             lblLastUpdated.Padding = new Padding(8, 0, 0, 0);
             lblLastUpdated.Size = new Size(155, 32);
             lblLastUpdated.TabIndex = 1;
             lblLastUpdated.Text = "最終更新: --:--:--";
             lblLastUpdated.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // btnCardDetail
+            // 
+            btnCardDetail.Dock = DockStyle.Left;
+            btnCardDetail.Location = new Point(208, 8);
+            btnCardDetail.Name = "btnCardDetail";
+            btnCardDetail.Size = new Size(100, 32);
+            btnCardDetail.TabIndex = 4;
+            btnCardDetail.Text = "○ カード詳細";
+            btnCardDetail.Click += BtnCardDetail_Click;
+            // 
+            // btnImageViewer
+            // 
+            btnImageViewer.Dock = DockStyle.Left;
+            btnImageViewer.Location = new Point(98, 8);
+            btnImageViewer.Name = "btnImageViewer";
+            btnImageViewer.Size = new Size(110, 32);
+            btnImageViewer.TabIndex = 3;
+            btnImageViewer.Text = "○ 画像ビューア";
+            btnImageViewer.Click += BtnImageViewer_Click;
             // 
             // btnToggleAuto
             // 
@@ -169,7 +193,7 @@ namespace StS2Toys
             listViewDeck.UseCompatibleStateImageBehavior = false;
             listViewDeck.View = View.Details;
             listViewDeck.ColumnClick += ListViewDeck_ColumnClick;
-            listViewDeck.ItemActivate += ListViewDeck_ItemActivate;
+            listViewDeck.SelectedIndexChanged += ListViewDeck_SelectedIndexChanged;
             // 
             // colCardName
             // 
@@ -180,12 +204,12 @@ namespace StS2Toys
             // 
             colCardNameJa.Text = "カード名 (JP)";
             colCardNameJa.Width = 160;
-            //
+            // 
             // colCardType
-            //
+            // 
             colCardType.Text = "種別";
             colCardType.Width = 65;
-            //
+            // 
             // colCardCount
             // 
             colCardCount.Text = "枚数";
@@ -215,7 +239,7 @@ namespace StS2Toys
             listViewRelics.TabIndex = 0;
             listViewRelics.UseCompatibleStateImageBehavior = false;
             listViewRelics.View = View.Details;
-            listViewRelics.ItemActivate += ListViewRelics_ItemActivate;
+            listViewRelics.SelectedIndexChanged += ListViewRelics_SelectedIndexChanged;
             // 
             // colRelicName
             // 
@@ -261,6 +285,8 @@ namespace StS2Toys
 
         private Panel panelTop;
         private Panel panelFileControls;
+        private Button btnCardDetail;
+        private Button btnImageViewer;
         private Button btnToggleAuto;
         private Label lblLastUpdated;
         private Label lblUpdateFlash;

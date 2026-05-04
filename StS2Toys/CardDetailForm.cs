@@ -4,10 +4,14 @@ namespace StS2Toys;
 
 public partial class CardDetailForm : Form
 {
-    public CardDetailForm(string id, bool isRelic)
+    public CardDetailForm()
     {
         InitializeComponent();
+        btnClose.Click += (_, _) => Close();
+    }
 
+    public void UpdateCard(string id, bool isRelic)
+    {
         var en = CardDatabaseService.GetName(id, japanese: false);
         var ja = CardDatabaseService.GetName(id, japanese: true);
         lblTitle.Text = $"{en}  /  {ja}";
@@ -24,15 +28,25 @@ public partial class CardDetailForm : Form
             rtbFlavor.Visible = true;
             rtbFlavor.Text    = $"{f.En}\n\n{f.Ja}";
 
-            // 3つの RichTextBox を等分に再配分
             tableLayout.RowStyles[2].Height = 33.3f;
             tableLayout.RowStyles[4].Height = 33.3f;
             tableLayout.RowStyles[5].SizeType = SizeType.AutoSize;
-            tableLayout.RowStyles[5].Height = 0f;
+            tableLayout.RowStyles[5].Height   = 0f;
             tableLayout.RowStyles[6].SizeType = SizeType.Percent;
-            tableLayout.RowStyles[6].Height = 33.4f;
+            tableLayout.RowStyles[6].Height   = 33.4f;
         }
+        else
+        {
+            lblFlavor.Visible = false;
+            rtbFlavor.Visible = false;
+            rtbFlavor.Text    = "";
 
-        btnClose.Click += (_, _) => Close();
+            tableLayout.RowStyles[2].Height   = 50f;
+            tableLayout.RowStyles[4].Height   = 50f;
+            tableLayout.RowStyles[5].SizeType = SizeType.Absolute;
+            tableLayout.RowStyles[5].Height   = 0f;
+            tableLayout.RowStyles[6].SizeType = SizeType.Absolute;
+            tableLayout.RowStyles[6].Height   = 0f;
+        }
     }
 }

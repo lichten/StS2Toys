@@ -3,6 +3,11 @@ using System.Text.Json;
 namespace StS2Toys.Services;
 
 record WindowSettings(int X, int Y, int Width, int Height, string State);
+record SubWindowSettings(int X, int Y, int Width, int Height);
+record AppSettings(
+    WindowSettings? Main = null,
+    SubWindowSettings? ImageViewer = null,
+    SubWindowSettings? CardDetail = null);
 
 static class WindowSettingsService
 {
@@ -12,21 +17,21 @@ static class WindowSettingsService
 
     static readonly JsonSerializerOptions Options = new() { WriteIndented = true };
 
-    public static WindowSettings? Load()
+    public static AppSettings Load()
     {
-        if (!File.Exists(SettingsPath)) return null;
+        if (!File.Exists(SettingsPath)) return new AppSettings();
         try
         {
             using var stream = File.OpenRead(SettingsPath);
-            return JsonSerializer.Deserialize<WindowSettings>(stream, Options);
+            return JsonSerializer.Deserialize<AppSettings>(stream, Options) ?? new AppSettings();
         }
         catch
         {
-            return null;
+            return new AppSettings();
         }
     }
 
-    public static void Save(WindowSettings settings)
+    public static void Save(AppSettings settings)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(SettingsPath)!);
         using var stream = File.Create(SettingsPath);
