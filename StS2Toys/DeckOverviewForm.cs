@@ -280,19 +280,33 @@ public partial class DeckOverviewForm : Form
     {
         var cacheKey = cardId + "|" + type;
         if (_imageCache.TryGetValue(cacheKey, out var cached)) return cached;
+
         var path = CardImageViewerForm.FindCardImage(cardId, type);
-        if (path is null) { _imageCache[cacheKey] = null; return null; }
-        try
+        if (path is not null)
         {
-            using var original = Image.FromFile(path);
-            var thumb = new Bitmap(CardW, CardH);
-            using var tg = Graphics.FromImage(thumb);
-            tg.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            tg.DrawImage(original, 0, 0, CardW, CardH);
-            _imageCache[cacheKey] = thumb;
-            return thumb;
+            try
+            {
+                using var original = Image.FromFile(path);
+                return CacheThumb(cacheKey, original);
+            }
+            catch { }
         }
-        catch { _imageCache[cardId] = null; return null; }
+
+        // フォールバック: カードアトラスから取得
+        var atlasBmp = Services.CardAtlasService.GetCardBitmap(cardId);
+        if (atlasBmp is null) { _imageCache[cacheKey] = null; return null; }
+        try { return CacheThumb(cacheKey, atlasBmp); }
+        catch { _imageCache[cacheKey] = null; return null; }
+    }
+
+    Bitmap? CacheThumb(string cacheKey, Image source)
+    {
+        var thumb = new Bitmap(CardW, CardH);
+        using var tg = Graphics.FromImage(thumb);
+        tg.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+        tg.DrawImage(source, 0, 0, CardW, CardH);
+        _imageCache[cacheKey] = thumb;
+        return thumb;
     }
 
     static int TypeOrder(string type) => type switch

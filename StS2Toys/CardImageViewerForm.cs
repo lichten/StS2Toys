@@ -14,8 +14,21 @@ public partial class CardImageViewerForm : Form
     public void ShowCard(string cardId, string? typeHint = null)
     {
         var oldImage = pictureBox.Image;
+
         var imagePath = FindCardImage(cardId, typeHint);
-        pictureBox.Image = imagePath != null ? Image.FromFile(imagePath) : null;
+        Image? newImage;
+        if (imagePath is not null)
+        {
+            newImage = Image.FromFile(imagePath);
+        }
+        else
+        {
+            // フォールバック: カードアトラスから取得（コピーして独立した所有権を確保）
+            var atlasBmp = Services.CardAtlasService.GetCardBitmap(cardId);
+            newImage = atlasBmp is not null ? new Bitmap(atlasBmp) : null;
+        }
+
+        pictureBox.Image = newImage;
         oldImage?.Dispose();
         pictureBox.Invalidate();
     }
