@@ -150,8 +150,8 @@ public partial class DeckOverviewForm : Form
 
         if (card.IsUpgraded)
         {
-            using var goldPen = new Pen(Color.FromArgb(200, 180, 120, 0), 1.5f);
-            g.DrawRectangle(goldPen, rect);
+            using var outerPen = new Pen(Color.FromArgb(255, 220, 30, 30), 3f);
+            g.DrawRectangle(outerPen, rect);
             DrawUpgradeBadge(g, rect);
         }
         else
@@ -166,10 +166,15 @@ public partial class DeckOverviewForm : Form
 
     static void DrawUpgradeBadge(Graphics g, Rectangle cardRect)
     {
-        var r = new Rectangle(cardRect.Right - 24, cardRect.Y + 2, 22, 22);
-        using var bg = new SolidBrush(Color.FromArgb(210, 180, 140, 0));
+        var r = new Rectangle(cardRect.Right - 26, cardRect.Y + 2, 24, 24);
+        // 白縁
+        using var outline = new Pen(Color.White, 2f);
+        g.DrawEllipse(outline, r);
+        // 赤背景
+        using var bg = new SolidBrush(Color.FromArgb(230, 210, 20, 20));
         g.FillEllipse(bg, r);
-        using var font = new Font("Segoe UI", 9f, FontStyle.Bold);
+        // 「+」テキスト
+        using var font = new Font("Segoe UI", 10f, FontStyle.Bold);
         using var fg = new SolidBrush(Color.White);
         using var fmt = new StringFormat
         {
