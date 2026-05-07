@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace StS2Toys.Services;
 
 record WindowSettings(int X, int Y, int Width, int Height, string State);
-record SubWindowSettings(int X, int Y, int Width, int Height);
+record SubWindowSettings(int X, int Y, int Width, int Height, bool Visible = false);
 record AppSettings(
     WindowSettings? Main = null,
     SubWindowSettings? ImageViewer = null,

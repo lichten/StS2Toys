@@ -45,7 +45,10 @@ namespace StS2Toys
             RestoreWindowSettings();
             var defaultPath = SaveDataService.GetDefaultSavePath();
             if (File.Exists(defaultPath))
+            {
                 OpenFile(defaultPath);
+                RestoreSubWindowVisibility();
+            }
         }
 
         void Form1_FormClosing(object? sender, FormClosingEventArgs e)
@@ -86,20 +89,30 @@ namespace StS2Toys
         void SaveWindowSettings()
         {
             if (_imageViewer is { IsDisposed: false })
-                _imageViewerSettings = BoundsToSub(_imageViewer.Bounds);
+                _imageViewerSettings = WindowToSub(_imageViewer);
             if (_detailViewer is { IsDisposed: false })
-                _cardDetailSettings = BoundsToSub(_detailViewer.Bounds);
+                _cardDetailSettings = WindowToSub(_detailViewer);
             if (_deckOverview is { IsDisposed: false })
-                _deckOverviewSettings = BoundsToSub(_deckOverview.Bounds);
+                _deckOverviewSettings = WindowToSub(_deckOverview);
             if (_blockOverview is { IsDisposed: false })
-                _blockOverviewSettings = BoundsToSub(_blockOverview.Bounds);
+                _blockOverviewSettings = WindowToSub(_blockOverview);
             if (_hpHistory is { IsDisposed: false })
-                _hpHistorySettings = BoundsToSub(_hpHistory.Bounds);
+                _hpHistorySettings = WindowToSub(_hpHistory);
 
             var state = WindowState == FormWindowState.Minimized ? FormWindowState.Normal : WindowState;
             var bounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
             var main = new WindowSettings(bounds.X, bounds.Y, bounds.Width, bounds.Height, state.ToString());
             WindowSettingsService.Save(new AppSettings(main, _imageViewerSettings, _cardDetailSettings, _deckOverviewSettings, _blockOverviewSettings, _hpHistorySettings));
+        }
+
+        static SubWindowSettings WindowToSub(Form form) =>
+            new(form.Bounds.X, form.Bounds.Y, form.Bounds.Width, form.Bounds.Height, form.Visible);
+
+        void RestoreSubWindowVisibility()
+        {
+            if (_deckOverviewSettings?.Visible == true)  BtnDeckOverview_Click(null, EventArgs.Empty);
+            if (_blockOverviewSettings?.Visible == true) BtnBlockOverview_Click(null, EventArgs.Empty);
+            if (_hpHistorySettings?.Visible == true)     BtnHpHistory_Click(null, EventArgs.Empty);
         }
 
         static SubWindowSettings BoundsToSub(Rectangle r) => new(r.X, r.Y, r.Width, r.Height);
