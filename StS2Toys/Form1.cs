@@ -12,11 +12,13 @@ namespace StS2Toys
         private CardDetailForm? _detailViewer;
         private DeckOverviewForm? _deckOverview;
         private DeckOverviewForm? _blockOverview;
+        private DeckOverviewForm? _drawOverview;
         private HpHistoryForm? _hpHistory;
         private SubWindowSettings? _imageViewerSettings;
         private SubWindowSettings? _cardDetailSettings;
         private SubWindowSettings? _deckOverviewSettings;
         private SubWindowSettings? _blockOverviewSettings;
+        private SubWindowSettings? _drawOverviewSettings;
         private SubWindowSettings? _hpHistorySettings;
         private IReadOnlyList<DeckCard>? _lastDeckCards;
         private IReadOnlyList<RelicEntry>? _lastRelics;
@@ -61,6 +63,7 @@ namespace StS2Toys
             _detailViewer?.Close();
             _deckOverview?.Close();
             _blockOverview?.Close();
+            _drawOverview?.Close();
             _hpHistory?.Close();
         }
 
@@ -71,6 +74,7 @@ namespace StS2Toys
             _cardDetailSettings = app.CardDetail;
             _deckOverviewSettings = app.DeckOverview;
             _blockOverviewSettings = app.BlockOverview;
+            _drawOverviewSettings = app.DrawOverview;
             _hpHistorySettings = app.HpHistory;
 
             var main = app.Main;
@@ -96,13 +100,15 @@ namespace StS2Toys
                 _deckOverviewSettings = WindowToSub(_deckOverview);
             if (_blockOverview is { IsDisposed: false })
                 _blockOverviewSettings = WindowToSub(_blockOverview);
+            if (_drawOverview is { IsDisposed: false })
+                _drawOverviewSettings = WindowToSub(_drawOverview);
             if (_hpHistory is { IsDisposed: false })
                 _hpHistorySettings = WindowToSub(_hpHistory);
 
             var state = WindowState == FormWindowState.Minimized ? FormWindowState.Normal : WindowState;
             var bounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
             var main = new WindowSettings(bounds.X, bounds.Y, bounds.Width, bounds.Height, state.ToString());
-            WindowSettingsService.Save(new AppSettings(main, _imageViewerSettings, _cardDetailSettings, _deckOverviewSettings, _blockOverviewSettings, _hpHistorySettings));
+            WindowSettingsService.Save(new AppSettings(main, _imageViewerSettings, _cardDetailSettings, _deckOverviewSettings, _blockOverviewSettings, _hpHistorySettings, _drawOverviewSettings));
         }
 
         static SubWindowSettings WindowToSub(Form form) =>
@@ -112,6 +118,7 @@ namespace StS2Toys
         {
             if (_deckOverviewSettings?.Visible == true)  BtnDeckOverview_Click(null, EventArgs.Empty);
             if (_blockOverviewSettings?.Visible == true) BtnBlockOverview_Click(null, EventArgs.Empty);
+            if (_drawOverviewSettings?.Visible == true)  BtnDrawOverview_Click(null, EventArgs.Empty);
             if (_hpHistorySettings?.Visible == true)     BtnHpHistory_Click(null, EventArgs.Empty);
         }
 
@@ -313,6 +320,7 @@ namespace StS2Toys
                 listViewDeck.ListViewItemSorter = new DeckItemComparer(_sortColumn, _sortAscending);
 
             RefreshBlockOverview();
+            RefreshDrawOverview();
         }
 
         void DisplayRelics(PlayerData player)
@@ -339,6 +347,7 @@ namespace StS2Toys
 
             RefreshDeckOverview();
             RefreshBlockOverview();
+            RefreshDrawOverview();
         }
 
         void RefreshDeckOverview()
@@ -361,6 +370,51 @@ namespace StS2Toys
             _blockOverview.UpdateDeck(blockCards);
             _blockOverview.UpdateRelics(blockRelics);
             _blockOverview.SetBlockStats(blockCards.Sum(c => c.Count), total, blockRelics.Count);
+        }
+
+        void RefreshDrawOverview()
+        {
+            if (_drawOverview is null || _drawOverview.IsDisposed || !_drawOverview.Visible) return;
+            if (_lastDeckCards is null) return;
+
+            var drawCards  = _lastDeckCards.Where(c => CardDatabaseService.IsDrawRelated(c.Id)).ToList();
+            var drawRelics = (_lastRelics ?? []).Where(r => CardDatabaseService.IsRelicDrawRelated(r.Id)).ToList();
+            int total = _lastDeckCards.Sum(c => c.Count);
+
+            _drawOverview.UpdateDeck(drawCards);
+            _drawOverview.UpdateRelics(drawRelics);
+            _drawOverview.SetDrawStats(drawCards.Sum(c => c.Count), total, drawRelics.Count);
+        }
+
+        void BtnDrawOverview_Click(object? sender, EventArgs e)
+        {
+            if (_drawOverview is null || _drawOverview.IsDisposed || !_drawOverview.Visible)
+            {
+                if (_drawOverview is null || _drawOverview.IsDisposed)
+                {
+                    _drawOverview = new DeckOverviewForm();
+                    ApplySubWindowSettings(_drawOverview, _drawOverviewSettings, new Point(Right + 4, Top));
+                    _drawOverview.FormClosed += (_, _) =>
+                    {
+                        _drawOverviewSettings = BoundsToSub(_drawOverview.Bounds);
+                        UpdateDrawOverviewButton(false);
+                    };
+                }
+                _drawOverview.Show(this);
+                UpdateDrawOverviewButton(true);
+                RefreshDrawOverview();
+            }
+            else
+            {
+                _drawOverview.Hide();
+                UpdateDrawOverviewButton(false);
+            }
+        }
+
+        void UpdateDrawOverviewButton(bool visible)
+        {
+            btnDrawOverview.Text = visible ? "● ドロー関連概観" : "○ ドロー関連概観";
+            btnDrawOverview.ForeColor = visible ? Color.DarkGreen : SystemColors.ControlText;
         }
 
         void ListViewDeck_ColumnClick(object? sender, ColumnClickEventArgs e)

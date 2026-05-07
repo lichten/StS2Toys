@@ -53,6 +53,15 @@ public partial class DeckOverviewForm : Form
         Text = "ブロック関連カード概観";
     }
 
+    public void SetDrawStats(int drawCount, int totalCount, int relicCount)
+    {
+        double pct = totalCount > 0 ? 100.0 * drawCount / totalCount : 0;
+        var relicPart = relicCount > 0 ? $"  レリック: {relicCount}個" : "";
+        _statsLabel.Text = $"ドロー関連: {drawCount}枚 / デッキ全体: {totalCount}枚 ({pct:F0}%){relicPart}";
+        _statsPanel.Visible = true;
+        Text = "ドロー関連カード概観";
+    }
+
     void RecomposeIfNeeded()
     {
         if (_cards is null) return;

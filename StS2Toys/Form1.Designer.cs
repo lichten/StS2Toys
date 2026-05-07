@@ -17,6 +17,7 @@ namespace StS2Toys
             lblUpdateFlash = new Label();
             lblLastUpdated = new Label();
             btnHpHistory = new Button();
+            btnDrawOverview = new Button();
             btnBlockOverview = new Button();
             btnDeckOverview = new Button();
             btnCardDetail = new Button();
@@ -57,6 +58,7 @@ namespace StS2Toys
             panelTop.Controls.Add(lblUpdateFlash);
             panelTop.Controls.Add(lblLastUpdated);
             panelTop.Controls.Add(btnHpHistory);
+            panelTop.Controls.Add(btnDrawOverview);
             panelTop.Controls.Add(btnBlockOverview);
             panelTop.Controls.Add(btnDeckOverview);
             panelTop.Controls.Add(btnCardDetail);
@@ -100,6 +102,15 @@ namespace StS2Toys
             btnBlockOverview.TabIndex = 6;
             btnBlockOverview.Text = "○ ブロック関連概観";
             btnBlockOverview.Click += BtnBlockOverview_Click;
+            //
+            // btnDrawOverview
+            //
+            btnDrawOverview.Dock = DockStyle.Left;
+            btnDrawOverview.Name = "btnDrawOverview";
+            btnDrawOverview.Size = new Size(100, 32);
+            btnDrawOverview.TabIndex = 8;
+            btnDrawOverview.Text = "○ ドロー関連概観";
+            btnDrawOverview.Click += BtnDrawOverview_Click;
             //
             // btnHpHistory
             //
@@ -373,6 +384,7 @@ namespace StS2Toys
         private Panel panelBlockActions;
         private Button btnFilterBlock;
         private Button btnBlockOverview;
+        private Button btnDrawOverview;
         private Button btnHpHistory;
         private ListView listViewDeck;
         private ColumnHeader colCardName;

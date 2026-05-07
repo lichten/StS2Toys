@@ -100,6 +100,8 @@ static class CardDatabaseService
     static readonly LocData _loc = LoadLoc();
     static readonly HashSet<string> _blockGivers = ComputeBlockGivers();
     static readonly HashSet<string> _blockRelicGivers = ComputeBlockRelicGivers();
+    static readonly HashSet<string> _drawRelated = ComputeDrawRelated();
+    static readonly HashSet<string> _drawRelicRelated = ComputeDrawRelicRelated();
 
     static HashSet<string> ComputeBlockGivers()
     {
@@ -153,8 +155,40 @@ static class CardDatabaseService
         return result;
     }
 
+    static HashSet<string> ComputeDrawRelated()
+    {
+        const string drawPileTag = "[gold]Draw Pile[/gold]";
+        const string descSuffix = ".description";
+        var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (key, desc) in _loc.EngCards)
+        {
+            if (!key.EndsWith(descSuffix, StringComparison.Ordinal)) continue;
+            if (desc.Contains("draw", StringComparison.OrdinalIgnoreCase) ||
+                desc.Contains(drawPileTag, StringComparison.Ordinal))
+                result.Add(key[..^descSuffix.Length]);
+        }
+        return result;
+    }
+
+    static HashSet<string> ComputeDrawRelicRelated()
+    {
+        const string drawPileTag = "[gold]Draw Pile[/gold]";
+        const string descSuffix = ".description";
+        var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (key, desc) in _loc.EngRelics)
+        {
+            if (!key.EndsWith(descSuffix, StringComparison.Ordinal)) continue;
+            if (desc.Contains("draw", StringComparison.OrdinalIgnoreCase) ||
+                desc.Contains(drawPileTag, StringComparison.Ordinal))
+                result.Add(key[..^descSuffix.Length]);
+        }
+        return result;
+    }
+
     public static bool IsBlockGiver(string id) => _blockGivers.Contains(ToRawId(id));
     public static bool IsRelicBlockGiver(string id) => _blockRelicGivers.Contains(ToRawId(id));
+    public static bool IsDrawRelated(string id) => _drawRelated.Contains(ToRawId(id));
+    public static bool IsRelicDrawRelated(string id) => _drawRelicRelated.Contains(ToRawId(id));
 
     static LocData LoadLoc() => new(
         LoadLocJson("eng.cards"),
