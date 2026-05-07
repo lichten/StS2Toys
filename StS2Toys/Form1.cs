@@ -13,12 +13,14 @@ namespace StS2Toys
         private DeckOverviewForm? _deckOverview;
         private DeckOverviewForm? _blockOverview;
         private DeckOverviewForm? _drawOverview;
+        private EncounterOverviewForm? _encounterOverview;
         private HpHistoryForm? _hpHistory;
         private SubWindowSettings? _imageViewerSettings;
         private SubWindowSettings? _cardDetailSettings;
         private SubWindowSettings? _deckOverviewSettings;
         private SubWindowSettings? _blockOverviewSettings;
         private SubWindowSettings? _drawOverviewSettings;
+        private SubWindowSettings? _encounterOverviewSettings;
         private SubWindowSettings? _hpHistorySettings;
         private IReadOnlyList<DeckCard>? _lastDeckCards;
         private IReadOnlyList<RelicEntry>? _lastRelics;
@@ -64,6 +66,7 @@ namespace StS2Toys
             _deckOverview?.Close();
             _blockOverview?.Close();
             _drawOverview?.Close();
+            _encounterOverview?.Close();
             _hpHistory?.Close();
         }
 
@@ -75,6 +78,7 @@ namespace StS2Toys
             _deckOverviewSettings = app.DeckOverview;
             _blockOverviewSettings = app.BlockOverview;
             _drawOverviewSettings = app.DrawOverview;
+            _encounterOverviewSettings = app.EncounterOverview;
             _hpHistorySettings = app.HpHistory;
 
             var main = app.Main;
@@ -102,13 +106,15 @@ namespace StS2Toys
                 _blockOverviewSettings = WindowToSub(_blockOverview);
             if (_drawOverview is { IsDisposed: false })
                 _drawOverviewSettings = WindowToSub(_drawOverview);
+            if (_encounterOverview is { IsDisposed: false })
+                _encounterOverviewSettings = WindowToSub(_encounterOverview);
             if (_hpHistory is { IsDisposed: false })
                 _hpHistorySettings = WindowToSub(_hpHistory);
 
             var state = WindowState == FormWindowState.Minimized ? FormWindowState.Normal : WindowState;
             var bounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
             var main = new WindowSettings(bounds.X, bounds.Y, bounds.Width, bounds.Height, state.ToString());
-            WindowSettingsService.Save(new AppSettings(main, _imageViewerSettings, _cardDetailSettings, _deckOverviewSettings, _blockOverviewSettings, _hpHistorySettings, _drawOverviewSettings));
+            WindowSettingsService.Save(new AppSettings(main, _imageViewerSettings, _cardDetailSettings, _deckOverviewSettings, _blockOverviewSettings, _hpHistorySettings, _drawOverviewSettings, _encounterOverviewSettings));
         }
 
         static SubWindowSettings WindowToSub(Form form) =>
@@ -118,8 +124,9 @@ namespace StS2Toys
         {
             if (_deckOverviewSettings?.Visible == true)  BtnDeckOverview_Click(null, EventArgs.Empty);
             if (_blockOverviewSettings?.Visible == true) BtnBlockOverview_Click(null, EventArgs.Empty);
-            if (_drawOverviewSettings?.Visible == true)  BtnDrawOverview_Click(null, EventArgs.Empty);
-            if (_hpHistorySettings?.Visible == true)     BtnHpHistory_Click(null, EventArgs.Empty);
+            if (_drawOverviewSettings?.Visible == true)       BtnDrawOverview_Click(null, EventArgs.Empty);
+            if (_encounterOverviewSettings?.Visible == true)  BtnEncounterOverview_Click(null, EventArgs.Empty);
+            if (_hpHistorySettings?.Visible == true)          BtnHpHistory_Click(null, EventArgs.Empty);
         }
 
         static SubWindowSettings BoundsToSub(Rectangle r) => new(r.X, r.Y, r.Width, r.Height);
@@ -246,6 +253,7 @@ namespace StS2Toys
             DisplayDeck(player);
             DisplayRelics(player);
             RefreshHpHistory();
+            RefreshEncounterOverview();
         }
 
         void DisplayDeck(PlayerData player)
@@ -384,6 +392,44 @@ namespace StS2Toys
             _drawOverview.UpdateDeck(drawCards);
             _drawOverview.UpdateRelics(drawRelics);
             _drawOverview.SetDrawStats(drawCards.Sum(c => c.Count), total, drawRelics.Count);
+        }
+
+        void RefreshEncounterOverview()
+        {
+            if (_encounterOverview is null || _encounterOverview.IsDisposed || !_encounterOverview.Visible) return;
+            if (_lastRunData is null) return;
+            _encounterOverview.UpdateData(_lastRunData);
+        }
+
+        void BtnEncounterOverview_Click(object? sender, EventArgs e)
+        {
+            if (_encounterOverview is null || _encounterOverview.IsDisposed || !_encounterOverview.Visible)
+            {
+                if (_encounterOverview is null || _encounterOverview.IsDisposed)
+                {
+                    _encounterOverview = new EncounterOverviewForm();
+                    ApplySubWindowSettings(_encounterOverview, _encounterOverviewSettings, new Point(Right + 4, Top));
+                    _encounterOverview.FormClosed += (_, _) =>
+                    {
+                        _encounterOverviewSettings = BoundsToSub(_encounterOverview.Bounds);
+                        UpdateEncounterOverviewButton(false);
+                    };
+                }
+                _encounterOverview.Show(this);
+                UpdateEncounterOverviewButton(true);
+                RefreshEncounterOverview();
+            }
+            else
+            {
+                _encounterOverview.Hide();
+                UpdateEncounterOverviewButton(false);
+            }
+        }
+
+        void UpdateEncounterOverviewButton(bool visible)
+        {
+            btnEncounterOverview.Text      = visible ? "● 敵情報" : "○ 敵情報";
+            btnEncounterOverview.ForeColor = visible ? Color.DarkSlateBlue : SystemColors.ControlText;
         }
 
         void BtnDrawOverview_Click(object? sender, EventArgs e)

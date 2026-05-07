@@ -11,7 +11,8 @@ record AppSettings(
     SubWindowSettings? DeckOverview = null,
     SubWindowSettings? BlockOverview = null,
     SubWindowSettings? HpHistory = null,
-    SubWindowSettings? DrawOverview = null);
+    SubWindowSettings? DrawOverview = null,
+    SubWindowSettings? EncounterOverview = null);
 
 static class WindowSettingsService
 {

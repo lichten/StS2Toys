@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace StS2Toys.Models;
 
-class RunSaveData
+public class RunSaveData
 {
     [JsonPropertyName("ascension")]
     public int Ascension { get; init; }
@@ -18,6 +18,36 @@ class RunSaveData
 
     [JsonPropertyName("map_point_history")]
     public List<List<MapPointHistoryEntry>> MapPointHistory { get; init; } = [];
+
+    [JsonPropertyName("acts")]
+    public List<ActData> Acts { get; init; } = [];
+}
+
+public class ActData
+{
+    [JsonPropertyName("id")]
+    public string Id { get; init; } = "";
+
+    [JsonPropertyName("rooms")]
+    public ActRooms? Rooms { get; init; }
+}
+
+public class ActRooms
+{
+    [JsonPropertyName("boss_id")]
+    public string? BossId { get; init; }
+
+    [JsonPropertyName("second_boss_id")]
+    public string? SecondBossId { get; init; }
+
+    [JsonPropertyName("elite_encounter_ids")]
+    public List<string> EliteEncounterIds { get; init; } = [];
+
+    [JsonPropertyName("elite_encounters_visited")]
+    public int EliteEncountersVisited { get; init; }
+
+    [JsonPropertyName("boss_encounters_visited")]
+    public int BossEncountersVisited { get; init; }
 }
 
 public class MapPointHistoryEntry
@@ -53,7 +83,7 @@ public class PlayerFloorStats
     public int CurrentGold { get; init; }
 }
 
-class PlayerData
+public class PlayerData
 {
     [JsonPropertyName("character_id")]
     public string CharacterId { get; init; } = "";
@@ -77,7 +107,7 @@ class PlayerData
     public List<RelicData> Relics { get; init; } = [];
 }
 
-class EnchantmentData
+public class EnchantmentData
 {
     [JsonPropertyName("id")]
     public string Id { get; init; } = "";
@@ -86,7 +116,7 @@ class EnchantmentData
     public int Amount { get; init; }
 }
 
-class CardData
+public class CardData
 {
     [JsonPropertyName("id")]
     public string Id { get; init; } = "";
@@ -107,13 +137,13 @@ class CardData
         Props?.Ints.FirstOrDefault(x => x.Name == name)?.Value;
 }
 
-class CardProps
+public class CardProps
 {
     [JsonPropertyName("ints")]
     public List<NamedInt> Ints { get; init; } = [];
 }
 
-class NamedInt
+public class NamedInt
 {
     [JsonPropertyName("name")]
     public string Name { get; init; } = "";
@@ -122,7 +152,7 @@ class NamedInt
     public int Value { get; init; }
 }
 
-class RelicData
+public class RelicData
 {
     [JsonPropertyName("id")]
     public string Id { get; init; } = "";
