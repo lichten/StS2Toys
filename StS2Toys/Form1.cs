@@ -81,6 +81,9 @@ namespace StS2Toys
             _encounterOverviewSettings = app.EncounterOverview;
             _hpHistorySettings = app.HpHistory;
 
+            if (app.SidePanelWidth is int w)
+                splitContainerOuter.SplitterDistance = w;
+
             var main = app.Main;
             if (main is null) return;
 
@@ -114,7 +117,7 @@ namespace StS2Toys
             var state = WindowState == FormWindowState.Minimized ? FormWindowState.Normal : WindowState;
             var bounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
             var main = new WindowSettings(bounds.X, bounds.Y, bounds.Width, bounds.Height, state.ToString());
-            WindowSettingsService.Save(new AppSettings(main, _imageViewerSettings, _cardDetailSettings, _deckOverviewSettings, _blockOverviewSettings, _hpHistorySettings, _drawOverviewSettings, _encounterOverviewSettings));
+            WindowSettingsService.Save(new AppSettings(main, _imageViewerSettings, _cardDetailSettings, _deckOverviewSettings, _blockOverviewSettings, _hpHistorySettings, _drawOverviewSettings, _encounterOverviewSettings, splitContainerOuter.SplitterDistance));
         }
 
         static SubWindowSettings WindowToSub(Form form) =>
