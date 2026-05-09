@@ -238,6 +238,7 @@ public partial class HpHistoryForm : Form
         "treasure" => Color.FromArgb(200, 255, 200, 50),
         "event"    => Color.FromArgb(200, 150, 150, 255),
         "ancient"  => Color.FromArgb(200, 200, 150, 255),
+        "unknown"  => Color.FromArgb(200, 180, 160, 220),
         _          => Color.FromArgb(200, 180, 180, 180),
     };
 
@@ -251,6 +252,7 @@ public partial class HpHistoryForm : Form
         "treasure" => "宝",
         "event"    => "イベント",
         "ancient"  => "古代の儀式",
+        "unknown"  => "???",
         _          => type.Length > 0 ? type : "不明",
     };
 }
