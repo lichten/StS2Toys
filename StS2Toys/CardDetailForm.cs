@@ -1,4 +1,4 @@
-using StS2Toys.Services;
+using StS2Shared.Services;
 
 namespace StS2Toys;
 

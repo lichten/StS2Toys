@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="StS2Shared/StS2Shared.csproj" />
   <Project Path="StS2Toys/StS2Toys.csproj" />
   <Project Path="StS2EventBrowser/StS2EventBrowser.csproj" />
   <Project Path="card-type-extractor/card-type-extractor.csproj" />

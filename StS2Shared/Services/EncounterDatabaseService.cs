@@ -1,9 +1,9 @@
 using System.Reflection;
 using System.Text.Json;
 
-namespace StS2Toys.Services;
+namespace StS2Shared.Services;
 
-static class EncounterDatabaseService
+public static class EncounterDatabaseService
 {
     static readonly IReadOnlyDictionary<string, string> _engEncounters = LoadJson("eng.encounters");
     static readonly IReadOnlyDictionary<string, string> _jpnEncounters = LoadJson("jpn.encounters");

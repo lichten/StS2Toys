@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>StS2Shared</AssemblyName>
+    <RootNamespace>StS2Shared</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\*.json" />
+    <EmbeddedResource Include="..\tools\extracted\localization\eng\cards.json" LogicalName="StS2Shared.localization.eng.cards.json" />
+    <EmbeddedResource Include="..\tools\extracted\localization\jpn\cards.json" LogicalName="StS2Shared.localization.jpn.cards.json" />
+    <EmbeddedResource Include="..\tools\extracted\localization\eng\relics.json" LogicalName="StS2Shared.localization.eng.relics.json" />
+    <EmbeddedResource Include="..\tools\extracted\localization\jpn\relics.json" LogicalName="StS2Shared.localization.jpn.relics.json" />
+    <EmbeddedResource Include="..\tools\extracted\localization\eng\enchantments.json" LogicalName="StS2Shared.localization.eng.enchantments.json" />
+    <EmbeddedResource Include="..\tools\extracted\localization\jpn\enchantments.json" LogicalName="StS2Shared.localization.jpn.enchantments.json" />
+    <EmbeddedResource Include="..\tools\extracted\localization\eng\encounters.json" LogicalName="StS2Shared.localization.eng.encounters.json" />
+    <EmbeddedResource Include="..\tools\extracted\localization\jpn\encounters.json" LogicalName="StS2Shared.localization.jpn.encounters.json" />
+    <EmbeddedResource Include="..\tools\extracted\localization\eng\acts.json" LogicalName="StS2Shared.localization.eng.acts.json" />
+    <EmbeddedResource Include="..\tools\extracted\localization\jpn\acts.json" LogicalName="StS2Shared.localization.jpn.acts.json" />
+  </ItemGroup>
+
+</Project>

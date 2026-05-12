@@ -10,4 +10,7 @@
     <PackageReference Include="BCnEncoder.NET" Version="2.1.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\StS2Shared\StS2Shared.csproj" />
+  </ItemGroup>
 </Project>

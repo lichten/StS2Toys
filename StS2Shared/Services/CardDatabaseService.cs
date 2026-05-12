@@ -2,9 +2,9 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace StS2Toys.Services;
+namespace StS2Shared.Services;
 
-static class CardDatabaseService
+public static class CardDatabaseService
 {
     record Entry(string En, string Ja);
 

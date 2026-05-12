@@ -1,4 +1,5 @@
 using StS2Toys.Services;
+using StS2Shared.Services;
 
 namespace StS2Toys;
 
@@ -53,7 +54,7 @@ public partial class CardImageViewerForm : Form
         if (found is not null) return found;
 
         // タイプ別ファイル名のフォールバック（例: mad_science_skill.png）
-        var type = (typeHint ?? Services.CardDatabaseService.GetCardType(cardId)).ToLowerInvariant();
+        var type = (typeHint ?? CardDatabaseService.GetCardType(cardId)).ToLowerInvariant();
         if (!string.IsNullOrEmpty(type))
             found = SearchPortraitsDir(dir, baseName + "_" + type + ".png");
 

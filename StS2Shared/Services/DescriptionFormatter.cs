@@ -1,8 +1,8 @@
 using System.Text.RegularExpressions;
 
-namespace StS2Toys.Services;
+namespace StS2Shared.Services;
 
-static class DescriptionFormatter
+public static class DescriptionFormatter
 {
     static readonly Regex TagRegex      = new(@"\[/?[a-zA-Z]+\]", RegexOptions.Compiled);
     static readonly Regex TemplateRegex = new(@"\{([^}]+)\}",     RegexOptions.Compiled);
