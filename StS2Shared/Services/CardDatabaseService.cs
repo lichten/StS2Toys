@@ -10,6 +10,7 @@ public static class CardDatabaseService
 
     static readonly Dictionary<string, Entry> _db = Load();
     static readonly Dictionary<string, string> _types = LoadTypes();
+    static readonly Dictionary<string, string> _rarities = LoadStringDict("card_rarities.json");
     static readonly Dictionary<string, int> _costs = LoadCosts();
 
     static Dictionary<string, Entry> Load()
@@ -32,10 +33,13 @@ public static class CardDatabaseService
     }
 
     static Dictionary<string, string> LoadTypes()
+        => LoadStringDict("card_types.json");
+
+    static Dictionary<string, string> LoadStringDict(string suffix)
     {
         var asm = Assembly.GetExecutingAssembly();
         var name = asm.GetManifestResourceNames()
-            .FirstOrDefault(n => n.EndsWith("card_types.json"));
+            .FirstOrDefault(n => n.EndsWith(suffix));
         if (name is null) return new Dictionary<string, string>();
 
         using var stream = asm.GetManifestResourceStream(name)!;
@@ -65,6 +69,12 @@ public static class CardDatabaseService
     {
         _types.TryGetValue(id, out var type);
         return type ?? "";
+    }
+
+    public static string GetCardRarity(string id)
+    {
+        _rarities.TryGetValue(id, out var rarity);
+        return rarity ?? "";
     }
 
     public static string GetCardCost(string id)

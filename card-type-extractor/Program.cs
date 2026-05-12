@@ -12,7 +12,7 @@ var dllPath = (args.Length > 0 && !args[0].StartsWith("--")) ? args[0] : default
 // AppContext.BaseDirectory = .../card-type-extractor/bin/Debug/net10.0/
 // 4階層上がるとリポジトリルート
 var defaultOut = Path.GetFullPath(
-    Path.Combine(AppContext.BaseDirectory, @"..\..\..\..\StS2Toys\Resources\card_types.json"));
+    Path.Combine(AppContext.BaseDirectory, @"..\..\..\..\StS2Shared\Resources\card_types.json"));
 var outPath = args.Length > 1 ? args[1] : defaultOut;
 
 using var stream = File.OpenRead(dllPath);
@@ -410,6 +410,32 @@ foreach (var typeHandle in mr.TypeDefinitions)
     break;
 }
 
+// Rarity enum 値マップ（Common/Uncommon/Rare 等のフィールドを持つ enum を検索）
+var rarityByInt = new Dictionary<int, string>();
+foreach (var typeHandle in mr.TypeDefinitions)
+{
+    var typeDef = mr.GetTypeDefinition(typeHandle);
+    var fields = typeDef.GetFields().ToList();
+    // value__ を除くフィールド名に Common/Uncommon/Rare が含まれる enum を探す
+    var fieldNames = fields
+        .Select(fh => mr.GetString(mr.GetFieldDefinition(fh).Name))
+        .Where(fn => fn != "value__")
+        .ToList();
+    if (!fieldNames.Any(fn => fn is "Common" or "Uncommon" or "Rare")) continue;
+    foreach (var fh in fields)
+    {
+        var field = mr.GetFieldDefinition(fh);
+        var fn = mr.GetString(field.Name);
+        if (fn == "value__") continue;
+        var ch = field.GetDefaultValue();
+        if (ch.IsNil) continue;
+        var br = mr.GetBlobReader(mr.GetConstant(ch).Value);
+        rarityByInt[br.ReadInt32()] = fn;
+    }
+    Console.Error.WriteLine($"Rarity enum '{mr.GetString(typeDef.Name)}': {string.Join(", ", rarityByInt.Select(kv => $"{kv.Key}={kv.Value}"))}");
+    break;
+}
+
 // CardModel .ctor: どの引数位置が CardType か確認済み → param[2] = type
 // Alchemize の例: ldarg.0, ldc.i4(cost), ldc.i4(type), ldc.i4(rarity), ...
 // つまり IL の ldc.i4 系が 2 番目に押し込まれる値が CardType
@@ -444,6 +470,7 @@ foreach (var typeHandle in mr.TypeDefinitions)
 // およびフィールド代入 (ldarg.0, ldc.i4 N, stfld F) を取得
 var results   = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 var costs     = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+var rarities  = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 var cardStats = new Dictionary<string, Dictionary<string, int>>(StringComparer.OrdinalIgnoreCase);
 
 // コンストラクタトークン → DynamicVar 名 のマップを構築
@@ -550,6 +577,8 @@ foreach (var typeHandle in mr.TypeDefinitions)
             costs.TryAdd(cardId, intArgs[0]);
             if (cardTypeByInt.TryGetValue(intArgs[1], out var typeName))
                 results.TryAdd(cardId, typeName);
+            if (intArgs.Count >= 3 && rarityByInt.TryGetValue(intArgs[2], out var rarityName))
+                rarities.TryAdd(cardId, rarityName);
         }
 
         // パス2: フィールド代入 (stfld) とプロパティセッター (call/callvirt set_Xxx) を収集
@@ -655,6 +684,14 @@ var costLines = costs.OrderBy(kv => kv.Key)
     .Select(kv => $"  \"{kv.Key}\": {kv.Value}");
 File.WriteAllText(costsOutPath, "{\n" + string.Join(",\n", costLines) + "\n}\n");
 Console.WriteLine(costsOutPath);
+
+// card_rarities.json 出力
+var raritiesOutPath = Path.Combine(Path.GetDirectoryName(outPath)!, "card_rarities.json");
+Console.Error.WriteLine($"Extracted {rarities.Count} card rarity mappings.");
+var rarityLines = rarities.OrderBy(kv => kv.Key)
+    .Select(kv => $"  \"{kv.Key}\": \"{kv.Value}\"");
+File.WriteAllText(raritiesOutPath, "{\n" + string.Join(",\n", rarityLines) + "\n}\n");
+Console.WriteLine(raritiesOutPath);
 
 // card_stats.json 出力
 var statsOutPath = Path.Combine(Path.GetDirectoryName(outPath)!, "card_stats.json");
