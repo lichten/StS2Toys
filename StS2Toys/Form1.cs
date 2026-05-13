@@ -514,11 +514,10 @@ namespace StS2Toys
                 if (_necroOverview is null || _necroOverview.IsDisposed)
                 {
                     _necroOverview = new DeckOverviewForm();
-                    _necroOverview.SetKeywordGroups([
-                        ("Osty",  c => CardDatabaseService.IsNecroOsty(c.Id)),
-                        ("Soul",  c => CardDatabaseService.IsNecroSoul(c.Id)),
-                        ("Doom",  c => CardDatabaseService.IsNecroDoom(c.Id)),
-                    ], "Necrobinder概観");
+                    _necroOverview.SetKeywordGroups(
+                        CharacterMechanics.MechanicsFor("Necrobinder")
+                            .Select(m => (m.MecLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
+                        "Necrobinder概観");
                     ApplySubWindowSettings(_necroOverview, _necroOverviewSettings, new Point(Right + 4, Top));
                     _necroOverview.FormClosed += (_, _) =>
                     {
@@ -548,10 +547,7 @@ namespace StS2Toys
             if (_necroOverview is null || _necroOverview.IsDisposed || !_necroOverview.Visible) return;
             if (_lastDeckCards is null) return;
             _necroOverview.UpdateDeck(_lastDeckCards);
-            int osty = _lastDeckCards.Where(c => CardDatabaseService.IsNecroOsty(c.Id)).Sum(c => c.Count);
-            int soul = _lastDeckCards.Where(c => CardDatabaseService.IsNecroSoul(c.Id)).Sum(c => c.Count);
-            int doom = _lastDeckCards.Where(c => CardDatabaseService.IsNecroDoom(c.Id)).Sum(c => c.Count);
-            _necroOverview.SetStatsText($"Osty: {osty}枚  Soul: {soul}枚  Doom: {doom}枚");
+            _necroOverview.SetStatsText(BuildStatsText("Necrobinder", _lastDeckCards));
         }
 
         void BtnIroncladOverview_Click(object? sender, EventArgs e)
@@ -561,10 +557,10 @@ namespace StS2Toys
                 if (_ironcladOverview is null || _ironcladOverview.IsDisposed)
                 {
                     _ironcladOverview = new DeckOverviewForm();
-                    _ironcladOverview.SetKeywordGroups([
-                        ("Strength", c => CardDatabaseService.IsIroncladStrength(c.Id)),
-                        ("Exhaust",  c => CardDatabaseService.IsIroncladExhaust(c.Id)),
-                    ], "Ironclad概観");
+                    _ironcladOverview.SetKeywordGroups(
+                        CharacterMechanics.MechanicsFor("Ironclad")
+                            .Select(m => (m.MecLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
+                        "Ironclad概観");
                     ApplySubWindowSettings(_ironcladOverview, _ironcladOverviewSettings, new Point(Right + 4, Top));
                     _ironcladOverview.FormClosed += (_, _) =>
                     {
@@ -594,9 +590,7 @@ namespace StS2Toys
             if (_ironcladOverview is null || _ironcladOverview.IsDisposed || !_ironcladOverview.Visible) return;
             if (_lastDeckCards is null) return;
             _ironcladOverview.UpdateDeck(_lastDeckCards);
-            int str = _lastDeckCards.Where(c => CardDatabaseService.IsIroncladStrength(c.Id)).Sum(c => c.Count);
-            int ex  = _lastDeckCards.Where(c => CardDatabaseService.IsIroncladExhaust(c.Id)).Sum(c => c.Count);
-            _ironcladOverview.SetStatsText($"Strength: {str}枚  Exhaust: {ex}枚");
+            _ironcladOverview.SetStatsText(BuildStatsText("Ironclad", _lastDeckCards));
         }
 
         void BtnSilentOverview_Click(object? sender, EventArgs e)
@@ -606,10 +600,10 @@ namespace StS2Toys
                 if (_silentOverview is null || _silentOverview.IsDisposed)
                 {
                     _silentOverview = new DeckOverviewForm();
-                    _silentOverview.SetKeywordGroups([
-                        ("Poison", c => CardDatabaseService.IsSilentPoison(c.Id)),
-                        ("Shiv",   c => CardDatabaseService.IsSilentShiv(c.Id)),
-                    ], "Silent概観");
+                    _silentOverview.SetKeywordGroups(
+                        CharacterMechanics.MechanicsFor("Silent")
+                            .Select(m => (m.MecLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
+                        "Silent概観");
                     ApplySubWindowSettings(_silentOverview, _silentOverviewSettings, new Point(Right + 4, Top));
                     _silentOverview.FormClosed += (_, _) =>
                     {
@@ -639,9 +633,7 @@ namespace StS2Toys
             if (_silentOverview is null || _silentOverview.IsDisposed || !_silentOverview.Visible) return;
             if (_lastDeckCards is null) return;
             _silentOverview.UpdateDeck(_lastDeckCards);
-            int poison = _lastDeckCards.Where(c => CardDatabaseService.IsSilentPoison(c.Id)).Sum(c => c.Count);
-            int shiv   = _lastDeckCards.Where(c => CardDatabaseService.IsSilentShiv(c.Id)).Sum(c => c.Count);
-            _silentOverview.SetStatsText($"Poison: {poison}枚  Shiv: {shiv}枚");
+            _silentOverview.SetStatsText(BuildStatsText("Silent", _lastDeckCards));
         }
 
         void BtnDefectOverview_Click(object? sender, EventArgs e)
@@ -651,11 +643,10 @@ namespace StS2Toys
                 if (_defectOverview is null || _defectOverview.IsDisposed)
                 {
                     _defectOverview = new DeckOverviewForm();
-                    _defectOverview.SetKeywordGroups([
-                        ("Channel", c => CardDatabaseService.IsDefectChannel(c.Id)),
-                        ("Evoke",   c => CardDatabaseService.IsDefectEvoke(c.Id)),
-                        ("Focus",   c => CardDatabaseService.IsDefectFocus(c.Id)),
-                    ], "Defect概観");
+                    _defectOverview.SetKeywordGroups(
+                        CharacterMechanics.MechanicsFor("Defect")
+                            .Select(m => (m.MecLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
+                        "Defect概観");
                     ApplySubWindowSettings(_defectOverview, _defectOverviewSettings, new Point(Right + 4, Top));
                     _defectOverview.FormClosed += (_, _) =>
                     {
@@ -685,10 +676,7 @@ namespace StS2Toys
             if (_defectOverview is null || _defectOverview.IsDisposed || !_defectOverview.Visible) return;
             if (_lastDeckCards is null) return;
             _defectOverview.UpdateDeck(_lastDeckCards);
-            int ch = _lastDeckCards.Where(c => CardDatabaseService.IsDefectChannel(c.Id)).Sum(c => c.Count);
-            int ev = _lastDeckCards.Where(c => CardDatabaseService.IsDefectEvoke(c.Id)).Sum(c => c.Count);
-            int fo = _lastDeckCards.Where(c => CardDatabaseService.IsDefectFocus(c.Id)).Sum(c => c.Count);
-            _defectOverview.SetStatsText($"Channel: {ch}枚  Evoke: {ev}枚  Focus: {fo}枚");
+            _defectOverview.SetStatsText(BuildStatsText("Defect", _lastDeckCards));
         }
 
         void BtnRegentOverview_Click(object? sender, EventArgs e)
@@ -698,10 +686,10 @@ namespace StS2Toys
                 if (_regentOverview is null || _regentOverview.IsDisposed)
                 {
                     _regentOverview = new DeckOverviewForm();
-                    _regentOverview.SetKeywordGroups([
-                        ("Forge / Sovereign Blade", c => CardDatabaseService.IsRegentForge(c.Id) || CardDatabaseService.IsRegentBlade(c.Id)),
-                        ("カード作成シナジー",        c => CardDatabaseService.IsRegentCreate(c.Id)),
-                    ], "Regent概観");
+                    _regentOverview.SetKeywordGroups(
+                        CharacterMechanics.MechanicsFor("Regent")
+                            .Select(m => (m.MecLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
+                        "Regent概観");
                     ApplySubWindowSettings(_regentOverview, _regentOverviewSettings, new Point(Right + 4, Top));
                     _regentOverview.FormClosed += (_, _) =>
                     {
@@ -731,11 +719,12 @@ namespace StS2Toys
             if (_regentOverview is null || _regentOverview.IsDisposed || !_regentOverview.Visible) return;
             if (_lastDeckCards is null) return;
             _regentOverview.UpdateDeck(_lastDeckCards);
-            int forge  = _lastDeckCards.Where(c => CardDatabaseService.IsRegentForge(c.Id)).Sum(c => c.Count);
-            int blade  = _lastDeckCards.Where(c => CardDatabaseService.IsRegentBlade(c.Id)).Sum(c => c.Count);
-            int create = _lastDeckCards.Where(c => CardDatabaseService.IsRegentCreate(c.Id)).Sum(c => c.Count);
-            _regentOverview.SetStatsText($"Forge: {forge}枚  Sovereign Blade: {blade}枚  カード作成: {create}枚");
+            _regentOverview.SetStatsText(BuildStatsText("Regent", _lastDeckCards));
         }
+
+        static string BuildStatsText(string charLabel, IReadOnlyList<DeckCard> deck) =>
+            string.Join("  ", CharacterMechanics.MechanicsFor(charLabel)
+                .Select(m => $"{m.MecLabel}: {deck.Where(c => m.Filter(c.Id)).Sum(c => c.Count)}枚"));
 
         void ListViewDeck_ColumnClick(object? sender, ColumnClickEventArgs e)
         {

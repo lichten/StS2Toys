@@ -9,38 +9,9 @@ public class CardBrowserForm : Form
 {
     const int SidebarBtnH = 28;
 
-    // ---- キャラクター × メカニクス定義 ----
+    // ---- キャラクター × メカニクス定義（StS2Shared.CharacterMechanics で一元管理）----
     static readonly (string CharLabel, (string MecLabel, Func<string, bool> Filter)[] Mechanics)[] Characters =
-    [
-        ("Necrobinder",
-        [
-            ("Osty",  CardDatabaseService.IsNecroOsty),
-            ("Soul",  CardDatabaseService.IsNecroSoul),
-            ("Doom",  CardDatabaseService.IsNecroDoom),
-        ]),
-        ("Ironclad",
-        [
-            ("Strength", CardDatabaseService.IsIroncladStrength),
-            ("Exhaust",  CardDatabaseService.IsIroncladExhaust),
-        ]),
-        ("Silent",
-        [
-            ("Poison", CardDatabaseService.IsSilentPoison),
-            ("Shiv",   CardDatabaseService.IsSilentShiv),
-        ]),
-        ("Defect",
-        [
-            ("Channel", CardDatabaseService.IsDefectChannel),
-            ("Evoke",   CardDatabaseService.IsDefectEvoke),
-            ("Focus",   CardDatabaseService.IsDefectFocus),
-        ]),
-        ("Regent",
-        [
-            ("Forge / Sovereign Blade", id => CardDatabaseService.IsRegentForge(id) || CardDatabaseService.IsRegentBlade(id)),
-            ("カード作成シナジー",        CardDatabaseService.IsRegentCreate),
-        ]),
-        ("その他", []),
-    ];
+        CharacterMechanics.All;
 
     // ---- データ ----
     List<CardEntry> _allCards = [];

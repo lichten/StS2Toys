@@ -122,8 +122,9 @@ public static class CardDatabaseService
     static readonly HashSet<string> _necroOsty     = ComputeByTag("[gold]Osty[/gold]", "[gold]Osty's[/gold]");
     static readonly HashSet<string> _necroSoul     = ComputeByTag("[gold]Soul[/gold]");
     static readonly HashSet<string> _necroDoom     = ComputeByTag("[gold]Doom[/gold]");
-    static readonly HashSet<string> _ironcladStr   = ComputeByTag("[gold]Strength[/gold]");
+    static readonly HashSet<string> _ironcladStr    = ComputeByTag("[gold]Strength[/gold]");
     static readonly HashSet<string> _ironcladEx    = ComputeByTag("[gold]Exhaust[/gold]", "[gold]Exhausted[/gold]", "[gold]Exhaust Pile[/gold]");
+    static readonly HashSet<string> _ironcladStrike = ComputeByNameContaining("Strike");
     static readonly HashSet<string> _silentPoison  = ComputeByTag("[gold]Poison[/gold]");
     static readonly HashSet<string> _silentShiv    = ComputeByTag("[gold]Shiv[/gold]", "[gold]Shivs[/gold]");
     static readonly HashSet<string> _defectChannel = ComputeByTag("[gold]Channel[/gold]", "[gold]Channeled[/gold]", "[gold]Channels[/gold]");
@@ -243,6 +244,19 @@ public static class CardDatabaseService
         return result;
     }
 
+    static HashSet<string> ComputeByNameContaining(string substring)
+    {
+        const string nameSuffix = ".name";
+        var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (key, value) in _loc.EngCards)
+        {
+            if (!key.EndsWith(nameSuffix, StringComparison.Ordinal)) continue;
+            if (value.Contains(substring, StringComparison.OrdinalIgnoreCase))
+                result.Add(key[..^nameSuffix.Length]);
+        }
+        return result;
+    }
+
     static HashSet<string> ComputeStatusGenerators()
     {
         // card_types.json の Status 型カード名から [gold]{Name}[/gold] タグを構築
@@ -269,6 +283,7 @@ public static class CardDatabaseService
     public static bool IsNecroDoom(string id)      => _necroDoom.Contains(ToRawId(id));
     public static bool IsIroncladStrength(string id) => _ironcladStr.Contains(ToRawId(id));
     public static bool IsIroncladExhaust(string id)  => _ironcladEx.Contains(ToRawId(id));
+    public static bool IsIroncladStrike(string id)   => _ironcladStrike.Contains(ToRawId(id));
     public static bool IsSilentPoison(string id)   => _silentPoison.Contains(ToRawId(id));
     public static bool IsSilentShiv(string id)     => _silentShiv.Contains(ToRawId(id));
     public static bool IsDefectChannel(string id)  => _defectChannel.Contains(ToRawId(id));
