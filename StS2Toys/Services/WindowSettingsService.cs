@@ -18,7 +18,8 @@ record AppSettings(
     SubWindowSettings? IroncladOverview = null,
     SubWindowSettings? SilentOverview = null,
     SubWindowSettings? DefectOverview = null,
-    SubWindowSettings? RegentOverview = null);
+    SubWindowSettings? RegentOverview = null,
+    SubWindowSettings? CommonOverview = null);
 
 static class WindowSettingsService
 {

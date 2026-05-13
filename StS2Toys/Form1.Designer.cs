@@ -37,6 +37,7 @@ namespace StS2Toys
             btnSilentOverview = new Button();
             btnDefectOverview = new Button();
             btnRegentOverview = new Button();
+            btnCommonOverview = new Button();
             lblGroupOverview = new Label();
             lblGroupOther = new Label();
             splitContainer = new SplitContainer();
@@ -172,6 +173,7 @@ namespace StS2Toys
             panelSideButtons.Controls.Add(btnEncounterOverview);
             panelSideButtons.Controls.Add(btnHpHistory);
             panelSideButtons.Controls.Add(lblGroupOther);
+            panelSideButtons.Controls.Add(btnCommonOverview);
             panelSideButtons.Controls.Add(btnRegentOverview);
             panelSideButtons.Controls.Add(btnDefectOverview);
             panelSideButtons.Controls.Add(btnSilentOverview);
@@ -288,6 +290,15 @@ namespace StS2Toys
             btnRegentOverview.TabIndex = 12;
             btnRegentOverview.Text = "○ Regent概観";
             btnRegentOverview.Click += BtnRegentOverview_Click;
+            //
+            // btnCommonOverview
+            //
+            btnCommonOverview.Dock = DockStyle.Top;
+            btnCommonOverview.Height = 30;
+            btnCommonOverview.Name = "btnCommonOverview";
+            btnCommonOverview.TabIndex = 13;
+            btnCommonOverview.Text = "○ 共通概観";
+            btnCommonOverview.Click += BtnCommonOverview_Click;
             //
             // lblGroupOther
             //
@@ -485,6 +496,7 @@ namespace StS2Toys
         private Button btnSilentOverview;
         private Button btnDefectOverview;
         private Button btnRegentOverview;
+        private Button btnCommonOverview;
         private Label lblGroupOverview;
         private Label lblGroupOther;
         private SplitContainer splitContainer;

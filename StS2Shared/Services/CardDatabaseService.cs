@@ -130,6 +130,8 @@ public static class CardDatabaseService
     static readonly HashSet<string> _defectChannel = ComputeByTag("[gold]Channel[/gold]", "[gold]Channeled[/gold]", "[gold]Channels[/gold]");
     static readonly HashSet<string> _defectEvoke   = ComputeByTag("[gold]Evoke[/gold]");
     static readonly HashSet<string> _defectFocus   = ComputeByTag("[gold]Focus[/gold]");
+    static readonly HashSet<string> _weak           = ComputeByTag("[gold]Weak[/gold]");
+    static readonly HashSet<string> _vulnerable    = ComputeByTag("[gold]Vulnerable[/gold]");
     static readonly HashSet<string> _regentForge   = ComputeByTag("[gold]Forge[/gold]", "[gold]Forges[/gold]");
     static readonly HashSet<string> _regentBlade   = ComputeByTag("[gold]Sovereign Blade[/gold]");
     static readonly HashSet<string> _regentCreate     = ComputeByPlainText("Whenever you create", "created this combat");
@@ -278,6 +280,8 @@ public static class CardDatabaseService
         return result;
     }
 
+    public static bool IsWeak(string id)           => _weak.Contains(ToRawId(id));
+    public static bool IsVulnerable(string id)    => _vulnerable.Contains(ToRawId(id));
     public static bool IsNecroOsty(string id)      => _necroOsty.Contains(ToRawId(id));
     public static bool IsNecroSoul(string id)      => _necroSoul.Contains(ToRawId(id));
     public static bool IsNecroDoom(string id)      => _necroDoom.Contains(ToRawId(id));

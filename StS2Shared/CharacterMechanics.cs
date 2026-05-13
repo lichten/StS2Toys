@@ -33,6 +33,11 @@ public static class CharacterMechanics
             ("カード作成シナジー",        CardDatabaseService.IsRegentCreate),
         ]),
         ("その他", []),
+        ("共通",
+        [
+            ("脱力 (Weak)",       CardDatabaseService.IsWeak),
+            ("弱体 (Vulnerable)", CardDatabaseService.IsVulnerable),
+        ]),
     ];
 
     public static (string MecLabel, Func<string, bool> Filter)[] MechanicsFor(string charLabel) =>

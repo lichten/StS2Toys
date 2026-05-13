@@ -19,6 +19,7 @@ namespace StS2Toys
         private DeckOverviewForm? _silentOverview;
         private DeckOverviewForm? _defectOverview;
         private DeckOverviewForm? _regentOverview;
+        private DeckOverviewForm? _commonOverview;
         private EncounterOverviewForm? _encounterOverview;
         private HpHistoryForm? _hpHistory;
         private SubWindowSettings? _imageViewerSettings;
@@ -33,6 +34,7 @@ namespace StS2Toys
         private SubWindowSettings? _silentOverviewSettings;
         private SubWindowSettings? _defectOverviewSettings;
         private SubWindowSettings? _regentOverviewSettings;
+        private SubWindowSettings? _commonOverviewSettings;
         private IReadOnlyList<DeckCard>? _lastDeckCards;
         private IReadOnlyList<RelicEntry>? _lastRelics;
         private RunSaveData? _lastRunData;
@@ -84,6 +86,7 @@ namespace StS2Toys
             _silentOverview?.Close();
             _defectOverview?.Close();
             _regentOverview?.Close();
+            _commonOverview?.Close();
         }
 
         void RestoreWindowSettings()
@@ -101,6 +104,7 @@ namespace StS2Toys
             _silentOverviewSettings   = app.SilentOverview;
             _defectOverviewSettings   = app.DefectOverview;
             _regentOverviewSettings   = app.RegentOverview;
+            _commonOverviewSettings   = app.CommonOverview;
 
             if (app.SidePanelWidth is int w)
                 splitContainerOuter.SplitterDistance = w;
@@ -140,6 +144,8 @@ namespace StS2Toys
                 _defectOverviewSettings = WindowToSub(_defectOverview);
             if (_regentOverview is { IsDisposed: false })
                 _regentOverviewSettings = WindowToSub(_regentOverview);
+            if (_commonOverview is { IsDisposed: false })
+                _commonOverviewSettings = WindowToSub(_commonOverview);
             if (_encounterOverview is { IsDisposed: false })
                 _encounterOverviewSettings = WindowToSub(_encounterOverview);
             if (_hpHistory is { IsDisposed: false })
@@ -148,7 +154,7 @@ namespace StS2Toys
             var state = WindowState == FormWindowState.Minimized ? FormWindowState.Normal : WindowState;
             var bounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
             var main = new WindowSettings(bounds.X, bounds.Y, bounds.Width, bounds.Height, state.ToString());
-            WindowSettingsService.Save(new AppSettings(main, _imageViewerSettings, _cardDetailSettings, _deckOverviewSettings, _blockOverviewSettings, _hpHistorySettings, _drawOverviewSettings, _encounterOverviewSettings, splitContainerOuter.SplitterDistance, _necroOverviewSettings, _ironcladOverviewSettings, _silentOverviewSettings, _defectOverviewSettings, _regentOverviewSettings));
+            WindowSettingsService.Save(new AppSettings(main, _imageViewerSettings, _cardDetailSettings, _deckOverviewSettings, _blockOverviewSettings, _hpHistorySettings, _drawOverviewSettings, _encounterOverviewSettings, splitContainerOuter.SplitterDistance, _necroOverviewSettings, _ironcladOverviewSettings, _silentOverviewSettings, _defectOverviewSettings, _regentOverviewSettings, _commonOverviewSettings));
         }
 
         static SubWindowSettings WindowToSub(Form form) =>
@@ -166,6 +172,7 @@ namespace StS2Toys
             if (_silentOverviewSettings?.Visible == true)     BtnSilentOverview_Click(null, EventArgs.Empty);
             if (_defectOverviewSettings?.Visible == true)     BtnDefectOverview_Click(null, EventArgs.Empty);
             if (_regentOverviewSettings?.Visible == true)     BtnRegentOverview_Click(null, EventArgs.Empty);
+            if (_commonOverviewSettings?.Visible == true)     BtnCommonOverview_Click(null, EventArgs.Empty);
         }
 
         static SubWindowSettings BoundsToSub(Rectangle r) => new(r.X, r.Y, r.Width, r.Height);
@@ -373,6 +380,7 @@ namespace StS2Toys
             RefreshSilentOverview();
             RefreshDefectOverview();
             RefreshRegentOverview();
+            RefreshCommonOverview();
         }
 
         void DisplayRelics(PlayerData player)
@@ -720,6 +728,49 @@ namespace StS2Toys
             if (_lastDeckCards is null) return;
             _regentOverview.UpdateDeck(_lastDeckCards);
             _regentOverview.SetStatsText(BuildStatsText("Regent", _lastDeckCards));
+        }
+
+        void BtnCommonOverview_Click(object? sender, EventArgs e)
+        {
+            if (_commonOverview is null || _commonOverview.IsDisposed || !_commonOverview.Visible)
+            {
+                if (_commonOverview is null || _commonOverview.IsDisposed)
+                {
+                    _commonOverview = new DeckOverviewForm();
+                    _commonOverview.SetKeywordGroups(
+                        CharacterMechanics.MechanicsFor("共通")
+                            .Select(m => (m.MecLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
+                        "共通概観");
+                    ApplySubWindowSettings(_commonOverview, _commonOverviewSettings, new Point(Right + 4, Top));
+                    _commonOverview.FormClosed += (_, _) =>
+                    {
+                        _commonOverviewSettings = BoundsToSub(_commonOverview.Bounds);
+                        UpdateCommonOverviewButton(false);
+                    };
+                }
+                _commonOverview.Show(this);
+                UpdateCommonOverviewButton(true);
+                RefreshCommonOverview();
+            }
+            else
+            {
+                _commonOverview.Hide();
+                UpdateCommonOverviewButton(false);
+            }
+        }
+
+        void UpdateCommonOverviewButton(bool visible)
+        {
+            btnCommonOverview.Text = visible ? "● 共通概観" : "○ 共通概観";
+            btnCommonOverview.ForeColor = visible ? Color.DarkCyan : SystemColors.ControlText;
+        }
+
+        void RefreshCommonOverview()
+        {
+            if (_commonOverview is null || _commonOverview.IsDisposed || !_commonOverview.Visible) return;
+            if (_lastDeckCards is null) return;
+            _commonOverview.UpdateDeck(_lastDeckCards);
+            _commonOverview.SetStatsText(BuildStatsText("共通", _lastDeckCards));
         }
 
         static string BuildStatsText(string charLabel, IReadOnlyList<DeckCard> deck) =>
