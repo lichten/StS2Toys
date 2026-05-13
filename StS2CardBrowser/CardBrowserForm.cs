@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using StS2Shared.Services;
 
 namespace StS2CardBrowser;
@@ -75,6 +76,11 @@ public class CardBrowserForm : Form
     Button[] _subButtons = [];
     Button[] _rarityButtons = [];
     Button[] _costButtons = [];
+
+    // ---- Win32 アイコン間隔制御 ----
+    [DllImport("user32.dll")]
+    static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+    const int LVM_SETICONSPACING = 0x1035;
 
     // ---- カード画像 ----
     PictureBox _portraitBox = null!;
@@ -322,6 +328,7 @@ public class CardBrowserForm : Form
         {
             _isJp = isJp;
             RefreshLangButtons();
+            ClearThumbCache();
             PopulateList();
         };
         return btn;
@@ -437,7 +444,7 @@ public class CardBrowserForm : Form
         {
             var c = _filtered[i];
             _imageList.Images.Add(GetOrCreateThumb(c));
-            var item = new ListViewItem(_isJp ? c.NameJa : c.NameEn, i) { Tag = c };
+            var item = new ListViewItem("", i) { Tag = c };
             _cardList.Items.Add(item);
             if (c.Id == _currentCard?.Id) selectItem = item;
         }
@@ -705,6 +712,8 @@ public class CardBrowserForm : Form
         using var g = Graphics.FromImage(bmp);
         g.Clear(Color.FromArgb(40, 40, 40));
         g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
         var path = ResolvePortraitPath(card);
         if (path is not null)
@@ -715,24 +724,58 @@ public class CardBrowserForm : Form
                 float scale = Math.Min((float)sz.Width / orig.Width, (float)sz.Height / orig.Height);
                 int w = (int)(orig.Width * scale), h = (int)(orig.Height * scale);
                 g.DrawImage(orig, (sz.Width - w) / 2, (sz.Height - h) / 2, w, h);
-                return bmp;
             }
-            catch { /* fall through to text placeholder */ }
+            catch { }
         }
 
-        // 画像なし: テキストでフォールバック
-        using var font = new Font("Meiryo", 7);
-        using var brush = new SolidBrush(Color.FromArgb(180, 180, 180));
-        var name = _isJp ? card.NameJa : card.NameEn;
-        g.DrawString(name, font, brush, new RectangleF(2, 2, sz.Width - 4, sz.Height - 4));
+        DrawThumbCostBadge(g, card.Cost, sz);
+        DrawThumbNameBar(g, _isJp ? card.NameJa : card.NameEn, sz);
         return bmp;
+    }
+
+    static void DrawThumbCostBadge(Graphics g, string cost, Size sz)
+    {
+        const int r = 9, margin = 3;
+        var rect = new Rectangle(margin, margin, r * 2, r * 2);
+        using var bgBrush = new SolidBrush(Color.FromArgb(180, 0, 0, 0));
+        g.FillEllipse(bgBrush, rect);
+        using var font = new Font("Meiryo", 7.5f, FontStyle.Bold);
+        var sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+        g.DrawString(string.IsNullOrEmpty(cost) ? "?" : cost, font, Brushes.White, rect, sf);
+    }
+
+    static void DrawThumbNameBar(Graphics g, string name, Size sz)
+    {
+        const int barH = 24;
+        var barRect = new Rectangle(0, sz.Height - barH, sz.Width, barH);
+        using var grad = new System.Drawing.Drawing2D.LinearGradientBrush(
+            new Point(barRect.X, barRect.Y),
+            new Point(barRect.X, barRect.Bottom),
+            Color.FromArgb(0, 0, 0, 0),
+            Color.FromArgb(210, 0, 0, 0));
+        g.FillRectangle(grad, barRect);
+        using var font = new Font("Meiryo", 7f, FontStyle.Bold);
+        var sf = new StringFormat
+        {
+            Alignment = StringAlignment.Near,
+            LineAlignment = StringAlignment.Center,
+            Trimming = StringTrimming.EllipsisCharacter,
+            FormatFlags = StringFormatFlags.NoWrap,
+        };
+        g.DrawString(name, font, Brushes.White, new RectangleF(4, barRect.Y, sz.Width - 8, barH), sf);
+    }
+
+    void ClearThumbCache()
+    {
+        foreach (var bmp in _thumbCache.Values) bmp.Dispose();
+        _thumbCache.Clear();
     }
 
     protected override void OnFormClosed(FormClosedEventArgs e)
     {
         base.OnFormClosed(e);
         _portraitImage?.Dispose();
-        foreach (var bmp in _thumbCache.Values) bmp.Dispose();
+        ClearThumbCache();
     }
 
     void AppendBold(string text, float size, Color? color = null)
@@ -844,6 +887,11 @@ public class CardBrowserForm : Form
         _split.Panel1MinSize = 260;
         _split.Panel2MinSize = 200;
         _split.SplitterDistance = 320;
+
+        // LVM_SETICONSPACING: ラベルなし表示用に画像サイズ+最小パディング
+        var spacing = (IntPtr)(((91 + 4) << 16) | ((120 + 4) & 0xFFFF));
+        SendMessage(_cardList.Handle, LVM_SETICONSPACING, IntPtr.Zero, spacing);
+
         RefreshCharButtons();
         RefreshCostButtons();
         RefreshRarityButtons();
