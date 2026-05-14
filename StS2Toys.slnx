@@ -5,5 +5,4 @@
   <Project Path="StS2EventBrowser/StS2EventBrowser.csproj" />
   <Project Path="card-type-extractor/card-type-extractor.csproj" />
   <Project Path="ctex-to-png/ctex-to-png.csproj" />
-  <Project Path="StS2SiteBuilder/StS2SiteBuilder.csproj" />
 </Solution>

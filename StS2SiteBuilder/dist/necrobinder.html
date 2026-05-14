@@ -1,0 +1,209 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Necrobinder | StS2 カードリファレンス</title>
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial,
+               'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  background: #f5f7fa;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+a { color: inherit; text-decoration: none; }
+.layout { display: flex; min-height: 100vh; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  background: #fff;
+  border-right: 1px solid #e8e8e8;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+.sidebar-brand {
+  padding: 18px 20px 16px;
+  background: #1e2128;
+  border-bottom: 1px solid #2c3040;
+}
+.brand-game { font-size: 13px; font-weight: 700; color: #f0f0f0; letter-spacing: 0.3px; }
+.brand-label { font-size: 11px; color: #8899aa; margin-top: 3px; }
+.nav-section { padding: 14px 0 6px; }
+.nav-group-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #c0c0c0;
+  padding: 0 20px 8px;
+}
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 20px;
+  font-size: 13.5px;
+  color: #555;
+  border-left: 3px solid transparent;
+  transition: background 0.1s;
+}
+.nav-link:hover { background: #f7f8fa; color: #222; }
+.nav-link.active { background: #f3f4f6; color: #111; font-weight: 600; }
+.nav-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.nav-home-icon { font-size: 15px; line-height: 1; }
+.nav-name-ja { font-size: 11px; color: #aaa; margin-left: auto; }
+.nav-link.active .nav-name-ja { color: #888; }
+
+/* ── Main ── */
+.main { flex: 1; padding: 40px 48px; min-width: 0; }
+
+/* ── Hero (index) ── */
+.page-hero {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e8e8e8;
+}
+.hero-title { font-size: 28px; font-weight: 800; color: #1a1a2e; letter-spacing: -0.5px; }
+.hero-sub { font-size: 15px; color: #666; margin-top: 4px; }
+.hero-desc { font-size: 13.5px; color: #999; margin-top: 10px; }
+
+/* ── Character grid (index) ── */
+.char-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 16px;
+}
+.char-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+.char-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.13); transform: translateY(-3px); }
+.char-card-header { padding: 20px 18px 14px; color: #fff; }
+.char-name-en { font-size: 19px; font-weight: 800; letter-spacing: -0.3px; }
+.char-name-ja { font-size: 11px; opacity: 0.82; margin-top: 3px; }
+.char-card-body { padding: 14px 18px; flex: 1; }
+.char-desc { font-size: 12.5px; color: #666; line-height: 1.65; }
+.char-card-footer {
+  padding: 9px 18px 11px;
+  font-size: 12px;
+  color: #aaa;
+  border-top: 1px solid #f0f0f0;
+  font-weight: 500;
+}
+.char-card:hover .char-card-footer { color: #666; }
+
+/* ── Character page header ── */
+.char-header {
+  border-radius: 10px;
+  padding: 28px 32px;
+  margin-bottom: 24px;
+}
+.char-title-en { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; }
+.char-title-ja { font-size: 13px; color: #777; margin-top: 5px; }
+.char-desc-full {
+  font-size: 14px;
+  color: #555;
+  margin-top: 14px;
+  max-width: 560px;
+  line-height: 1.75;
+}
+
+/* ── Sections ── */
+.section {
+  background: #fff;
+  border-radius: 10px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+  letter-spacing: 0.2px;
+}
+.mec-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.mec-tag {
+  padding: 5px 13px;
+  background: #f5f6f8;
+  border: 1px solid #e4e6ea;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #444;
+}
+.placeholder { font-size: 13.5px; color: #bbb; font-style: italic; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-game">Slay the Spire 2</div>
+        <div class="brand-label">カードリファレンス</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-group-label">ページ</div>
+        <a href="index.html" class="nav-link">
+          <span class="nav-home-icon">&#8962;</span>
+          トップ
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-group-label">キャラクター</div>
+              <a href="ironclad.html" class="nav-link">
+        <span class="nav-dot" style="background:#c0392b"></span>
+        Ironclad
+        <span class="nav-name-ja">アイアンクラッド</span>
+      </a>      <a href="silent.html" class="nav-link">
+        <span class="nav-dot" style="background:#1a7a4a"></span>
+        Silent
+        <span class="nav-name-ja">サイレント</span>
+      </a>      <a href="defect.html" class="nav-link">
+        <span class="nav-dot" style="background:#1a5799"></span>
+        Defect
+        <span class="nav-name-ja">ディフェクト</span>
+      </a>      <a href="necrobinder.html" class="nav-link active" style="border-left-color:#6c3483">
+        <span class="nav-dot" style="background:#6c3483"></span>
+        Necrobinder
+        <span class="nav-name-ja">ネクロバインダー</span>
+      </a>      <a href="regent.html" class="nav-link">
+        <span class="nav-dot" style="background:#7d6608"></span>
+        Regent
+        <span class="nav-name-ja">リージェント</span>
+      </a>
+      </div>
+    </nav>
+    <main class="main">
+      <div class="char-header" style="border-left:5px solid #6c3483;background:#f4ecf7">
+  <h1 class="char-title-en" style="color:#6c3483">Necrobinder</h1>
+  <div class="char-title-ja">ネクロバインダー</div>
+  <p class="char-desc-full">暗黒魔術と召喚のキャラクター。OstyとSoulを操り、Doomで敵を追い詰める。</p>
+</div>
+<section class="section">
+  <h2 class="section-title">メカニクス / シナジー</h2>
+  <div class="mec-tags"><span class="mec-tag">Osty</span><span class="mec-tag">Soul</span><span class="mec-tag">Doom</span></div>
+</section>
+<section class="section">
+  <h2 class="section-title">カード一覧</h2>
+  <p class="placeholder">準備中...</p>
+</section>
+    </main>
+  </div>
+</body>
+</html>
