@@ -215,8 +215,12 @@ public static class CardDatabaseService
         foreach (var (key, desc) in _loc.EngCards)
         {
             if (!key.EndsWith(descSuffix, StringComparison.Ordinal)) continue;
-            if (desc.Contains("draw", StringComparison.OrdinalIgnoreCase) ||
-                desc.Contains(drawPileTag, StringComparison.Ordinal))
+            var stripped = desc.Replace(drawPileTag, "", StringComparison.Ordinal);
+            bool isDrawCard = stripped.Contains("draw", StringComparison.OrdinalIgnoreCase);
+            // "Add ... Soul/Souls" パターン: Soulカードを生成してドローできるカード
+            bool isSoulGenerator = desc.Contains("Add", StringComparison.OrdinalIgnoreCase) &&
+                                   desc.Contains("Soul", StringComparison.OrdinalIgnoreCase);
+            if (isDrawCard || isSoulGenerator)
                 result.Add(key[..^descSuffix.Length]);
         }
         return result;
@@ -230,8 +234,8 @@ public static class CardDatabaseService
         foreach (var (key, desc) in _loc.EngRelics)
         {
             if (!key.EndsWith(descSuffix, StringComparison.Ordinal)) continue;
-            if (desc.Contains("draw", StringComparison.OrdinalIgnoreCase) ||
-                desc.Contains(drawPileTag, StringComparison.Ordinal))
+            var stripped = desc.Replace(drawPileTag, "", StringComparison.Ordinal);
+            if (stripped.Contains("draw", StringComparison.OrdinalIgnoreCase))
                 result.Add(key[..^descSuffix.Length]);
         }
         return result;
