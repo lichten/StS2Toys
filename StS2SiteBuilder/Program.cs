@@ -30,9 +30,11 @@ PageEntry[] pages =
         "全カードをタイプ・レアリティ・フラグ付きで一覧表示。", "#2c3e50"),
 ];
 
-File.WriteAllText(Path.Combine(distDir, "index.html"), BuildIndex(chars),           System.Text.Encoding.UTF8);
-File.WriteAllText(Path.Combine(distDir, "pages.html"), BuildPageList(pages, chars), System.Text.Encoding.UTF8);
-File.WriteAllText(Path.Combine(distDir, "cards.html"), BuildCardListPage(chars),    System.Text.Encoding.UTF8);
+var allCardIds = CardDatabaseService.GetAllCardIds().ToArray();
+
+File.WriteAllText(Path.Combine(distDir, "index.html"), BuildIndex(chars),              System.Text.Encoding.UTF8);
+File.WriteAllText(Path.Combine(distDir, "pages.html"), BuildPageList(pages, chars),    System.Text.Encoding.UTF8);
+File.WriteAllText(Path.Combine(distDir, "cards.html"), BuildCardListPage(allCardIds, chars), System.Text.Encoding.UTF8);
 foreach (var ch in chars)
 {
     mechanicsMap.TryGetValue(ch.EnName, out var mecs);
@@ -40,7 +42,30 @@ foreach (var ch in chars)
         BuildCharPage(ch, chars, mecs ?? []), System.Text.Encoding.UTF8);
 }
 
-Console.WriteLine($"Generated {3 + chars.Length} files -> {distDir}");
+// 個別カードページ（dist/cards/{charDir}/{CARD_ID}.html）
+foreach (var cardId in allCardIds)
+{
+    var dir     = GetCardDir(cardId, chars);
+    var cardDir = Path.Combine(distDir, "cards", dir);
+    Directory.CreateDirectory(cardDir);
+    File.WriteAllText(
+        Path.Combine(cardDir, $"{RawId(cardId)}.html"),
+        BuildCardPage(cardId, chars, basePath: "../../"),
+        System.Text.Encoding.UTF8);
+}
+
+Console.WriteLine($"Generated {3 + chars.Length + allCardIds.Length} files -> {distDir}");
+
+// ── helpers ───────────────────────────────────────────────────────────────────
+
+static string RawId(string id) => id.Contains('.') ? id[(id.IndexOf('.') + 1)..] : id;
+
+static string GetCardDir(string cardId, CharData[] chars)
+{
+    var charName = CardDatabaseService.GetCardCharacter(cardId);
+    var ch = chars.FirstOrDefault(c => c.EnName.Equals(charName, StringComparison.OrdinalIgnoreCase));
+    return ch?.Id ?? "shared";
+}
 
 // ── page builders ─────────────────────────────────────────────────────────────
 
@@ -121,18 +146,16 @@ static string BuildPageList(PageEntry[] pages, CharData[] chars)
         """);
 }
 
-static string BuildCardListPage(CharData[] chars)
+static string BuildCardListPage(string[] allCardIds, CharData[] chars)
 {
-    var allIds    = CardDatabaseService.GetAllCardIds().ToArray();
     var charNames = new HashSet<string>(chars.Select(c => c.EnName), StringComparer.OrdinalIgnoreCase);
 
-    // 5キャラクター + 共有・特殊（Status / Curse / Ancient 等）
     var groups = chars
         .Select(ch => (
             Label:   ch.EnName,
             LabelJa: ch.JaName,
             Accent:  ch.Accent,
-            Ids: allIds
+            Ids: allCardIds
                 .Where(id => CardDatabaseService.GetCardCharacter(id)
                     .Equals(ch.EnName, StringComparison.OrdinalIgnoreCase))
                 .OrderBy(id => TypeOrder(CardDatabaseService.GetCardType(id)))
@@ -144,7 +167,7 @@ static string BuildCardListPage(CharData[] chars)
             Label:   "共有・特殊",
             LabelJa: "",
             Accent:  "#888",
-            Ids: allIds
+            Ids: allCardIds
                 .Where(id => !charNames.Contains(CardDatabaseService.GetCardCharacter(id)))
                 .OrderBy(id => TypeOrder(CardDatabaseService.GetCardType(id)))
                 .ThenBy(id => RarityOrder(CardDatabaseService.GetCardRarity(id)))
@@ -160,11 +183,14 @@ static string BuildCardListPage(CharData[] chars)
 
         var rows = string.Concat(g.Ids.Select(id =>
         {
+            var rawId   = RawId(id);
             var nameEn  = CardDatabaseService.GetName(id);
             var nameJa  = CardDatabaseService.GetName(id, japanese: true);
             var type    = CardDatabaseService.GetCardType(id);
             var rarity  = CardDatabaseService.GetCardRarity(id);
             var flags   = ComputeFlags(id);
+            var dir     = GetCardDir(id, chars);
+            var href    = $"cards/{dir}/{rawId}.html";
 
             var typeBadge   = type   != "" ? $"""<span class="badge type-{type.ToLower()}">{type}</span>""" : "";
             var rarityBadge = rarity != "" ? $"""<span class="badge rarity-{rarity.ToLower()}">{rarity}</span>""" : "";
@@ -176,7 +202,9 @@ static string BuildCardListPage(CharData[] chars)
 
             return $"""
                       <tr>
-                        <td class="col-name"><span class="card-name-en">{nameEn}</span>{jaSpan}</td>
+                        <td class="col-name">
+                          <a href="{href}" class="card-name-link">{nameEn}</a>{jaSpan}
+                        </td>
                         <td class="col-type">{typeBadge}</td>
                         <td class="col-rarity">{rarityBadge}</td>
                         <td class="col-flags"><div class="flag-cell">{flagBadges}</div></td>
@@ -206,35 +234,89 @@ static string BuildCardListPage(CharData[] chars)
     return Layout("カード一覧", "cards", "#2c3e50", chars, $"""
         <div class="page-hero">
           <h1 class="hero-title">カード一覧</h1>
-          <p class="hero-sub">全{allIds.Length}件</p>
+          <p class="hero-sub">全{allCardIds.Length}件</p>
         </div>
         {sections}
         """);
 }
 
-static HashSet<string> ComputeFlags(string id)
+static string BuildCardPage(string cardId, CharData[] chars, string basePath)
 {
-    var type   = CardDatabaseService.GetCardType(id);
-    var rarity = CardDatabaseService.GetCardRarity(id);
-    var flags  = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-    if (rarity == "Ancient")         flags.Add(CardFlags.IsAncient);
-    if (type is "Status" or "Curse") flags.Add(CardFlags.IsGeneratedInCombat);
-    return flags;
+    var rawId    = RawId(cardId);
+    var nameEn   = CardDatabaseService.GetName(cardId);
+    var nameJa   = CardDatabaseService.GetName(cardId, japanese: true);
+    var type     = CardDatabaseService.GetCardType(cardId);
+    var rarity   = CardDatabaseService.GetCardRarity(cardId);
+    var cost     = CardDatabaseService.GetCardCost(cardId);
+    var flags    = ComputeFlags(cardId);
+    var stats    = CardDatabaseService.GetCardStats(cardId);
+    var (rawDescEn, rawDescJa) = CardDatabaseService.GetDescription(cardId);
+    var charName = CardDatabaseService.GetCardCharacter(cardId);
+    var ch       = chars.FirstOrDefault(c => c.EnName.Equals(charName, StringComparison.OrdinalIgnoreCase));
+
+    var accent  = ch?.Accent  ?? "#888";
+    var lightBg = ch?.LightBg ?? "#f8f8f8";
+
+    // テンプレート変数を stats で解決。未定義変数は [VarName] 表示
+    var descEn = DescriptionFormatter.Resolve(rawDescEn, stats).Replace("\n", "<br>");
+    var descJa = DescriptionFormatter.Resolve(rawDescJa, stats, japanese: true).Replace("\n", "<br>");
+
+    var typeBadge   = type   != "" ? $"""<span class="badge type-{type.ToLower()}">{type}</span>""" : "";
+    var rarityBadge = rarity != "" ? $"""<span class="badge rarity-{rarity.ToLower()}">{rarity}</span>""" : "";
+    var costBadge   = cost   != "" ? $"""<span class="badge cost-badge">{cost}</span>""" : "";
+    var flagBadges  = string.Concat(
+        CardFlags.AllDefs
+            .Where(f => flags.Contains(f.Key))
+            .Select(f => $"""<span class="badge flag-badge">{f.Label}</span>"""));
+
+    var charLink = ch is not null
+        ? $"""<a href="{basePath}{ch.Id}.html" class="char-back-link" style="color:{accent}">{ch.EnName} <span class="char-back-ja">({ch.JaName})</span></a>"""
+        : """<span class="char-back-link char-back-neutral">共有・特殊</span>""";
+
+    var descSection = (descEn != "") ? $"""
+        <section class="section">
+          <h2 class="section-title">効果テキスト</h2>
+          <p class="card-desc-en">{descEn}</p>
+          {(descJa != "" && descJa != descEn ? $"""<p class="card-desc-ja">{descJa}</p>""" : "")}
+        </section>
+        """ : "";
+
+    var statsSection = "";
+    if (stats is { Count: > 0 })
+    {
+        var rows = string.Concat(stats.Select(kv =>
+            $"""<tr><td class="stat-key">{kv.Key}</td><td class="stat-val">{kv.Value}</td></tr>"""));
+        statsSection = $"""
+            <section class="section">
+              <h2 class="section-title">基本値</h2>
+              <table class="stat-table"><tbody>{rows}</tbody></table>
+            </section>
+            """;
+    }
+
+    var flagsSection = flags.Count > 0 ? $"""
+        <section class="section">
+          <h2 class="section-title">特性</h2>
+          <div class="flag-cell">{flagBadges}</div>
+        </section>
+        """ : "";
+
+    var content = $"""
+        <div class="card-detail-header" style="border-left:5px solid {accent};background:{lightBg}">
+          <div>
+            <div class="card-breadcrumb">{charLink}</div>
+            <h1 class="card-title-en" style="color:{accent}">{nameEn}</h1>
+            {(nameJa != nameEn ? $"""<div class="card-title-ja">{nameJa}</div>""" : "")}
+            <div class="card-badges">{typeBadge}{rarityBadge}{costBadge}</div>
+          </div>
+        </div>
+        {descSection}
+        {statsSection}
+        {flagsSection}
+        """;
+
+    return Layout(nameEn, "cards", accent, chars, content, basePath);
 }
-
-static int TypeOrder(string type) => type switch
-{
-    "Attack" => 0, "Skill" => 1, "Power" => 2,
-    "Status" => 3, "Curse" => 4, "Quest" => 5,
-    _ => 99,
-};
-
-static int RarityOrder(string rarity) => rarity switch
-{
-    "Starter" => 0, "Common" => 1, "Uncommon" => 2, "Rare" => 3,
-    "Ancient" => 4, "Event"  => 5, "Shop"     => 6,
-    _ => 99,
-};
 
 static string BuildCharPage(CharData ch, CharData[] chars, string[] mecs)
 {
@@ -262,33 +344,50 @@ static string BuildCharPage(CharData ch, CharData[] chars, string[] mecs)
         """);
 }
 
-static string Layout(string title, string activeId, string accent, CharData[] chars, string content)
+static HashSet<string> ComputeFlags(string id)
+{
+    var type   = CardDatabaseService.GetCardType(id);
+    var rarity = CardDatabaseService.GetCardRarity(id);
+    var flags  = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    if (rarity == "Ancient")         flags.Add(CardFlags.IsAncient);
+    if (type is "Status" or "Curse") flags.Add(CardFlags.IsGeneratedInCombat);
+    return flags;
+}
+
+static int TypeOrder(string type) => type switch
+{
+    "Attack" => 0, "Skill" => 1, "Power" => 2,
+    "Status" => 3, "Curse" => 4, "Quest" => 5,
+    _ => 99,
+};
+
+static int RarityOrder(string rarity) => rarity switch
+{
+    "Starter" => 0, "Common" => 1, "Uncommon" => 2, "Rare" => 3,
+    "Ancient" => 4, "Event"  => 5, "Shop"     => 6,
+    _ => 99,
+};
+
+static string Layout(string title, string activeId, string accent, CharData[] chars, string content,
+                     string basePath = "")
 {
     const string CSS = """
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial,
                        'Hiragino Sans', 'Noto Sans JP', sans-serif;
-          background: #f5f7fa;
-          color: #2c2c2c;
-          line-height: 1.6;
+          background: #f5f7fa; color: #2c2c2c; line-height: 1.6;
         }
         a { color: inherit; text-decoration: none; }
         .layout { display: flex; min-height: 100vh; }
 
         /* ── Sidebar ── */
         .sidebar {
-          width: 240px; min-width: 240px;
-          background: #fff;
-          border-right: 1px solid #e8e8e8;
-          display: flex; flex-direction: column;
+          width: 240px; min-width: 240px; background: #fff;
+          border-right: 1px solid #e8e8e8; display: flex; flex-direction: column;
           position: sticky; top: 0; height: 100vh; overflow-y: auto;
         }
-        .sidebar-brand {
-          padding: 18px 20px 16px;
-          background: #1e2128;
-          border-bottom: 1px solid #2c3040;
-        }
+        .sidebar-brand { padding: 18px 20px 16px; background: #1e2128; border-bottom: 1px solid #2c3040; }
         .brand-game  { font-size: 13px; font-weight: 700; color: #f0f0f0; letter-spacing: 0.3px; }
         .brand-label { font-size: 11px; color: #8899aa; margin-top: 3px; }
         .nav-section { padding: 14px 0 6px; }
@@ -303,42 +402,36 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
         }
         .nav-link:hover  { background: #f7f8fa; color: #222; }
         .nav-link.active { background: #f3f4f6; color: #111; font-weight: 600; }
-        .nav-dot       { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-        .nav-icon      { font-size: 15px; line-height: 1; }
-        .nav-name-ja   { font-size: 11px; color: #aaa; margin-left: auto; }
+        .nav-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+        .nav-icon { font-size: 15px; line-height: 1; }
+        .nav-name-ja { font-size: 11px; color: #aaa; margin-left: auto; }
         .nav-link.active .nav-name-ja { color: #888; }
 
         /* ── Main ── */
         .main { flex: 1; padding: 40px 48px; min-width: 0; }
 
         /* ── Hero ── */
-        .page-hero {
-          margin-bottom: 32px; padding-bottom: 24px;
-          border-bottom: 1px solid #e8e8e8;
-        }
+        .page-hero { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #e8e8e8; }
         .hero-title { font-size: 28px; font-weight: 800; color: #1a1a2e; letter-spacing: -0.5px; }
         .hero-sub   { font-size: 15px; color: #666; margin-top: 4px; }
         .hero-desc  { font-size: 13.5px; color: #999; margin-top: 10px; }
 
-        /* ── Character grid (index / pages) ── */
+        /* ── Character grid ── */
         .char-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-          gap: 16px;
+          display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px;
         }
         .char-card {
-          display: flex; flex-direction: column;
-          background: #fff; border-radius: 10px; overflow: hidden;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-          transition: box-shadow 0.15s, transform 0.15s;
+          display: flex; flex-direction: column; background: #fff;
+          border-radius: 10px; overflow: hidden;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.08); transition: box-shadow 0.15s, transform 0.15s;
         }
         .char-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.13); transform: translateY(-3px); }
-        .char-card-header  { padding: 20px 18px 14px; color: #fff; }
-        .char-name-en      { font-size: 19px; font-weight: 800; letter-spacing: -0.3px; }
-        .char-name-ja      { font-size: 11px; opacity: 0.82; margin-top: 3px; }
-        .char-card-body    { padding: 14px 18px; flex: 1; }
-        .char-desc         { font-size: 12.5px; color: #666; line-height: 1.65; }
-        .char-card-footer  {
+        .char-card-header { padding: 20px 18px 14px; color: #fff; }
+        .char-name-en     { font-size: 19px; font-weight: 800; letter-spacing: -0.3px; }
+        .char-name-ja     { font-size: 11px; opacity: 0.82; margin-top: 3px; }
+        .char-card-body   { padding: 14px 18px; flex: 1; }
+        .char-desc        { font-size: 12.5px; color: #666; line-height: 1.65; }
+        .char-card-footer {
           padding: 9px 18px 11px; font-size: 12px; color: #aaa;
           border-top: 1px solid #f0f0f0; font-weight: 500;
         }
@@ -350,14 +443,31 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
           display: flex; align-items: center; gap: 28px; overflow: hidden;
         }
         .char-header-body { flex: 1; min-width: 0; }
-        .char-title-en    { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; }
-        .char-title-ja    { font-size: 13px; color: #777; margin-top: 5px; }
-        .char-desc-full   { font-size: 14px; color: #555; margin-top: 14px; max-width: 560px; line-height: 1.75; }
-        .char-hero-img    {
-          width: 132px; height: 195px; object-fit: cover;
-          border-radius: 8px; flex-shrink: 0;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.15); image-rendering: auto;
+        .char-title-en  { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; }
+        .char-title-ja  { font-size: 13px; color: #777; margin-top: 5px; }
+        .char-desc-full { font-size: 14px; color: #555; margin-top: 14px; max-width: 560px; line-height: 1.75; }
+        .char-hero-img  {
+          width: 132px; height: 195px; object-fit: cover; border-radius: 8px;
+          flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.15); image-rendering: auto;
         }
+
+        /* ── Card detail header ── */
+        .card-detail-header {
+          border-radius: 10px; padding: 28px 32px; margin-bottom: 24px; overflow: hidden;
+        }
+        .card-breadcrumb  { font-size: 12px; margin-bottom: 10px; }
+        .char-back-link   { font-weight: 600; }
+        .char-back-link:hover { text-decoration: underline; }
+        .char-back-ja     { font-weight: 400; opacity: 0.8; }
+        .char-back-neutral { color: #888; }
+        .card-title-en  { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; }
+        .card-title-ja  { font-size: 13px; color: #777; margin-top: 5px; }
+        .card-badges    { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+        .card-desc-en   { font-size: 14px; color: #333; line-height: 1.75; }
+        .card-desc-ja   { font-size: 13px; color: #777; line-height: 1.75; margin-top: 12px; }
+        .stat-table     { border-collapse: collapse; }
+        .stat-key { font-size: 13px; color: #666; padding: 3px 20px 3px 0; }
+        .stat-val { font-size: 13px; font-weight: 600; color: #222; }
 
         /* ── Sections ── */
         .section {
@@ -379,7 +489,7 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
         }
         .placeholder { font-size: 13.5px; color: #bbb; font-style: italic; }
 
-        /* ── Page list (pages.html) ── */
+        /* ── Page list ── */
         .section-pending { opacity: 0.55; }
         .pending-badge {
           display: inline-block; font-size: 10px; font-weight: 600;
@@ -388,24 +498,22 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
           letter-spacing: 0.5px; font-style: normal;
         }
 
-        /* ── Card table (cards.html) ── */
+        /* ── Card table ── */
         .card-table { width: 100%; border-collapse: collapse; font-size: 13px; }
         .card-table th {
           text-align: left; font-size: 10.5px; font-weight: 600;
           text-transform: uppercase; letter-spacing: 0.5px; color: #bbb;
           padding: 0 16px 8px 0; border-bottom: 1px solid #f0f0f0;
         }
-        .card-table td {
-          padding: 5px 16px 5px 0; border-bottom: 1px solid #f8f8f8;
-          vertical-align: middle;
-        }
+        .card-table td { padding: 5px 16px 5px 0; border-bottom: 1px solid #f8f8f8; vertical-align: middle; }
         .card-table tr:last-child td { border-bottom: none; }
-        .col-name    { min-width: 180px; }
-        .col-type    { white-space: nowrap; }
-        .col-rarity  { white-space: nowrap; }
-        .card-name-en { display: block; font-size: 13.5px; color: #222; }
-        .card-name-ja { font-size: 11px; color: #bbb; }
-        .flag-cell    { display: flex; gap: 4px; flex-wrap: wrap; }
+        .col-name   { min-width: 180px; }
+        .col-type   { white-space: nowrap; }
+        .col-rarity { white-space: nowrap; }
+        .card-name-link { color: #1a5799; }
+        .card-name-link:hover { text-decoration: underline; }
+        .card-name-ja   { font-size: 11px; color: #bbb; margin-left: 6px; }
+        .flag-cell  { display: flex; gap: 4px; flex-wrap: wrap; }
 
         /* ── Badges ── */
         .badge {
@@ -425,6 +533,7 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
         .rarity-ancient  { background: #fff0d8;  color: #a0600c; }
         .rarity-event    { background: #e8f8f0;  color: #1a7a4a; }
         .rarity-shop     { background: #fdf0fc;  color: #7d1a7d; }
+        .cost-badge      { background: #e8eaed;  color: #333; }
         .flag-badge      { background: #e8eaf0;  color: #445566; }
         """;
 
@@ -443,7 +552,7 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
         var activeStyle = isActive ? $" style=\"border-left-color:{ch.Accent}\"" : "";
         var cls         = isActive ? " active" : "";
         return $"""
-                  <a href="{ch.Id}.html" class="nav-link{cls}"{activeStyle}>
+                  <a href="{basePath}{ch.Id}.html" class="nav-link{cls}"{activeStyle}>
                     <span class="nav-dot" style="background:{ch.Accent}"></span>
                     {ch.EnName}
                     <span class="nav-name-ja">{ch.JaName}</span>
@@ -471,13 +580,13 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
               </div>
               <div class="nav-section">
                 <div class="nav-group-label">ページ</div>
-                <a href="index.html" class="nav-link{homeClass}"{homeStyle}>
+                <a href="{basePath}index.html" class="nav-link{homeClass}"{homeStyle}>
                   <span class="nav-icon">&#8962;</span>トップ
                 </a>
-                <a href="pages.html" class="nav-link{pagesClass}"{pagesStyle}>
+                <a href="{basePath}pages.html" class="nav-link{pagesClass}"{pagesStyle}>
                   <span class="nav-icon">&#9776;</span>ページ一覧
                 </a>
-                <a href="cards.html" class="nav-link{cardsClass}"{cardsStyle}>
+                <a href="{basePath}cards.html" class="nav-link{cardsClass}"{cardsStyle}>
                   <span class="nav-icon">&#9670;</span>カード一覧
                 </a>
               </div>
@@ -503,12 +612,10 @@ record FlagDef(string Key, string Label);
 
 static class CardFlags
 {
-    // ── フラグキー定数 ────────────────────────────────────────────────────────
     // 新フラグを追加するときはここに定数を追加し、AllDefs と ComputeFlags() にも反映する
     public const string IsAncient           = "IsAncient";
     public const string IsGeneratedInCombat = "IsGeneratedInCombat";
 
-    // ── フラグ表示定義（key → ラベル）────────────────────────────────────────
     public static readonly FlagDef[] AllDefs =
     [
         new(IsAncient,           "エンシェント"),
