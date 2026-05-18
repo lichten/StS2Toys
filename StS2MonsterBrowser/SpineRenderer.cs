@@ -96,7 +96,9 @@ static class SpineRenderer
         paint.Shader = shader;
         paint.BlendMode = blend;
         var skVerts = SKVertices.CreateCopy(SKVertexMode.Triangles, positions, texCoords, colors, indices);
-        canvas.DrawVertices(skVerts, blend, paint);
+        // Modulate: 頂点カラーでテクスチャを乗算（ティント・アルファ反映）。
+        // blend は paint.BlendMode としてキャンバスへの合成に使う（SrcOver / Plus / Multiply）。
+        canvas.DrawVertices(skVerts, SKBlendMode.Modulate, paint);
     }
 
     static void DrawMesh(SKCanvas canvas, SKPaint paint, SKShader shader,
@@ -120,7 +122,7 @@ static class SpineRenderer
         paint.Shader = shader;
         paint.BlendMode = blend;
         var skVerts = SKVertices.CreateCopy(SKVertexMode.Triangles, positions, texCoords, colors, indices);
-        canvas.DrawVertices(skVerts, blend, paint);
+        canvas.DrawVertices(skVerts, SKBlendMode.Modulate, paint);
     }
 
     static SKRect ComputeBounds(Skeleton skeleton)
