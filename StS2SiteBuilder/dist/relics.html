@@ -186,21 +186,45 @@ a { color: inherit; text-decoration: none; }
 .relic-filter-panel {
   background: #fff; border-radius: 10px; padding: 16px 20px;
   margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
 }
+.relic-filter-section { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.relic-filter-section + .relic-filter-section { margin-top: 10px; padding-top: 10px; border-top: 1px solid #f2f2f2; }
 .relic-filter-label {
   font-size: 10.5px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.7px; color: #bbb; flex-shrink: 0;
+  letter-spacing: 0.7px; color: #bbb; min-width: 66px; flex-shrink: 0;
 }
 .relic-search-input {
-  flex: 1; min-width: 200px; max-width: 380px; padding: 6px 14px;
+  flex: 1; min-width: 200px; max-width: 380px; padding: 5px 13px;
   border: 1.5px solid #ddd; border-radius: 20px; font-size: 13px;
   color: #333; background: #fff; font-family: inherit;
   outline: none; transition: border-color 0.15s, box-shadow 0.15s;
 }
 .relic-search-input:focus { border-color: #a0600c; box-shadow: 0 0 0 3px rgba(160,96,12,0.12); }
 .relic-search-input::placeholder { color: #bbb; }
-.relic-count { font-size: 12px; color: #bbb; margin-left: auto; }
+.relic-count { font-size: 12px; color: #bbb; margin-left: 8px; }
+.relic-filter-bar { display: flex; gap: 7px; flex-wrap: wrap; }
+.rfbtn {
+  padding: 5px 13px; border: 1.5px solid transparent; border-radius: 20px;
+  font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.07); font-family: inherit;
+}
+.rfbtn:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.13); }
+.rfbtn[data-r="all"]      { color: #555; border-color: #ccc; }
+.rfbtn[data-r="all"].active   { background: #555; color: #fff; border-color: #555; }
+.rfbtn[data-r="common"]   { color: #555; border-color: #999; }
+.rfbtn[data-r="common"].active   { background: #666; color: #fff; border-color: #666; }
+.rfbtn[data-r="uncommon"] { color: #1a5799; border-color: #1a5799; }
+.rfbtn[data-r="uncommon"].active { background: #1a5799; color: #fff; }
+.rfbtn[data-r="rare"]     { color: #c0392b; border-color: #c0392b; }
+.rfbtn[data-r="rare"].active     { background: #c0392b; color: #fff; }
+.rfbtn[data-r="shop"]     { color: #7d1a7d; border-color: #7d1a7d; }
+.rfbtn[data-r="shop"].active     { background: #7d1a7d; color: #fff; }
+.rfbtn[data-r="event"]    { color: #1a7a4a; border-color: #1a7a4a; }
+.rfbtn[data-r="event"].active    { background: #1a7a4a; color: #fff; }
+.rfbtn[data-r="starter"]  { color: #888; border-color: #bbb; }
+.rfbtn[data-r="starter"].active  { background: #888; color: #fff; border-color: #888; }
+.rfbtn[data-r="ancient"]  { color: #a0600c; border-color: #a0600c; }
+.rfbtn[data-r="ancient"].active  { background: #a0600c; color: #fff; }
 </style>
 </head>
 <body>
@@ -256,1239 +280,1560 @@ a { color: inherit; text-decoration: none; }
   <p class="hero-sub">全306件</p>
 </div>
 <div class="relic-filter-panel">
-  <span class="relic-filter-label">レリック名</span>
-  <input type="text" id="relic-search" class="relic-search-input" placeholder="名前で検索…" autocomplete="off">
-  <span class="relic-count" id="relic-count">306件</span>
+  <div class="relic-filter-section">
+    <span class="relic-filter-label">レリック名</span>
+    <input type="text" id="relic-search" class="relic-search-input" placeholder="名前で検索…" autocomplete="off">
+    <span class="relic-count" id="relic-count">306件</span>
+  </div>
+  <div class="relic-filter-section">
+    <span class="relic-filter-label">レアリティ</span>
+    <div class="relic-filter-bar">
+      <button class="rfbtn active" data-r="all">すべて</button>
+      <button class="rfbtn" data-r="starter">Starter</button>
+      <button class="rfbtn" data-r="common">Common</button>
+      <button class="rfbtn" data-r="uncommon">Uncommon</button>
+      <button class="rfbtn" data-r="rare">Rare</button>
+      <button class="rfbtn" data-r="shop">Shop</button>
+      <button class="rfbtn" data-r="event">Event</button>
+      <button class="rfbtn" data-r="ancient">Ancient</button>
+    </div>
+  </div>
 </div>
 <section class="section">
   <table class="card-table" id="relic-table">
     <thead>
-      <tr><th>レリック名</th></tr>
+      <tr><th>レリック名</th><th>レアリティ</th></tr>
     </thead>
-    <tbody>      <tr>
+    <tbody>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/AKABEKO.html" class="card-name-link">Akabeko</a><span class="card-name-ja">赤べこ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/ALCHEMICAL_COFFER.html" class="card-name-link">Alchemical Coffer</a><span class="card-name-ja">錬金術の宝庫</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/AMETHYST_AUBERGINE.html" class="card-name-link">Amethyst Aubergine</a><span class="card-name-ja">アメジストのナス</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/ANCHOR.html" class="card-name-link">Anchor</a><span class="card-name-ja">イカリ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/ARCANE_SCROLL.html" class="card-name-link">Arcane Scroll</a><span class="card-name-ja">秘術の巻物</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/ARCHAIC_TOOTH.html" class="card-name-link">Archaic Tooth</a><span class="card-name-ja">古代の牙</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/ART_OF_WAR.html" class="card-name-link">Art of War</a><span class="card-name-ja">孫子兵法</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/ASTROLABE.html" class="card-name-link">Astrolabe</a><span class="card-name-ja">アストロラーベ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/BAG_OF_MARBLES.html" class="card-name-link">Bag of Marbles</a><span class="card-name-ja">ビー玉袋</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/BAG_OF_PREPARATION.html" class="card-name-link">Bag of Preparation</a><span class="card-name-ja">バックパック</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/BEATING_REMNANT.html" class="card-name-link">Beating Remnant</a><span class="card-name-ja">脈打つ亡骸</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/BEAUTIFUL_BRACELET.html" class="card-name-link">Beautiful Bracelet</a><span class="card-name-ja">麗しの腕輪</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/BELLOWS.html" class="card-name-link">Bellows</a><span class="card-name-ja">ふいご</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/BELT_BUCKLE.html" class="card-name-link">Belt Buckle</a><span class="card-name-ja">ベルトの留め具</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/BIG_HAT.html" class="card-name-link">Big Hat</a><span class="card-name-ja">ビッグハット</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/BIG_MUSHROOM.html" class="card-name-link">Big Mushroom</a><span class="card-name-ja">大きなキノコ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/BIIIG_HUG.html" class="card-name-link">Biiig Hug</a><span class="card-name-ja">アツアツの愛情</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/BING_BONG.html" class="card-name-link">Bing Bong</a><span class="card-name-ja">ビン・ボン</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="starter">
         <td class="col-name">
           <a href="relics/BLACK_BLOOD.html" class="card-name-link">Black Blood</a><span class="card-name-ja">ブラックブラッド</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-starter">Starter</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/BLACK_STAR.html" class="card-name-link">Black Star</a><span class="card-name-ja">ブラックスター</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/BLESSED_ANTLER.html" class="card-name-link">Blessed Antler</a><span class="card-name-ja">祝福の枝角</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/BLOOD_SOAKED_ROSE.html" class="card-name-link">Blood-Soaked Rose</a><span class="card-name-ja">血染めのバラ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/BLOOD_VIAL.html" class="card-name-link">Blood Vial</a><span class="card-name-ja">血のガラス瓶</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/BONE_FLUTE.html" class="card-name-link">Bone Flute</a><span class="card-name-ja">骨のフルート</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/BONE_TEA.html" class="card-name-link">Bone Tea</a><span class="card-name-ja">骨茶</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/BOOKMARK.html" class="card-name-link">Bookmark</a><span class="card-name-ja">栞</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/BOOK_OF_FIVE_RINGS.html" class="card-name-link">Book of Five Rings</a><span class="card-name-ja">五輪書</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/BOOK_REPAIR_KNIFE.html" class="card-name-link">Book Repair Knife</a><span class="card-name-ja">製本用ナイフ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/BOOMING_CONCH.html" class="card-name-link">Booming Conch</a><span class="card-name-ja">轟音のほら貝</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="starter">
         <td class="col-name">
           <a href="relics/BOUND_PHYLACTERY.html" class="card-name-link">Bound Phylactery</a><span class="card-name-ja">封じられし霊箱</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-starter">Starter</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/BOWLER_HAT.html" class="card-name-link">Bowler Hat</a><span class="card-name-ja">山高帽</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/BREAD.html" class="card-name-link">Bread</a><span class="card-name-ja">パン</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/BRILLIANT_SCARF.html" class="card-name-link">Brilliant Scarf</a><span class="card-name-ja">鮮やかなスカーフ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/BRIMSTONE.html" class="card-name-link">Brimstone</a><span class="card-name-ja">ブリムストーン</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/BRONZE_SCALES.html" class="card-name-link">Bronze Scales</a><span class="card-name-ja">青銅のウロコ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="starter">
         <td class="col-name">
           <a href="relics/BURNING_BLOOD.html" class="card-name-link">Burning Blood</a><span class="card-name-ja">バーニングブラッド</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-starter">Starter</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/BURNING_STICKS.html" class="card-name-link">Burning Sticks</a><span class="card-name-ja">護摩木</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/BYRDPIP.html" class="card-name-link">Byrdpip</a><span class="card-name-ja">ビャードのヒナ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/CALLING_BELL.html" class="card-name-link">Calling Bell</a><span class="card-name-ja">呼びよせる鐘</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/CANDELABRA.html" class="card-name-link">Candelabra</a><span class="card-name-ja">燭台</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/CAPTAINS_WHEEL.html" class="card-name-link">Captain's Wheel</a><span class="card-name-ja">船長の舵輪</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/CAULDRON.html" class="card-name-link">Cauldron</a><span class="card-name-ja">大釜</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/CENTENNIAL_PUZZLE.html" class="card-name-link">Centennial Puzzle</a><span class="card-name-ja">百年パズル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/CHANDELIER.html" class="card-name-link">Chandelier</a><span class="card-name-ja">シャンデリア</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/CHARONS_ASHES.html" class="card-name-link">Charon's Ashes</a><span class="card-name-ja">カロンの遺灰</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/CHEMICAL_X.html" class="card-name-link">Chemical X</a><span class="card-name-ja">ケミカルX</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/CHOICES_PARADOX.html" class="card-name-link">Choices Paradox</a><span class="card-name-ja">選択のジレンマ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/CHOSEN_CHEESE.html" class="card-name-link">The Chosen Cheese</a><span class="card-name-ja">選ばれしチーズ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="none">
         <td class="col-name">
           <a href="relics/CIRCLET.html" class="card-name-link">Circlet</a><span class="card-name-ja">サークレット</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-none">None</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/CLAWS.html" class="card-name-link">Claws</a><span class="card-name-ja">かぎ爪</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/CLOAK_CLASP.html" class="card-name-link">Cloak Clasp</a><span class="card-name-ja">マントの留め具</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="starter">
         <td class="col-name">
           <a href="relics/CRACKED_CORE.html" class="card-name-link">Cracked Core</a><span class="card-name-ja">ひび割れたコア</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-starter">Starter</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/CROSSBOW.html" class="card-name-link">Crossbow</a><span class="card-name-ja">クロスボウ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="">
         <td class="col-name">
           <a href="relics/CURSED_KETTLE.html" class="card-name-link">Cursed Kettle</a><span class="card-name-ja">呪いのヤカン</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/CURSED_PEARL.html" class="card-name-link">Cursed Pearl</a><span class="card-name-ja">呪いの真珠</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/DARKSTONE_PERIAPT.html" class="card-name-link">Darkstone Periapt</a><span class="card-name-ja">闇石の護符</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/DATA_DISK.html" class="card-name-link">Data Disk</a><span class="card-name-ja">データディスク</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/DAUGHTER_OF_THE_WIND.html" class="card-name-link">Daughter of the Wind</a><span class="card-name-ja">風の乙女</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/DELICATE_FROND.html" class="card-name-link">Delicate Frond</a><span class="card-name-ja">繊細な葉</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/DEMON_TONGUE.html" class="card-name-link">Demon Tongue</a><span class="card-name-ja">悪魔の舌</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="none">
         <td class="col-name">
           <a href="relics/DEPRECATED_RELIC.html" class="card-name-link">Deprecated Relic</a><span class="card-name-ja">※削除されたレリック※</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-none">None</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/DIAMOND_DIADEM.html" class="card-name-link">Diamond Diadem</a><span class="card-name-ja">ダイヤのティアラ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/DINGY_RUG.html" class="card-name-link">Dingy Rug</a><span class="card-name-ja">薄汚れた敷物</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/DISTINGUISHED_CAPE.html" class="card-name-link">Distinguished Cape</a><span class="card-name-ja">気高いケープ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="starter">
         <td class="col-name">
           <a href="relics/DIVINE_DESTINY.html" class="card-name-link">Divine Destiny</a><span class="card-name-ja">神授天命</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-starter">Starter</span></td>
+      </tr>      <tr data-rarity="starter">
         <td class="col-name">
           <a href="relics/DIVINE_RIGHT.html" class="card-name-link">Divine Right</a><span class="card-name-ja">神授王権</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-starter">Starter</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/DOLLYS_MIRROR.html" class="card-name-link">Dolly's Mirror</a><span class="card-name-ja">ドリーの鏡</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/DRAGON_FRUIT.html" class="card-name-link">Dragon Fruit</a><span class="card-name-ja">ドラゴンフルーツ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/DREAM_CATCHER.html" class="card-name-link">Dream Catcher</a><span class="card-name-ja">ドリームキャッチャー</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/DRIFTWOOD.html" class="card-name-link">Driftwood</a><span class="card-name-ja">流木</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/DUSTY_TOME.html" class="card-name-link">Dusty Tome</a><span class="card-name-ja">薄汚れた本</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/ECTOPLASM.html" class="card-name-link">Ectoplasm</a><span class="card-name-ja">エクトプラズム</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/ELECTRIC_SHRYMP.html" class="card-name-link">Electric Shrymp</a><span class="card-name-ja">電気エビ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/EMBER_TEA.html" class="card-name-link">Ember Tea</a><span class="card-name-ja">炭火茶</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/EMOTION_CHIP.html" class="card-name-link">Emotion Chip</a><span class="card-name-ja">感情制御回路</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/EMPTY_CAGE.html" class="card-name-link">Empty Cage</a><span class="card-name-ja">空っぽの檻</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="">
         <td class="col-name">
           <a href="relics/ENDLESS_APPETITE.html" class="card-name-link">Endless Appetite</a><span class="card-name-ja">底なしの食欲</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/ETERNAL_FEATHER.html" class="card-name-link">Eternal Feather</a><span class="card-name-ja">エターナルフェザー</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/FAKE_ANCHOR.html" class="card-name-link">Anchor???</a><span class="card-name-ja">イカリ？</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/FAKE_BLOOD_VIAL.html" class="card-name-link">Blood Vial???</a><span class="card-name-ja">血のガラス瓶？</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/FAKE_HAPPY_FLOWER.html" class="card-name-link">Happy Flower???</a><span class="card-name-ja">ハッピーフラワー？</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/FAKE_LEES_WAFFLE.html" class="card-name-link">Lee's Waffle???</a><span class="card-name-ja">リーのワッフル？</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/FAKE_MANGO.html" class="card-name-link">Mango???</a><span class="card-name-ja">マンゴー？</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/FAKE_MERCHANTS_RUG.html" class="card-name-link">The Merchant's Rug???</a><span class="card-name-ja">商人の敷物？</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/FAKE_ORICHALCUM.html" class="card-name-link">Orichalcum???</a><span class="card-name-ja">オリハルコン？</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/FAKE_SNECKO_EYE.html" class="card-name-link">Snecko Eye???</a><span class="card-name-ja">スネッコアイ？</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/FAKE_STRIKE_DUMMY.html" class="card-name-link">Strike Dummy???</a><span class="card-name-ja">ストライクダミー？</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/FAKE_VENERABLE_TEA_SET.html" class="card-name-link">Venerable Tea Set???</a><span class="card-name-ja">古びたティーセット？</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/FENCING_MANUAL.html" class="card-name-link">Fencing Manual</a><span class="card-name-ja">剣術教本</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/FESTIVE_POPPER.html" class="card-name-link">Festive Popper</a><span class="card-name-ja">クラッカー</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/FIDDLE.html" class="card-name-link">Fiddle</a><span class="card-name-ja">フィドル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/FORGOTTEN_SOUL.html" class="card-name-link">Forgotten Soul</a><span class="card-name-ja">忘れ去られし魂</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/FRAGRANT_MUSHROOM.html" class="card-name-link">Fragrant Mushroom</a><span class="card-name-ja">芳醇なキノコ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/FRESNEL_LENS.html" class="card-name-link">Fresnel Lens</a><span class="card-name-ja">フレネルレンズ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/FROZEN_EGG.html" class="card-name-link">Frozen Egg</a><span class="card-name-ja">凍った卵</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/FUNERARY_MASK.html" class="card-name-link">Funerary Mask</a><span class="card-name-ja">デスマスク</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/FUR_COAT.html" class="card-name-link">Fur Coat</a><span class="card-name-ja">毛皮のコート</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/GALACTIC_DUST.html" class="card-name-link">Galactic Dust</a><span class="card-name-ja">銀河の塵</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/GAMBLING_CHIP.html" class="card-name-link">Gambling Chip</a><span class="card-name-ja">ギャンブルチップ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/GAME_PIECE.html" class="card-name-link">Game Piece</a><span class="card-name-ja">ゲームの駒</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/GHOST_SEED.html" class="card-name-link">Ghost Seed</a><span class="card-name-ja">幽霊の種</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/GIRYA.html" class="card-name-link">Girya</a><span class="card-name-ja">ケトルベル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/GLASS_EYE.html" class="card-name-link">Glass Eye</a><span class="card-name-ja">ガラスの眼</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/GLITTER.html" class="card-name-link">Glitter</a><span class="card-name-ja">ラメ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="">
         <td class="col-name">
           <a href="relics/GLOWING_ORB.html" class="card-name-link">Glowing Orb</a><span class="card-name-ja">輝くオーブ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/GNARLED_HAMMER.html" class="card-name-link">Gnarled Hammer</a><span class="card-name-ja">節くれ立った槌</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/GOLDEN_COMPASS.html" class="card-name-link">Golden Compass</a><span class="card-name-ja">黄金の羅針盤</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/GOLDEN_PEARL.html" class="card-name-link">Golden Pearl</a><span class="card-name-ja">黄金の真珠</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/GOLD_PLATED_CABLES.html" class="card-name-link">Gold-Plated Cables</a><span class="card-name-ja">金メッキケーブル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/GORGET.html" class="card-name-link">Gorget</a><span class="card-name-ja">ゴルゲット</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/GREMLIN_HORN.html" class="card-name-link">Gremlin Horn</a><span class="card-name-ja">グレムリンの角</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/HAND_DRILL.html" class="card-name-link">Hand Drill</a><span class="card-name-ja">ハンドドリル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/HAPPY_FLOWER.html" class="card-name-link">Happy Flower</a><span class="card-name-ja">ハッピーフラワー</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/HEFTY_TABLET.html" class="card-name-link">Hefty Tablet</a><span class="card-name-ja">重い石板</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/HELICAL_DART.html" class="card-name-link">Helical Dart</a><span class="card-name-ja">螺旋のダーツ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/HISTORY_COURSE.html" class="card-name-link">History Course</a><span class="card-name-ja">歴史学教程</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/HORN_CLEAT.html" class="card-name-link">Horn Cleat</a><span class="card-name-ja">ホーンクリート</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/ICE_CREAM.html" class="card-name-link">Ice Cream</a><span class="card-name-ja">アイスクリーム</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="starter">
         <td class="col-name">
           <a href="relics/INFUSED_CORE.html" class="card-name-link">Infused Core</a><span class="card-name-ja">インフューズドコア</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-starter">Starter</span></td>
+      </tr>      <tr data-rarity="">
         <td class="col-name">
           <a href="relics/INK_BOTTLE.html" class="card-name-link">Ink Bottle</a><span class="card-name-ja">インク瓶</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/INTIMIDATING_HELMET.html" class="card-name-link">Intimidating Helmet</a><span class="card-name-ja">威圧の兜</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/IRON_CLUB.html" class="card-name-link">Iron Club</a><span class="card-name-ja">アイアンクラブ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/IVORY_TILE.html" class="card-name-link">Ivory Tile</a><span class="card-name-ja">象牙の牌</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/JEWELED_MASK.html" class="card-name-link">Jeweled Mask</a><span class="card-name-ja">宝飾の仮面</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/JEWELRY_BOX.html" class="card-name-link">Jewelry Box</a><span class="card-name-ja">宝石箱</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/JOSS_PAPER.html" class="card-name-link">Joss Paper</a><span class="card-name-ja">冥銭</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/JUZU_BRACELET.html" class="card-name-link">Juzu Bracelet</a><span class="card-name-ja">数珠</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/KIFUDA.html" class="card-name-link">Kifuda</a><span class="card-name-ja">木札</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/KUNAI.html" class="card-name-link">Kunai</a><span class="card-name-ja">クナイ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/KUSARIGAMA.html" class="card-name-link">Kusarigama</a><span class="card-name-ja">鎖鎌</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/LANTERN.html" class="card-name-link">Lantern</a><span class="card-name-ja">ランタン</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/LARGE_CAPSULE.html" class="card-name-link">Large Capsule</a><span class="card-name-ja">大きなカプセル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/LASTING_CANDY.html" class="card-name-link">Lasting Candy</a><span class="card-name-ja">長持ちキャンディ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/LAVA_LAMP.html" class="card-name-link">Lava Lamp</a><span class="card-name-ja">溶岩のランプ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/LAVA_ROCK.html" class="card-name-link">Lava Rock</a><span class="card-name-ja">溶岩石</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/LEAD_PAPERWEIGHT.html" class="card-name-link">Lead Paperweight</a><span class="card-name-ja">鉛の文鎮</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/LEAFY_POULTICE.html" class="card-name-link">Leafy Poultice</a><span class="card-name-ja">薬草の湿布</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/LEES_WAFFLE.html" class="card-name-link">Lee's Waffle</a><span class="card-name-ja">リーのワッフル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/LETTER_OPENER.html" class="card-name-link">Letter Opener</a><span class="card-name-ja">レターオープナー</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/LIZARD_TAIL.html" class="card-name-link">Lizard Tail</a><span class="card-name-ja">トカゲのしっぽ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/LOOMING_FRUIT.html" class="card-name-link">Looming Fruit</a><span class="card-name-ja">巨大なフルーツ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/LORDS_PARASOL.html" class="card-name-link">Lord's Parasol</a><span class="card-name-ja">王のパラソル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/LOST_COFFER.html" class="card-name-link">Lost Coffer</a><span class="card-name-ja">失われし金庫</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/LOST_WISP.html" class="card-name-link">Lost Wisp</a><span class="card-name-ja">迷子のウィスプ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/LUCKY_FYSH.html" class="card-name-link">Lucky Fysh</a><span class="card-name-ja">幸運の魚</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/LUNAR_PASTRY.html" class="card-name-link">Lunar Pastry</a><span class="card-name-ja">月餅</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/MANGO.html" class="card-name-link">Mango</a><span class="card-name-ja">マンゴー</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/MASSIVE_SCROLL.html" class="card-name-link">Massive Scroll</a><span class="card-name-ja">巨大な巻物</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/MAW_BANK.html" class="card-name-link">Maw Bank</a><span class="card-name-ja">モーの貯金箱</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/MEAL_TICKET.html" class="card-name-link">Meal Ticket</a><span class="card-name-ja">お食事券</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/MEAT_CLEAVER.html" class="card-name-link">Meat Cleaver</a><span class="card-name-ja">肉切り包丁</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/MEAT_ON_THE_BONE.html" class="card-name-link">Meat on the Bone</a><span class="card-name-ja">骨付き肉</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/MEMBERSHIP_CARD.html" class="card-name-link">Membership Card</a><span class="card-name-ja">会員カード</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/MERCURY_HOURGLASS.html" class="card-name-link">Mercury Hourglass</a><span class="card-name-ja">水銀の砂時計</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/METRONOME.html" class="card-name-link">Metronome</a><span class="card-name-ja">メトロノーム</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/MINIATURE_CANNON.html" class="card-name-link">Miniature Cannon</a><span class="card-name-ja">ミニ大砲</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/MINIATURE_TENT.html" class="card-name-link">Miniature Tent</a><span class="card-name-ja">ミニテント</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/MINI_REGENT.html" class="card-name-link">Mini Regent</a><span class="card-name-ja">ちびリージェント</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/MOLTEN_EGG.html" class="card-name-link">Molten Egg</a><span class="card-name-ja">溶融した卵</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/MR_STRUGGLES.html" class="card-name-link">Mr. Struggles</a><span class="card-name-ja">ミスター・ストラグル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/MUMMIFIED_HAND.html" class="card-name-link">Mummified Hand</a><span class="card-name-ja">ミイラの手</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/MUSIC_BOX.html" class="card-name-link">Music Box</a><span class="card-name-ja">オルゴール</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="">
         <td class="col-name">
           <a href="relics/MYSTERIOUS_COCOON.html" class="card-name-link">Mysterious Cocoon</a><span class="card-name-ja">謎めいた繭</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/MYSTIC_LIGHTER.html" class="card-name-link">Mystic Lighter</a><span class="card-name-ja">神秘のライター</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/NEOWS_BONES.html" class="card-name-link">Neow's Bones</a><span class="card-name-ja">ネオーの骨</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/NEOWS_TALISMAN.html" class="card-name-link">Neow's Talisman</a><span class="card-name-ja">ネオーのタリスマン</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/NEOWS_TORMENT.html" class="card-name-link">Neow's Torment</a><span class="card-name-ja">ネオーの苦悶</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/NEW_LEAF.html" class="card-name-link">New Leaf</a><span class="card-name-ja">若葉</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/NINJA_SCROLL.html" class="card-name-link">Ninja Scroll</a><span class="card-name-ja">忍者の巻物</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/NUNCHAKU.html" class="card-name-link">Nunchaku</a><span class="card-name-ja">ヌンチャク</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/NUTRITIOUS_OYSTER.html" class="card-name-link">Nutritious Oyster</a><span class="card-name-ja">栄養満点のカキ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/NUTRITIOUS_SOUP.html" class="card-name-link">Nutritious Soup</a><span class="card-name-ja">栄養満点のスープ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/ODDLY_SMOOTH_STONE.html" class="card-name-link">Oddly Smooth Stone</a><span class="card-name-ja">すべすべ石</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/OLD_COIN.html" class="card-name-link">Old Coin</a><span class="card-name-ja">古いコイン</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/ORANGE_DOUGH.html" class="card-name-link">Orange Dough</a><span class="card-name-ja">オレンジ色の生地</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/ORICHALCUM.html" class="card-name-link">Orichalcum</a><span class="card-name-ja">オリハルコン</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/ORNAMENTAL_FAN.html" class="card-name-link">Ornamental Fan</a><span class="card-name-ja">扇子</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/ORRERY.html" class="card-name-link">Orrery</a><span class="card-name-ja">太陽系儀</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PAELS_BLOOD.html" class="card-name-link">Pael's Blood</a><span class="card-name-ja">パエルの血</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PAELS_CLAW.html" class="card-name-link">Pael's Claw</a><span class="card-name-ja">パエルの爪</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PAELS_EYE.html" class="card-name-link">Pael's Eye</a><span class="card-name-ja">パエルの眼</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PAELS_FLESH.html" class="card-name-link">Pael's Flesh</a><span class="card-name-ja">パエルの肉</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PAELS_GROWTH.html" class="card-name-link">Pael's Growth</a><span class="card-name-ja">パエルの膿</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PAELS_HORN.html" class="card-name-link">Pael's Horn</a><span class="card-name-ja">パエルの角</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PAELS_LEGION.html" class="card-name-link">Pael's Legion</a><span class="card-name-ja">パエルの肉兵</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PAELS_TEARS.html" class="card-name-link">Pael's Tears</a><span class="card-name-ja">パエルの涙</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PAELS_TOOTH.html" class="card-name-link">Pael's Tooth</a><span class="card-name-ja">パエルの歯</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PAELS_WING.html" class="card-name-link">Pael's Wing</a><span class="card-name-ja">パエルの翼</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PANDORAS_BOX.html" class="card-name-link">Pandora's Box</a><span class="card-name-ja">パンドラの箱</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/PANTOGRAPH.html" class="card-name-link">Pantograph</a><span class="card-name-ja">パンタグラフ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/PAPER_KRANE.html" class="card-name-link">Paper Krane</a><span class="card-name-ja">折りズル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/PAPER_PHROG.html" class="card-name-link">Paper Phrog</a><span class="card-name-ja">折りキャエル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/PARRYING_SHIELD.html" class="card-name-link">Parrying Shield</a><span class="card-name-ja">パリィシールド</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/PEAR.html" class="card-name-link">Pear</a><span class="card-name-ja">洋ナシ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/PENDULUM.html" class="card-name-link">Pendulum</a><span class="card-name-ja">振り子</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/PEN_NIB.html" class="card-name-link">Pen Nib</a><span class="card-name-ja">ペン先</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/PERMAFROST.html" class="card-name-link">Permafrost</a><span class="card-name-ja">永久氷晶</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/PETRIFIED_TOAD.html" class="card-name-link">Petrified Toad</a><span class="card-name-ja">石化したカエル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PHIAL_HOLSTER.html" class="card-name-link">Phial Holster</a><span class="card-name-ja">薬瓶のホルスター</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PHILOSOPHERS_STONE.html" class="card-name-link">Philosopher's Stone</a><span class="card-name-ja">賢者の石</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="starter">
         <td class="col-name">
           <a href="relics/PHYLACTERY_UNBOUND.html" class="card-name-link">Phylactery Unbound</a><span class="card-name-ja">解き放たれし霊箱</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-starter">Starter</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/PLANISPHERE.html" class="card-name-link">Planisphere</a><span class="card-name-ja">星座早見盤</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/POCKETWATCH.html" class="card-name-link">Pocketwatch</a><span class="card-name-ja">懐中時計</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/POLLINOUS_CORE.html" class="card-name-link">Pollinous Core</a><span class="card-name-ja">花粉の核</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/POMANDER.html" class="card-name-link">Pomander</a><span class="card-name-ja">ポマンダー</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/POTION_BELT.html" class="card-name-link">Potion Belt</a><span class="card-name-ja">ポーションベルト</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/POWER_CELL.html" class="card-name-link">Power Cell</a><span class="card-name-ja">パワーセル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/PRAYER_WHEEL.html" class="card-name-link">Prayer Wheel</a><span class="card-name-ja">マニ車</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PRECARIOUS_SHEARS.html" class="card-name-link">Precarious Shears</a><span class="card-name-ja">危険な大鋏</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PRECISE_SCISSORS.html" class="card-name-link">Precise Scissors</a><span class="card-name-ja">精密なハサミ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PRESERVED_FOG.html" class="card-name-link">Preserved Fog</a><span class="card-name-ja">瓶詰めの霧</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PRISMATIC_GEM.html" class="card-name-link">Prismatic Gem</a><span class="card-name-ja">プリズムジェム</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/PUMPKIN_CANDLE.html" class="card-name-link">Pumpkin Candle</a><span class="card-name-ja">カボチャのキャンドル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/PUNCH_DAGGER.html" class="card-name-link">Punch Dagger</a><span class="card-name-ja">パンチダガー</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/RADIANT_PEARL.html" class="card-name-link">Radiant Pearl</a><span class="card-name-ja">光り輝く真珠</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/RAINBOW_RING.html" class="card-name-link">Rainbow Ring</a><span class="card-name-ja">虹の指輪</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/RAZOR_TOOTH.html" class="card-name-link">Razor Tooth</a><span class="card-name-ja">剃刀の牙</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/RED_MASK.html" class="card-name-link">Red Mask</a><span class="card-name-ja">レッドマスク</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/RED_SKULL.html" class="card-name-link">Red Skull</a><span class="card-name-ja">赤い頭蓋骨</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="">
         <td class="col-name">
           <a href="relics/RED_VINE_TEA.html" class="card-name-link">Red Vine Tea</a><span class="card-name-ja">赤蔓の茶</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/REGALITE.html" class="card-name-link">Regalite</a><span class="card-name-ja">レガライト</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/REGAL_PILLOW.html" class="card-name-link">Regal Pillow</a><span class="card-name-ja">高貴な枕</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/REPTILE_TRINKET.html" class="card-name-link">Reptile Trinket</a><span class="card-name-ja">爬虫類のトリンケット</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/RINGING_TRIANGLE.html" class="card-name-link">Ringing Triangle</a><span class="card-name-ja">共鳴するトライアングル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="starter">
         <td class="col-name">
           <a href="relics/RING_OF_THE_DRAKE.html" class="card-name-link">Ring of the Drake</a><span class="card-name-ja">ドレイクの指輪</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-starter">Starter</span></td>
+      </tr>      <tr data-rarity="starter">
         <td class="col-name">
           <a href="relics/RING_OF_THE_SNAKE.html" class="card-name-link">Ring of the Snake</a><span class="card-name-ja">蛇の指輪</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-starter">Starter</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/RIPPLE_BASIN.html" class="card-name-link">Ripple Basin</a><span class="card-name-ja">波紋の鉢</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/ROYAL_POISON.html" class="card-name-link">Royal Poison</a><span class="card-name-ja">ロイヤルな毒</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/ROYAL_STAMP.html" class="card-name-link">Royal Stamp</a><span class="card-name-ja">王家の印</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/RUINED_HELMET.html" class="card-name-link">Ruined Helmet</a><span class="card-name-ja">朽ちた兜</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/RUNIC_CAPACITOR.html" class="card-name-link">Runic Capacitor</a><span class="card-name-ja">ルーンのコンデンサ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/RUNIC_PYRAMID.html" class="card-name-link">Runic Pyramid</a><span class="card-name-ja">ルーンのピラミッド</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/SAI.html" class="card-name-link">Sai</a><span class="card-name-ja">釵</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/SAND_CASTLE.html" class="card-name-link">Sand Castle</a><span class="card-name-ja">砂の城</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/SCREAMING_FLAGON.html" class="card-name-link">Screaming Flagon</a><span class="card-name-ja">絶叫のフラゴン</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/SCROLL_BOXES.html" class="card-name-link">Scroll Boxes</a><span class="card-name-ja">巻物箱</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/SEAL_OF_GOLD.html" class="card-name-link">Seal of Gold</a><span class="card-name-ja">黄金の印章</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/SEA_GLASS.html" class="card-name-link">Sea Glass</a><span class="card-name-ja">シーグラス</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="">
         <td class="col-name">
           <a href="relics/SEA_GLASS.DEFECT.html" class="card-name-link">Gear Glass</a><span class="card-name-ja">ギアグラス</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"></td>
+      </tr>      <tr data-rarity="">
         <td class="col-name">
           <a href="relics/SEA_GLASS.IRONCLAD.html" class="card-name-link">Demon Glass</a><span class="card-name-ja">デーモングラス</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"></td>
+      </tr>      <tr data-rarity="">
         <td class="col-name">
           <a href="relics/SEA_GLASS.NECROBINDER.html" class="card-name-link">Lich Glass</a><span class="card-name-ja">リッチグラス</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"></td>
+      </tr>      <tr data-rarity="">
         <td class="col-name">
           <a href="relics/SEA_GLASS.REGENT.html" class="card-name-link">Noble Glass</a><span class="card-name-ja">ノーブルグラス</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"></td>
+      </tr>      <tr data-rarity="">
         <td class="col-name">
           <a href="relics/SEA_GLASS.SILENT.html" class="card-name-link">Venom Glass</a><span class="card-name-ja">ヴェノムグラス</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/SELF_FORMING_CLAY.html" class="card-name-link">Self-Forming Clay</a><span class="card-name-ja">自己形成粘土</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/SERE_TALON.html" class="card-name-link">Sere Talon</a><span class="card-name-ja">干からびた爪</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/SHOVEL.html" class="card-name-link">Shovel</a><span class="card-name-ja">ショベル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/SHURIKEN.html" class="card-name-link">Shuriken</a><span class="card-name-ja">手裏剣</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/SIGNET_RING.html" class="card-name-link">Signet Ring</a><span class="card-name-ja">シグネットリング</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/SILVER_CRUCIBLE.html" class="card-name-link">Silver Crucible</a><span class="card-name-ja">銀のるつぼ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/SLING_OF_COURAGE.html" class="card-name-link">Sling of Courage</a><span class="card-name-ja">勇気のスリング</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/SMALL_CAPSULE.html" class="card-name-link">Small Capsule</a><span class="card-name-ja">小さなカプセル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/SNECKO_EYE.html" class="card-name-link">Snecko Eye</a><span class="card-name-ja">スネッコアイ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/SNECKO_SKULL.html" class="card-name-link">Snecko Skull</a><span class="card-name-ja">スネッコスカル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/SOZU.html" class="card-name-link">Sozu</a><span class="card-name-ja">ししおどし</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/SPARKLING_ROUGE.html" class="card-name-link">Sparkling Rouge</a><span class="card-name-ja">キラめく口紅</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/SPIKED_GAUNTLETS.html" class="card-name-link">Spiked Gauntlets</a><span class="card-name-ja">トゲ付きガントレット</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/STONE_CALENDAR.html" class="card-name-link">Stone Calendar</a><span class="card-name-ja">暦石</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/STONE_CRACKER.html" class="card-name-link">Stone Cracker</a><span class="card-name-ja">石のクラッカー</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/STONE_HUMIDIFIER.html" class="card-name-link">Stone Humidifier</a><span class="card-name-ja">石の加湿器</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/STORYBOOK.html" class="card-name-link">Storybook</a><span class="card-name-ja">絵本</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/STRAWBERRY.html" class="card-name-link">Strawberry</a><span class="card-name-ja">イチゴ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/STRIKE_DUMMY.html" class="card-name-link">Strike Dummy</a><span class="card-name-ja">ストライク・ダミー</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/STURDY_CLAMP.html" class="card-name-link">Sturdy Clamp</a><span class="card-name-ja">頑丈なクランプ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/SWORD_OF_JADE.html" class="card-name-link">Sword of Jade</a><span class="card-name-ja">翡翠の剣</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/SWORD_OF_STONE.html" class="card-name-link">Sword of Stone</a><span class="card-name-ja">石の剣</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/SYMBIOTIC_VIRUS.html" class="card-name-link">Symbiotic Virus</a><span class="card-name-ja">共生ウイルス</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/TANXS_WHISTLE.html" class="card-name-link">Tanx's Whistle</a><span class="card-name-ja">タンクスのホイッスル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/TEA_OF_DISCOURTESY.html" class="card-name-link">Tea of Discourtesy</a><span class="card-name-ja">無作法茶</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/THE_ABACUS.html" class="card-name-link">The Abacus</a><span class="card-name-ja">そろばん</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/THE_BOOT.html" class="card-name-link">The Boot</a><span class="card-name-ja">ザ・ブーツ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/THE_COURIER.html" class="card-name-link">The Courier</a><span class="card-name-ja">配達人</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/THROWING_AXE.html" class="card-name-link">Throwing Axe</a><span class="card-name-ja">手投げ斧</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/TINGSHA.html" class="card-name-link">Tingsha</a><span class="card-name-ja">ティンシャ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/TINY_MAILBOX.html" class="card-name-link">Tiny Mailbox</a><span class="card-name-ja">小さなポスト</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/TOASTY_MITTENS.html" class="card-name-link">Toasty Mittens</a><span class="card-name-ja">あったか手袋</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/TOOLBOX.html" class="card-name-link">Toolbox</a><span class="card-name-ja">道具箱</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/TOUCH_OF_OROBAS.html" class="card-name-link">Touch of Orobas</a><span class="card-name-ja">オロバスの指先</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/TOUGH_BANDAGES.html" class="card-name-link">Tough Bandages</a><span class="card-name-ja">丈夫な包帯</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/TOXIC_EGG.html" class="card-name-link">Toxic Egg</a><span class="card-name-ja">毒の卵</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/TOY_BOX.html" class="card-name-link">Toy Box</a><span class="card-name-ja">おもちゃ箱</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/TRI_BOOMERANG.html" class="card-name-link">Tri-Boomerang</a><span class="card-name-ja">三又ブーメラン</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/TUNGSTEN_ROD.html" class="card-name-link">Tungsten Rod</a><span class="card-name-ja">タングステンの棒</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/TUNING_FORK.html" class="card-name-link">Tuning Fork</a><span class="card-name-ja">音叉</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/TWISTED_FUNNEL.html" class="card-name-link">Twisted Funnel</a><span class="card-name-ja">歪んだ漏斗</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/UNCEASING_TOP.html" class="card-name-link">Unceasing Top</a><span class="card-name-ja">永久コマ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/UNDYING_SIGIL.html" class="card-name-link">Undying Sigil</a><span class="card-name-ja">不死の紋章</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/UNSETTLING_LAMP.html" class="card-name-link">Unsettling Lamp</a><span class="card-name-ja">不気味なランプ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/VAJRA.html" class="card-name-link">Vajra</a><span class="card-name-ja">ヴァジュラ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="uncommon">
         <td class="col-name">
           <a href="relics/VAMBRACE.html" class="card-name-link">Vambrace</a><span class="card-name-ja">ヴァンプレイス</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/VELVET_CHOKER.html" class="card-name-link">Velvet Choker</a><span class="card-name-ja">ベルベットチョーカー</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/VENERABLE_TEA_SET.html" class="card-name-link">Venerable Tea Set</a><span class="card-name-ja">古びたティーセット</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/VERY_HOT_COCOA.html" class="card-name-link">Very Hot Cocoa</a><span class="card-name-ja">激熱ココア</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/VEXING_PUZZLEBOX.html" class="card-name-link">Vexing Puzzlebox</a><span class="card-name-ja">難解なパズル</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="">
         <td class="col-name">
           <a href="relics/VINE_BRACELET.html" class="card-name-link">Vine Bracelet</a><span class="card-name-ja">蔓の腕輪</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/VITRUVIAN_MINION.html" class="card-name-link">Vitruvian Minion</a><span class="card-name-ja">ウィトルウィウス的ミニオン</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/WAR_HAMMER.html" class="card-name-link">War Hammer</a><span class="card-name-ja">ウォーハンマー</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/WAR_PAINT.html" class="card-name-link">War Paint</a><span class="card-name-ja">戦化粧</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="common">
         <td class="col-name">
           <a href="relics/WHETSTONE.html" class="card-name-link">Whetstone</a><span class="card-name-ja">砥石</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/WHISPERING_EARRING.html" class="card-name-link">Whispering Earring</a><span class="card-name-ja">囁きのイヤリング</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/WHITE_BEAST_STATUE.html" class="card-name-link">White Beast Statue</a><span class="card-name-ja">白き獣の像</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="rare">
         <td class="col-name">
           <a href="relics/WHITE_STAR.html" class="card-name-link">White Star</a><span class="card-name-ja">ホワイトスター</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/WINGED_BOOTS.html" class="card-name-link">Winged Boots</a><span class="card-name-ja">空飛ぶ靴</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="shop">
         <td class="col-name">
           <a href="relics/WING_CHARM.html" class="card-name-link">Wing Charm</a><span class="card-name-ja">翼のチャーム</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/WONGOS_MYSTERY_TICKET.html" class="card-name-link">Wongo's Mystery Ticket</a><span class="card-name-ja">ウォンゴのミステリーチケット</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="event">
         <td class="col-name">
           <a href="relics/WONGO_CUSTOMER_APPRECIATION_BADGE.html" class="card-name-link">Wongo Customer Appreciation Badge</a><span class="card-name-ja">ウォンゴのお客様感謝バッジ</span>
         </td>
-      </tr>      <tr>
+        <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
+      </tr>      <tr data-rarity="ancient">
         <td class="col-name">
           <a href="relics/YUMMY_COOKIE.html" class="card-name-link">Yummy Cookie</a><span class="card-name-ja">おいしいクッキー</span>
         </td>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
       </tr></tbody>
   </table>
 </section>
@@ -1497,23 +1842,38 @@ a { color: inherit; text-decoration: none; }
   <script src="wiki-link.js"></script>
   <script>
 (function () {
-  var input = document.getElementById('relic-search');
-  var rows  = document.querySelectorAll('#relic-table tbody tr');
+  var input   = document.getElementById('relic-search');
   var countEl = document.getElementById('relic-count');
+  var allRows = document.querySelectorAll('#relic-table tbody tr');
+  function getActiveRarity() {
+    var b = document.querySelector('.rfbtn.active');
+    return b ? b.getAttribute('data-r') : 'all';
+  }
   function update() {
     var q = input.value.trim().toLowerCase();
+    var r = getActiveRarity();
     var n = 0;
-    rows.forEach(function (row) {
+    allRows.forEach(function (row) {
       var lnk = row.querySelector('.card-name-link');
       var ja  = row.querySelector('.card-name-ja');
-      var ok = q === '' || (lnk && lnk.textContent.toLowerCase().includes(q))
-                        || (ja  && ja.textContent.toLowerCase().includes(q));
+      var rowRarity = row.getAttribute('data-rarity') || '';
+      var nameOk = q === '' || (lnk && lnk.textContent.toLowerCase().includes(q))
+                            || (ja  && ja.textContent.toLowerCase().includes(q));
+      var rarityOk = r === 'all' || rowRarity === r;
+      var ok = nameOk && rarityOk;
       row.style.display = ok ? '' : 'none';
       if (ok) n++;
     });
     countEl.textContent = n + '件';
   }
   input.addEventListener('input', update);
+  document.querySelectorAll('.rfbtn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.rfbtn').forEach(function (b) { b.classList.remove('active'); });
+      this.classList.add('active');
+      update();
+    });
+  });
 })();
 </script>
 </body>

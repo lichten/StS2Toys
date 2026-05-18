@@ -353,6 +353,36 @@ if (args.Length > 0 && args[0] == "--resolve-methodspec")
     return;
 }
 
+// --- 調査: RelicPool の GenerateAllRelics から relic クラス名を列挙 ---
+if (args.Length > 0 && args[0] == "--dump-relic-classes")
+{
+    foreach (var typeHandle in mr.TypeDefinitions)
+    {
+        var typeDef = mr.GetTypeDefinition(typeHandle);
+        var poolName = mr.GetString(typeDef.Name);
+        if (!poolName.EndsWith("RelicPool")) continue;
+        Console.Error.WriteLine($"=== {poolName} ===");
+        foreach (var mh in typeDef.GetMethods())
+        {
+            var method = mr.GetMethodDefinition(mh);
+            if (mr.GetString(method.Name) != "GenerateAllRelics") continue;
+            if (method.RelativeVirtualAddress == 0) continue;
+            var body = peReader.GetMethodBody(method.RelativeVirtualAddress);
+            if (body == null) continue;
+            var il = body.GetILBytes();
+            for (int i = 0; i + 4 < il.Length; i++)
+            {
+                if (il[i] != 0x28 && il[i] != 0x6F) continue;
+                int token = il[i+1] | (il[i+2]<<8) | (il[i+3]<<16) | (il[i+4]<<24);
+                var typeName = ResolveMethodSpecFirstArg(mr, token);
+                if (!string.IsNullOrEmpty(typeName))
+                    Console.WriteLine($"{typeName}  →  {CamelToUpperSnake(typeName)}");
+            }
+        }
+    }
+    return;
+}
+
 // --- 調査: CardPool クラス名一覧を表示 ---
 if (args.Length > 0 && args[0] == "--list-cardpools")
 {
@@ -903,6 +933,125 @@ foreach (var typeHandle in mr.TypeDefinitions)
         break;
     }
 }
+
+// ── Relic 抽出 ──────────────────────────────────────────────────────────────
+
+// *RelicPool の GenerateAllRelics() から relic クラス名を収集
+var relicClasses = new HashSet<string>(StringComparer.Ordinal);
+foreach (var typeHandle in mr.TypeDefinitions)
+{
+    var typeDef = mr.GetTypeDefinition(typeHandle);
+    if (!mr.GetString(typeDef.Name).EndsWith("RelicPool")) continue;
+    foreach (var mh in typeDef.GetMethods())
+    {
+        var method = mr.GetMethodDefinition(mh);
+        if (mr.GetString(method.Name) != "GenerateAllRelics") continue;
+        if (method.RelativeVirtualAddress == 0) continue;
+        var body = peReader.GetMethodBody(method.RelativeVirtualAddress);
+        if (body == null) continue;
+        var il = body.GetILBytes();
+        for (int i = 0; i + 4 < il.Length; i++)
+        {
+            if (il[i] != 0x28 && il[i] != 0x6F) continue;
+            int token = il[i+1] | (il[i+2]<<8) | (il[i+3]<<16) | (il[i+4]<<24);
+            var typeName = ResolveMethodSpecFirstArg(mr, token);
+            if (!string.IsNullOrEmpty(typeName) && !typeName.Contains('<'))
+                relicClasses.Add(typeName);
+        }
+    }
+}
+Console.Error.WriteLine($"Found {relicClasses.Count} relic classes.");
+
+// 各 relic クラスから get_Rarity と get_CanonicalVars を抽出
+var relicRarities = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+var relicStats    = new Dictionary<string, Dictionary<string, int>>(StringComparer.OrdinalIgnoreCase);
+
+foreach (var typeHandle in mr.TypeDefinitions)
+{
+    var typeDef   = mr.GetTypeDefinition(typeHandle);
+    var className = mr.GetString(typeDef.Name);
+    if (!relicClasses.Contains(className)) continue;
+
+    var relicId = CamelToUpperSnake(className);
+
+    // get_Rarity → ldc.i4 N + ret
+    foreach (var mh in typeDef.GetMethods())
+    {
+        var method = mr.GetMethodDefinition(mh);
+        if (mr.GetString(method.Name) != "get_Rarity") continue;
+        if (method.RelativeVirtualAddress == 0) continue;
+        var body = peReader.GetMethodBody(method.RelativeVirtualAddress);
+        if (body == null) continue;
+        var il = body.GetILBytes();
+        var (val, _) = ReadLdcI4(il, 0);
+        if (val.HasValue && rarityByInt.TryGetValue(val.Value, out var rarityName))
+            relicRarities[relicId] = rarityName;
+        break;
+    }
+
+    // get_CanonicalVars → カードと同じパターン: ldc.i4 N → newobj Decimal → newobj XxxVar
+    foreach (var mh in typeDef.GetMethods())
+    {
+        var method = mr.GetMethodDefinition(mh);
+        if (mr.GetString(method.Name) != "get_CanonicalVars") continue;
+        if (method.RelativeVirtualAddress == 0) continue;
+        var body = peReader.GetMethodBody(method.RelativeVirtualAddress);
+        if (body == null) continue;
+        var il = body.GetILBytes();
+
+        int? lastIntR = null;
+        int? pendingDecimalR = null;
+        var canonFields = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        for (int i = 0; i < il.Length; )
+        {
+            byte op = il[i];
+            if (op == 0x73 && i + 4 < il.Length) // newobj
+            {
+                int tok = il[i+1]|(il[i+2]<<8)|(il[i+3]<<16)|(il[i+4]<<24);
+                if (tok == decimalIntCtorToken)
+                {
+                    pendingDecimalR = lastIntR;
+                    lastIntR = null;
+                }
+                else if (pendingDecimalR.HasValue && varNameByCtorToken.TryGetValue(tok, out var vname))
+                {
+                    canonFields.TryAdd(vname, pendingDecimalR.Value);
+                    pendingDecimalR = null;
+                    lastIntR = null;
+                }
+                i += 5;
+                continue;
+            }
+            var (valR, sizeR) = ReadLdcI4(il, i);
+            if (valR.HasValue) lastIntR = valR;
+            else if (op is not (0x02 or 0x25)) lastIntR = null;
+            i += sizeR;
+        }
+        if (canonFields.Count > 0)
+            relicStats[relicId] = canonFields;
+        break;
+    }
+}
+
+// relic_rarities.json 出力 → StS2Shared/Resources/
+var relicRaritiesOutPath = Path.Combine(Path.GetDirectoryName(outPath)!, "relic_rarities.json");
+Console.Error.WriteLine($"Extracted {relicRarities.Count} relic rarity mappings.");
+var relicRarityLines = relicRarities.OrderBy(kv => kv.Key)
+    .Select(kv => $"  \"{kv.Key}\": \"{kv.Value}\"");
+File.WriteAllText(relicRaritiesOutPath, "{\n" + string.Join(",\n", relicRarityLines) + "\n}\n");
+Console.WriteLine(relicRaritiesOutPath);
+
+// relic_stats.json 出力 → StS2Shared/Resources/
+var relicStatsOutPath = Path.Combine(Path.GetDirectoryName(outPath)!, "relic_stats.json");
+Console.Error.WriteLine($"Extracted {relicStats.Count} relic stat mappings.");
+var relicStatsEntries = relicStats.OrderBy(kv => kv.Key).Select(kv =>
+{
+    var fieldPairs = kv.Value.OrderBy(f => f.Key)
+        .Select(f => $"    \"{f.Key}\": {f.Value}");
+    return $"  \"{kv.Key}\": {{\n{string.Join(",\n", fieldPairs)}\n  }}";
+});
+File.WriteAllText(relicStatsOutPath, "{\n" + string.Join(",\n", relicStatsEntries) + "\n}\n");
+Console.WriteLine(relicStatsOutPath);
 
 // card_characters.json 出力
 var charsOutPath = Path.Combine(Path.GetDirectoryName(outPath)!, "card_characters.json");

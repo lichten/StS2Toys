@@ -447,6 +447,37 @@ public static class CardDatabaseService
             .OrderBy(id => id, StringComparer.OrdinalIgnoreCase);
     }
 
+    // ---- relic rarities / stats ----
+
+    static readonly IReadOnlyDictionary<string, string> _relicRarities = LoadStringDict("relic_rarities.json");
+    static readonly IReadOnlyDictionary<string, IReadOnlyDictionary<string, int>> _relicStats = LoadRelicStats();
+
+    static IReadOnlyDictionary<string, IReadOnlyDictionary<string, int>> LoadRelicStats()
+    {
+        var asm = Assembly.GetExecutingAssembly();
+        var name = asm.GetManifestResourceNames()
+            .FirstOrDefault(n => n.EndsWith("relic_stats.json", StringComparison.OrdinalIgnoreCase));
+        if (name is null) return new Dictionary<string, IReadOnlyDictionary<string, int>>();
+
+        using var stream = asm.GetManifestResourceStream(name)!;
+        var doc = JsonDocument.Parse(stream);
+        var result = new Dictionary<string, IReadOnlyDictionary<string, int>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var relic in doc.RootElement.EnumerateObject())
+        {
+            var fields = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            foreach (var field in relic.Value.EnumerateObject())
+                fields[field.Name] = field.Value.GetInt32();
+            result[relic.Name] = fields;
+        }
+        return result;
+    }
+
+    public static string GetRelicRarity(string id) =>
+        _relicRarities.TryGetValue(id, out var r) ? r : "";
+
+    public static IReadOnlyDictionary<string, int>? GetRelicStats(string id) =>
+        _relicStats.TryGetValue(id, out var v) ? v : null;
+
     public static string GetEnchantmentName(string id, bool japanese)
     {
         var raw = ToRawId(id);

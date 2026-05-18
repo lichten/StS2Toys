@@ -484,13 +484,16 @@ static string BuildRelicListPage(string[] allRelicIds, CharData[] chars)
     {
         var nameEn = CardDatabaseService.GetRelicTitle(id);
         var nameJa = CardDatabaseService.GetRelicTitle(id, japanese: true);
+        var rarity = CardDatabaseService.GetRelicRarity(id);
         var href   = $"relics/{id}.html";
-        var jaSpan = nameJa != nameEn ? $"""<span class="card-name-ja">{nameJa}</span>""" : "";
+        var jaSpan      = nameJa != nameEn ? $"""<span class="card-name-ja">{nameJa}</span>""" : "";
+        var rarityBadge = rarity != "" ? $"""<span class="badge rarity-{rarity.ToLower()}">{rarity}</span>""" : "";
         return $"""
-                  <tr>
+                  <tr data-rarity="{rarity.ToLower()}">
                     <td class="col-name">
                       <a href="{href}" class="card-name-link">{nameEn}</a>{jaSpan}
                     </td>
+                    <td class="col-rarity">{rarityBadge}</td>
                   </tr>
             """;
     }));
@@ -500,53 +503,107 @@ static string BuildRelicListPage(string[] allRelicIds, CharData[] chars)
         .relic-filter-panel {
           background: #fff; border-radius: 10px; padding: 16px 20px;
           margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-          display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
         }
+        .relic-filter-section { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .relic-filter-section + .relic-filter-section { margin-top: 10px; padding-top: 10px; border-top: 1px solid #f2f2f2; }
         .relic-filter-label {
           font-size: 10.5px; font-weight: 700; text-transform: uppercase;
-          letter-spacing: 0.7px; color: #bbb; flex-shrink: 0;
+          letter-spacing: 0.7px; color: #bbb; min-width: 66px; flex-shrink: 0;
         }
         .relic-search-input {
-          flex: 1; min-width: 200px; max-width: 380px; padding: 6px 14px;
+          flex: 1; min-width: 200px; max-width: 380px; padding: 5px 13px;
           border: 1.5px solid #ddd; border-radius: 20px; font-size: 13px;
           color: #333; background: #fff; font-family: inherit;
           outline: none; transition: border-color 0.15s, box-shadow 0.15s;
         }
         .relic-search-input:focus { border-color: #a0600c; box-shadow: 0 0 0 3px rgba(160,96,12,0.12); }
         .relic-search-input::placeholder { color: #bbb; }
-        .relic-count { font-size: 12px; color: #bbb; margin-left: auto; }
+        .relic-count { font-size: 12px; color: #bbb; margin-left: 8px; }
+        .relic-filter-bar { display: flex; gap: 7px; flex-wrap: wrap; }
+        .rfbtn {
+          padding: 5px 13px; border: 1.5px solid transparent; border-radius: 20px;
+          font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+          background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.07); font-family: inherit;
+        }
+        .rfbtn:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.13); }
+        .rfbtn[data-r="all"]      { color: #555; border-color: #ccc; }
+        .rfbtn[data-r="all"].active   { background: #555; color: #fff; border-color: #555; }
+        .rfbtn[data-r="common"]   { color: #555; border-color: #999; }
+        .rfbtn[data-r="common"].active   { background: #666; color: #fff; border-color: #666; }
+        .rfbtn[data-r="uncommon"] { color: #1a5799; border-color: #1a5799; }
+        .rfbtn[data-r="uncommon"].active { background: #1a5799; color: #fff; }
+        .rfbtn[data-r="rare"]     { color: #c0392b; border-color: #c0392b; }
+        .rfbtn[data-r="rare"].active     { background: #c0392b; color: #fff; }
+        .rfbtn[data-r="shop"]     { color: #7d1a7d; border-color: #7d1a7d; }
+        .rfbtn[data-r="shop"].active     { background: #7d1a7d; color: #fff; }
+        .rfbtn[data-r="event"]    { color: #1a7a4a; border-color: #1a7a4a; }
+        .rfbtn[data-r="event"].active    { background: #1a7a4a; color: #fff; }
+        .rfbtn[data-r="starter"]  { color: #888; border-color: #bbb; }
+        .rfbtn[data-r="starter"].active  { background: #888; color: #fff; border-color: #888; }
+        .rfbtn[data-r="ancient"]  { color: #a0600c; border-color: #a0600c; }
+        .rfbtn[data-r="ancient"].active  { background: #a0600c; color: #fff; }
         </style>
         """;
 
     const string RELIC_FILTER_JS = """
         <script>
         (function () {
-          var input = document.getElementById('relic-search');
-          var rows  = document.querySelectorAll('#relic-table tbody tr');
+          var input   = document.getElementById('relic-search');
           var countEl = document.getElementById('relic-count');
+          var allRows = document.querySelectorAll('#relic-table tbody tr');
+          function getActiveRarity() {
+            var b = document.querySelector('.rfbtn.active');
+            return b ? b.getAttribute('data-r') : 'all';
+          }
           function update() {
             var q = input.value.trim().toLowerCase();
+            var r = getActiveRarity();
             var n = 0;
-            rows.forEach(function (row) {
+            allRows.forEach(function (row) {
               var lnk = row.querySelector('.card-name-link');
               var ja  = row.querySelector('.card-name-ja');
-              var ok = q === '' || (lnk && lnk.textContent.toLowerCase().includes(q))
-                                || (ja  && ja.textContent.toLowerCase().includes(q));
+              var rowRarity = row.getAttribute('data-rarity') || '';
+              var nameOk = q === '' || (lnk && lnk.textContent.toLowerCase().includes(q))
+                                    || (ja  && ja.textContent.toLowerCase().includes(q));
+              var rarityOk = r === 'all' || rowRarity === r;
+              var ok = nameOk && rarityOk;
               row.style.display = ok ? '' : 'none';
               if (ok) n++;
             });
             countEl.textContent = n + '件';
           }
           input.addEventListener('input', update);
+          document.querySelectorAll('.rfbtn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              document.querySelectorAll('.rfbtn').forEach(function (b) { b.classList.remove('active'); });
+              this.classList.add('active');
+              update();
+            });
+          });
         })();
         </script>
         """;
 
     var filterPanel = $"""
         <div class="relic-filter-panel">
-          <span class="relic-filter-label">レリック名</span>
-          <input type="text" id="relic-search" class="relic-search-input" placeholder="名前で検索…" autocomplete="off">
-          <span class="relic-count" id="relic-count">{allRelicIds.Length}件</span>
+          <div class="relic-filter-section">
+            <span class="relic-filter-label">レリック名</span>
+            <input type="text" id="relic-search" class="relic-search-input" placeholder="名前で検索…" autocomplete="off">
+            <span class="relic-count" id="relic-count">{allRelicIds.Length}件</span>
+          </div>
+          <div class="relic-filter-section">
+            <span class="relic-filter-label">レアリティ</span>
+            <div class="relic-filter-bar">
+              <button class="rfbtn active" data-r="all">すべて</button>
+              <button class="rfbtn" data-r="starter">Starter</button>
+              <button class="rfbtn" data-r="common">Common</button>
+              <button class="rfbtn" data-r="uncommon">Uncommon</button>
+              <button class="rfbtn" data-r="rare">Rare</button>
+              <button class="rfbtn" data-r="shop">Shop</button>
+              <button class="rfbtn" data-r="event">Event</button>
+              <button class="rfbtn" data-r="ancient">Ancient</button>
+            </div>
+          </div>
         </div>
         """;
 
@@ -559,7 +616,7 @@ static string BuildRelicListPage(string[] allRelicIds, CharData[] chars)
         <section class="section">
           <table class="card-table" id="relic-table">
             <thead>
-              <tr><th>レリック名</th></tr>
+              <tr><th>レリック名</th><th>レアリティ</th></tr>
             </thead>
             <tbody>{rows}</tbody>
           </table>
@@ -570,11 +627,13 @@ static string BuildRelicListPage(string[] allRelicIds, CharData[] chars)
 static string BuildRelicPage(string relicId, CharData[] chars, string review = "")
 {
     const string basePath = "../";
-    var nameEn = CardDatabaseService.GetRelicTitle(relicId);
-    var nameJa = CardDatabaseService.GetRelicTitle(relicId, japanese: true);
+    var nameEn  = CardDatabaseService.GetRelicTitle(relicId);
+    var nameJa  = CardDatabaseService.GetRelicTitle(relicId, japanese: true);
+    var rarity  = CardDatabaseService.GetRelicRarity(relicId);
+    var stats   = CardDatabaseService.GetRelicStats(relicId);
     var (rawDescEn, rawDescJa) = CardDatabaseService.GetDescription("RELIC." + relicId);
-    var descEn = DescriptionFormatter.Clean(rawDescEn).Replace("\n", "<br>");
-    var descJa = DescriptionFormatter.Clean(rawDescJa, japanese: true).Replace("\n", "<br>");
+    var descEn = DescriptionFormatter.Resolve(rawDescEn, stats).Replace("\n", "<br>");
+    var descJa = DescriptionFormatter.Resolve(rawDescJa, stats, japanese: true).Replace("\n", "<br>");
     var flavor = CardDatabaseService.GetFlavor("RELIC." + relicId);
 
     const string accent  = "#a0600c";
@@ -621,6 +680,8 @@ static string BuildRelicPage(string relicId, CharData[] chars, string review = "
         <!-- REVIEW_START -->{review}<!-- REVIEW_END -->
         """;
 
+    var rarityBadge = rarity != "" ? $"""<span class="badge rarity-{rarity.ToLower()}">{rarity}</span>""" : "";
+
     var content = $"""
         <div class="card-detail-header" style="border-left:5px solid {accent};background:{lightBg}">
           <div>
@@ -629,6 +690,7 @@ static string BuildRelicPage(string relicId, CharData[] chars, string review = "
             </div>
             <h1 class="card-title-en" style="color:{accent}">{nameEn}</h1>
             {(nameJa != nameEn ? $"""<div class="card-title-ja">{nameJa}</div>""" : "")}
+            {(rarityBadge != "" ? $"""<div class="card-badges">{rarityBadge}</div>""" : "")}
           </div>
         </div>
         {descSection}

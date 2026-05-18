@@ -108,23 +108,43 @@ public static class DescriptionFormatter
     }
 
     // case-insensitive + 先頭アンダースコア除去でフィールド名を検索
+    // "Power" サフィックスも除去してリトライ（例: DexterityPower → Dexterity）
     static bool TryFindStat(IReadOnlyDictionary<string, int>? stats, string varName, out int value)
     {
         value = 0;
         if (stats == null) return false;
+        if (TryFindStatExact(stats, varName, out value)) return true;
+        if (varName.EndsWith("Power", StringComparison.OrdinalIgnoreCase))
+            return TryFindStatExact(stats, varName[..^5], out value);
+        return false;
+    }
+
+    static bool TryFindStatExact(IReadOnlyDictionary<string, int> stats, string varName, out int value)
+    {
         if (stats.TryGetValue(varName, out value)) return true;
         foreach (var (k, v) in stats)
         {
             if (string.Equals(k.TrimStart('_'), varName, StringComparison.OrdinalIgnoreCase))
             { value = v; return true; }
         }
+        value = 0;
         return false;
     }
 
     // base + upgraded の両値を取得（diff() 表示用）
+    // "Power" サフィックスも除去してリトライ（例: DexterityPower → Dexterity）
     static (int? Base, int? Upgraded) FindStatPair(IReadOnlyDictionary<string, int>? stats, string varName)
     {
         if (stats == null) return (null, null);
+        var result = FindStatPairExact(stats, varName);
+        if (result.Base.HasValue) return result;
+        if (varName.EndsWith("Power", StringComparison.OrdinalIgnoreCase))
+            return FindStatPairExact(stats, varName[..^5]);
+        return result;
+    }
+
+    static (int? Base, int? Upgraded) FindStatPairExact(IReadOnlyDictionary<string, int> stats, string varName)
+    {
         int? baseVal = null, upgVal = null;
         foreach (var (k, v) in stats)
         {
