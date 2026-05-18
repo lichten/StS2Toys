@@ -32,6 +32,11 @@ PageEntry[] pages =
 
 var allCardIds = CardDatabaseService.GetAllCardIds().ToArray();
 
+// favicon を assets/ から dist/ にコピー
+var faviconSrc = Path.Combine(projectDir, "assets", "favicon.png");
+var faviconDst = Path.Combine(distDir, "favicon.png");
+if (File.Exists(faviconSrc)) File.Copy(faviconSrc, faviconDst, overwrite: true);
+
 File.WriteAllText(Path.Combine(distDir, "index.html"), BuildIndex(chars),              System.Text.Encoding.UTF8);
 File.WriteAllText(Path.Combine(distDir, "pages.html"), BuildPageList(pages, chars),    System.Text.Encoding.UTF8);
 File.WriteAllText(Path.Combine(distDir, "cards.html"), BuildCardListPage(allCardIds, chars), System.Text.Encoding.UTF8);
@@ -893,6 +898,7 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>{title} | StS2 カードリファレンス</title>
+          <link rel="icon" type="image/png" href="{basePath}favicon.png">
           <style>
         {CSS}
           </style>
