@@ -23,23 +23,27 @@ var mechanicsMap = CharacterMechanics.All
                   c => c.Mechanics.Select(m => m.MecLabel).ToArray(),
                   StringComparer.OrdinalIgnoreCase);
 
+var allCardIds   = CardDatabaseService.GetAllCardIds().ToArray();
+var allRelicIds  = CardDatabaseService.GetAllRelicIds().ToArray();
+
 PageEntry[] pages =
 [
     ..chars.Select(ch => new PageEntry("キャラクター", $"{ch.Id}.html", ch.EnName, ch.JaName, ch.Desc, ch.Accent)),
     new PageEntry("カード", "cards.html", "Card List", "カード一覧",
         "全カードをタイプ・レアリティ・フラグ付きで一覧表示。", "#2c3e50"),
+    new PageEntry("レリック", "relics.html", "Relic List", "レリック一覧",
+        $"全{allRelicIds.Length}件のレリックを一覧表示。", "#a0600c"),
 ];
-
-var allCardIds = CardDatabaseService.GetAllCardIds().ToArray();
 
 // favicon を assets/ から dist/ にコピー
 var faviconSrc = Path.Combine(projectDir, "assets", "favicon.png");
 var faviconDst = Path.Combine(distDir, "favicon.png");
 if (File.Exists(faviconSrc)) File.Copy(faviconSrc, faviconDst, overwrite: true);
 
-File.WriteAllText(Path.Combine(distDir, "index.html"), BuildIndex(chars),              System.Text.Encoding.UTF8);
-File.WriteAllText(Path.Combine(distDir, "pages.html"), BuildPageList(pages, chars),    System.Text.Encoding.UTF8);
-File.WriteAllText(Path.Combine(distDir, "cards.html"), BuildCardListPage(allCardIds, chars), System.Text.Encoding.UTF8);
+File.WriteAllText(Path.Combine(distDir, "index.html"),  BuildIndex(chars),                    System.Text.Encoding.UTF8);
+File.WriteAllText(Path.Combine(distDir, "pages.html"),  BuildPageList(pages, chars),          System.Text.Encoding.UTF8);
+File.WriteAllText(Path.Combine(distDir, "cards.html"),  BuildCardListPage(allCardIds, chars), System.Text.Encoding.UTF8);
+File.WriteAllText(Path.Combine(distDir, "relics.html"), BuildRelicListPage(allRelicIds, chars), System.Text.Encoding.UTF8);
 foreach (var ch in chars)
 {
     mechanicsMap.TryGetValue(ch.EnName, out var mecs);
@@ -60,7 +64,19 @@ foreach (var cardId in allCardIds)
         System.Text.Encoding.UTF8);
 }
 
-Console.WriteLine($"Generated {3 + chars.Length + allCardIds.Length} files -> {distDir}");
+// 個別レリックページ（dist/relics/{RELIC_ID}.html）
+var relicOutDir = Path.Combine(distDir, "relics");
+Directory.CreateDirectory(relicOutDir);
+foreach (var relicId in allRelicIds)
+{
+    var outPath = Path.Combine(relicOutDir, $"{relicId}.html");
+    var review  = ExtractReview(outPath);
+    File.WriteAllText(outPath,
+        BuildRelicPage(relicId, chars, review: review),
+        System.Text.Encoding.UTF8);
+}
+
+Console.WriteLine($"Generated {4 + chars.Length + allCardIds.Length + allRelicIds.Length} files -> {distDir}");
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -460,6 +476,167 @@ static string BuildCardListPage(string[] allCardIds, CharData[] chars)
         {filterPanel}
         {sections}
         """, extraHead: FILTER_CSS, extraFoot: FILTER_JS);
+}
+
+static string BuildRelicListPage(string[] allRelicIds, CharData[] chars)
+{
+    var rows = string.Concat(allRelicIds.Select(id =>
+    {
+        var nameEn = CardDatabaseService.GetRelicTitle(id);
+        var nameJa = CardDatabaseService.GetRelicTitle(id, japanese: true);
+        var href   = $"relics/{id}.html";
+        var jaSpan = nameJa != nameEn ? $"""<span class="card-name-ja">{nameJa}</span>""" : "";
+        return $"""
+                  <tr>
+                    <td class="col-name">
+                      <a href="{href}" class="card-name-link">{nameEn}</a>{jaSpan}
+                    </td>
+                  </tr>
+            """;
+    }));
+
+    const string RELIC_FILTER_CSS = """
+        <style>
+        .relic-filter-panel {
+          background: #fff; border-radius: 10px; padding: 16px 20px;
+          margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+          display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+        }
+        .relic-filter-label {
+          font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+          letter-spacing: 0.7px; color: #bbb; flex-shrink: 0;
+        }
+        .relic-search-input {
+          flex: 1; min-width: 200px; max-width: 380px; padding: 6px 14px;
+          border: 1.5px solid #ddd; border-radius: 20px; font-size: 13px;
+          color: #333; background: #fff; font-family: inherit;
+          outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .relic-search-input:focus { border-color: #a0600c; box-shadow: 0 0 0 3px rgba(160,96,12,0.12); }
+        .relic-search-input::placeholder { color: #bbb; }
+        .relic-count { font-size: 12px; color: #bbb; margin-left: auto; }
+        </style>
+        """;
+
+    const string RELIC_FILTER_JS = """
+        <script>
+        (function () {
+          var input = document.getElementById('relic-search');
+          var rows  = document.querySelectorAll('#relic-table tbody tr');
+          var countEl = document.getElementById('relic-count');
+          function update() {
+            var q = input.value.trim().toLowerCase();
+            var n = 0;
+            rows.forEach(function (row) {
+              var lnk = row.querySelector('.card-name-link');
+              var ja  = row.querySelector('.card-name-ja');
+              var ok = q === '' || (lnk && lnk.textContent.toLowerCase().includes(q))
+                                || (ja  && ja.textContent.toLowerCase().includes(q));
+              row.style.display = ok ? '' : 'none';
+              if (ok) n++;
+            });
+            countEl.textContent = n + '件';
+          }
+          input.addEventListener('input', update);
+        })();
+        </script>
+        """;
+
+    var filterPanel = $"""
+        <div class="relic-filter-panel">
+          <span class="relic-filter-label">レリック名</span>
+          <input type="text" id="relic-search" class="relic-search-input" placeholder="名前で検索…" autocomplete="off">
+          <span class="relic-count" id="relic-count">{allRelicIds.Length}件</span>
+        </div>
+        """;
+
+    return Layout("レリック一覧", "relics", "#a0600c", chars, $"""
+        <div class="page-hero">
+          <h1 class="hero-title">レリック一覧</h1>
+          <p class="hero-sub">全{allRelicIds.Length}件</p>
+        </div>
+        {filterPanel}
+        <section class="section">
+          <table class="card-table" id="relic-table">
+            <thead>
+              <tr><th>レリック名</th></tr>
+            </thead>
+            <tbody>{rows}</tbody>
+          </table>
+        </section>
+        """, extraHead: RELIC_FILTER_CSS, extraFoot: RELIC_FILTER_JS);
+}
+
+static string BuildRelicPage(string relicId, CharData[] chars, string review = "")
+{
+    const string basePath = "../";
+    var nameEn = CardDatabaseService.GetRelicTitle(relicId);
+    var nameJa = CardDatabaseService.GetRelicTitle(relicId, japanese: true);
+    var (rawDescEn, rawDescJa) = CardDatabaseService.GetDescription("RELIC." + relicId);
+    var descEn = DescriptionFormatter.Clean(rawDescEn).Replace("\n", "<br>");
+    var descJa = DescriptionFormatter.Clean(rawDescJa, japanese: true).Replace("\n", "<br>");
+    var flavor = CardDatabaseService.GetFlavor("RELIC." + relicId);
+
+    const string accent  = "#a0600c";
+    const string lightBg = "#fff8f0";
+
+    var descSection = descEn != "" ? $"""
+        <section class="section">
+          <h2 class="section-title">効果テキスト</h2>
+          <p class="card-desc-en">{descEn}</p>
+          {(descJa != "" && descJa != descEn ? $"""<p class="card-desc-ja">{descJa}</p>""" : "")}
+        </section>
+        """ : "";
+
+    var flavorSection = flavor is { En: var flEn, Ja: var flJa } ? $"""
+        <section class="section">
+          <h2 class="section-title">フレーバーテキスト</h2>
+          <p class="card-desc-en" style="font-style:italic;color:#888">{flEn}</p>
+          {(flJa != "" && flJa != flEn ? $"""<p class="card-desc-ja" style="font-style:italic">{flJa}</p>""" : "")}
+        </section>
+        """ : "";
+
+    const string REVIEW_GUIDE = """
+
+        <!-- REVIEW_START -->
+        <!--
+          【評価・メモ】
+          このコメントブロック全体を削除し、かわりにHTMLを書いてください。
+          ビルド（dotnet run --project StS2SiteBuilder）後も上書きされません。
+
+          ▼ テンプレート（コピーして使ってください） ▼
+
+          <section class="section">
+            <h2 class="section-title">評価・メモ</h2>
+            <p>ここに感想や評価を書く。</p>
+          </section>
+        -->
+        <!-- REVIEW_END -->
+        """;
+
+    var reviewZone = review == ""
+        ? REVIEW_GUIDE
+        : $"""
+
+        <!-- REVIEW_START -->{review}<!-- REVIEW_END -->
+        """;
+
+    var content = $"""
+        <div class="card-detail-header" style="border-left:5px solid {accent};background:{lightBg}">
+          <div>
+            <div class="card-breadcrumb">
+              <a href="{basePath}relics.html" class="char-back-link" style="color:{accent}">レリック一覧</a>
+            </div>
+            <h1 class="card-title-en" style="color:{accent}">{nameEn}</h1>
+            {(nameJa != nameEn ? $"""<div class="card-title-ja">{nameJa}</div>""" : "")}
+          </div>
+        </div>
+        {descSection}
+        {reviewZone}
+        {flavorSection}
+        """;
+
+    return Layout(nameEn, "relics", accent, chars, content, basePath);
 }
 
 static string BuildCardPage(string cardId, CharData[] chars, string basePath, string review = "")
@@ -868,15 +1045,18 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
         .tab-panel.hidden { display: none; }
         """;
 
-    var homeActive  = activeId == "index";
-    var homeStyle   = homeActive  ? " style=\"border-left-color:#4a90d9\"" : "";
-    var homeClass   = homeActive  ? " active" : "";
-    var pagesActive = activeId == "pages";
-    var pagesStyle  = pagesActive ? " style=\"border-left-color:#4a90d9\"" : "";
-    var pagesClass  = pagesActive ? " active" : "";
-    var cardsActive = activeId == "cards";
-    var cardsStyle  = cardsActive ? " style=\"border-left-color:#4a90d9\"" : "";
-    var cardsClass  = cardsActive ? " active" : "";
+    var homeActive   = activeId == "index";
+    var homeStyle    = homeActive   ? " style=\"border-left-color:#4a90d9\"" : "";
+    var homeClass    = homeActive   ? " active" : "";
+    var pagesActive  = activeId == "pages";
+    var pagesStyle   = pagesActive  ? " style=\"border-left-color:#4a90d9\"" : "";
+    var pagesClass   = pagesActive  ? " active" : "";
+    var cardsActive  = activeId == "cards";
+    var cardsStyle   = cardsActive  ? " style=\"border-left-color:#4a90d9\"" : "";
+    var cardsClass   = cardsActive  ? " active" : "";
+    var relicsActive = activeId == "relics";
+    var relicsStyle  = relicsActive ? " style=\"border-left-color:#a0600c\"" : "";
+    var relicsClass  = relicsActive ? " active" : "";
 
     var navItems = string.Concat(chars.Select(ch => {
         var isActive    = ch.Id == activeId;
@@ -921,6 +1101,9 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
                 </a>
                 <a href="{basePath}cards.html" class="nav-link{cardsClass}"{cardsStyle}>
                   <span class="nav-icon">&#9670;</span>カード一覧
+                </a>
+                <a href="{basePath}relics.html" class="nav-link{relicsClass}"{relicsStyle}>
+                  <span class="nav-icon">&#9671;</span>レリック一覧
                 </a>
               </div>
               <div class="nav-section">

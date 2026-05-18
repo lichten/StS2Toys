@@ -438,6 +438,15 @@ public static class CardDatabaseService
 
     public static IEnumerable<string> GetAllCardIds() => _types.Keys;
 
+    public static IEnumerable<string> GetAllRelicIds()
+    {
+        const string titleSuffix = ".title";
+        return _loc.EngRelics.Keys
+            .Where(k => k.EndsWith(titleSuffix, StringComparison.Ordinal))
+            .Select(k => k[..^titleSuffix.Length])
+            .OrderBy(id => id, StringComparer.OrdinalIgnoreCase);
+    }
+
     public static string GetEnchantmentName(string id, bool japanese)
     {
         var raw = ToRawId(id);
