@@ -168,6 +168,86 @@ a { color: inherit; text-decoration: none; }
 .rarity-shop     { background: #fdf0fc;  color: #7d1a7d; }
 .cost-badge      { background: #e8eaed;  color: #333; }
 .flag-badge      { background: #e8eaf0;  color: #445566; }
+
+/* ── Character filter bar ── */
+.filter-panel {
+  background: #fff; border-radius: 10px; padding: 16px 20px;
+  margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.filter-section { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.filter-section + .filter-section { margin-top: 10px; padding-top: 10px; border-top: 1px solid #f2f2f2; }
+.filter-label {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.7px; color: #bbb; min-width: 66px; flex-shrink: 0;
+}
+.filter-bar { display: flex; gap: 7px; flex-wrap: wrap; }
+.filter-btn {
+  padding: 5px 13px; border: 1.5px solid transparent; border-radius: 20px;
+  font-size: 12.5px; font-weight: 600; cursor: pointer;
+  transition: all 0.15s; background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.07); font-family: inherit;
+}
+.filter-btn:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.13); }
+
+/* Character */
+.filter-btn[data-filter="all"]              { color: #555; border-color: #ccc; }
+.filter-btn[data-filter="all"].active       { background: #555; color: #fff; border-color: #555; }
+.filter-btn[data-filter="ironclad"]         { color: #c0392b; border-color: #c0392b; }
+.filter-btn[data-filter="ironclad"].active  { background: #c0392b; color: #fff; }
+.filter-btn[data-filter="silent"]           { color: #1a7a4a; border-color: #1a7a4a; }
+.filter-btn[data-filter="silent"].active    { background: #1a7a4a; color: #fff; }
+.filter-btn[data-filter="defect"]           { color: #1a5799; border-color: #1a5799; }
+.filter-btn[data-filter="defect"].active    { background: #1a5799; color: #fff; }
+.filter-btn[data-filter="necrobinder"]      { color: #6c3483; border-color: #6c3483; }
+.filter-btn[data-filter="necrobinder"].active { background: #6c3483; color: #fff; }
+.filter-btn[data-filter="regent"]           { color: #7d6608; border-color: #7d6608; }
+.filter-btn[data-filter="regent"].active    { background: #7d6608; color: #fff; }
+.filter-btn[data-filter="shared"]           { color: #555; border-color: #999; }
+.filter-btn[data-filter="shared"].active    { background: #666; color: #fff; border-color: #666; }
+
+/* Type */
+.filter-btn[data-type="all"]             { color: #555; border-color: #ccc; }
+.filter-btn[data-type="all"].active      { background: #555; color: #fff; border-color: #555; }
+.filter-btn[data-type="attack"]          { color: #c0392b; border-color: #c0392b; }
+.filter-btn[data-type="attack"].active   { background: #c0392b; color: #fff; }
+.filter-btn[data-type="skill"]           { color: #1a5799; border-color: #1a5799; }
+.filter-btn[data-type="skill"].active    { background: #1a5799; color: #fff; }
+.filter-btn[data-type="power"]           { color: #7d6608; border-color: #7d6608; }
+.filter-btn[data-type="power"].active    { background: #7d6608; color: #fff; }
+.filter-btn[data-type="status"]          { color: #666; border-color: #aaa; }
+.filter-btn[data-type="status"].active   { background: #666; color: #fff; border-color: #666; }
+.filter-btn[data-type="curse"]           { color: #6c3483; border-color: #6c3483; }
+.filter-btn[data-type="curse"].active    { background: #6c3483; color: #fff; }
+.filter-btn[data-type="quest"]           { color: #1a7a4a; border-color: #1a7a4a; }
+.filter-btn[data-type="quest"].active    { background: #1a7a4a; color: #fff; }
+
+/* Rarity */
+.filter-btn[data-rarity="all"]              { color: #555; border-color: #ccc; }
+.filter-btn[data-rarity="all"].active       { background: #555; color: #fff; border-color: #555; }
+.filter-btn[data-rarity="starter"]          { color: #888; border-color: #bbb; }
+.filter-btn[data-rarity="starter"].active   { background: #888; color: #fff; border-color: #888; }
+.filter-btn[data-rarity="common"]           { color: #555; border-color: #999; }
+.filter-btn[data-rarity="common"].active    { background: #666; color: #fff; border-color: #666; }
+.filter-btn[data-rarity="uncommon"]         { color: #1a5799; border-color: #1a5799; }
+.filter-btn[data-rarity="uncommon"].active  { background: #1a5799; color: #fff; }
+.filter-btn[data-rarity="rare"]             { color: #c0392b; border-color: #c0392b; }
+.filter-btn[data-rarity="rare"].active      { background: #c0392b; color: #fff; }
+.filter-btn[data-rarity="ancient"]          { color: #a0600c; border-color: #a0600c; }
+.filter-btn[data-rarity="ancient"].active   { background: #a0600c; color: #fff; }
+.filter-btn[data-rarity="event"]            { color: #1a7a4a; border-color: #1a7a4a; }
+.filter-btn[data-rarity="event"].active     { background: #1a7a4a; color: #fff; }
+.filter-btn[data-rarity="shop"]             { color: #7d1a7d; border-color: #7d1a7d; }
+.filter-btn[data-rarity="shop"].active      { background: #7d1a7d; color: #fff; }
+
+/* Search input */
+.search-input {
+  flex: 1; min-width: 180px; max-width: 320px;
+  padding: 5px 13px; border: 1.5px solid #ddd; border-radius: 20px;
+  font-size: 13px; color: #333; background: #fff; font-family: inherit;
+  outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.search-input:focus { border-color: #4a90d9; box-shadow: 0 0 0 3px rgba(74,144,217,0.12); }
+.search-input::placeholder { color: #bbb; }
   </style>
 </head>
 <body>
@@ -219,7 +299,50 @@ a { color: inherit; text-decoration: none; }
   <h1 class="hero-title">カード一覧</h1>
   <p class="hero-sub">全578件</p>
 </div>
-<section class="section">
+<div class="filter-panel">
+  <div class="filter-section">
+    <span class="filter-label">カード名</span>
+    <input type="text" id="card-search" class="search-input" placeholder="名前で検索…" autocomplete="off">
+  </div>
+  <div class="filter-section">
+    <span class="filter-label">キャラ</span>
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">すべて</button>
+      <button class="filter-btn" data-filter="ironclad">Ironclad</button>
+      <button class="filter-btn" data-filter="silent">Silent</button>
+      <button class="filter-btn" data-filter="defect">Defect</button>
+      <button class="filter-btn" data-filter="necrobinder">Necrobinder</button>
+      <button class="filter-btn" data-filter="regent">Regent</button>
+      <button class="filter-btn" data-filter="shared">共有・特殊</button>
+    </div>
+  </div>
+  <div class="filter-section">
+    <span class="filter-label">タイプ</span>
+    <div class="filter-bar">
+      <button class="filter-btn active" data-type="all">すべて</button>
+      <button class="filter-btn" data-type="attack">Attack</button>
+      <button class="filter-btn" data-type="skill">Skill</button>
+      <button class="filter-btn" data-type="power">Power</button>
+      <button class="filter-btn" data-type="status">Status</button>
+      <button class="filter-btn" data-type="curse">Curse</button>
+      <button class="filter-btn" data-type="quest">Quest</button>
+    </div>
+  </div>
+  <div class="filter-section">
+    <span class="filter-label">レアリティ</span>
+    <div class="filter-bar">
+      <button class="filter-btn active" data-rarity="all">すべて</button>
+      <button class="filter-btn" data-rarity="starter">Starter</button>
+      <button class="filter-btn" data-rarity="common">Common</button>
+      <button class="filter-btn" data-rarity="uncommon">Uncommon</button>
+      <button class="filter-btn" data-rarity="rare">Rare</button>
+      <button class="filter-btn" data-rarity="ancient">Ancient</button>
+      <button class="filter-btn" data-rarity="event">Event</button>
+      <button class="filter-btn" data-rarity="shop">Shop</button>
+    </div>
+  </div>
+</div>
+<section class="section" data-char="ironclad">
   <h2 class="section-title">
     <span class="section-dot" style="background:#c0392b"></span>
     Ironclad
@@ -842,7 +965,7 @@ a { color: inherit; text-decoration: none; }
         <td class="col-flags"><div class="flag-cell"></div></td>
       </tr></tbody>
   </table>
-</section><section class="section">
+</section><section class="section" data-char="silent">
   <h2 class="section-title">
     <span class="section-dot" style="background:#1a7a4a"></span>
     Silent
@@ -1472,7 +1595,7 @@ a { color: inherit; text-decoration: none; }
         <td class="col-flags"><div class="flag-cell"></div></td>
       </tr></tbody>
   </table>
-</section><section class="section">
+</section><section class="section" data-char="defect">
   <h2 class="section-title">
     <span class="section-dot" style="background:#1a5799"></span>
     Defect
@@ -2102,7 +2225,7 @@ a { color: inherit; text-decoration: none; }
         <td class="col-flags"><div class="flag-cell"></div></td>
       </tr></tbody>
   </table>
-</section><section class="section">
+</section><section class="section" data-char="necrobinder">
   <h2 class="section-title">
     <span class="section-dot" style="background:#6c3483"></span>
     Necrobinder
@@ -2732,7 +2855,7 @@ a { color: inherit; text-decoration: none; }
         <td class="col-flags"><div class="flag-cell"></div></td>
       </tr></tbody>
   </table>
-</section><section class="section">
+</section><section class="section" data-char="regent">
   <h2 class="section-title">
     <span class="section-dot" style="background:#7d6608"></span>
     Regent
@@ -3362,7 +3485,7 @@ a { color: inherit; text-decoration: none; }
         <td class="col-flags"><div class="flag-cell"></div></td>
       </tr></tbody>
   </table>
-</section><section class="section">
+</section><section class="section" data-char="shared">
   <h2 class="section-title">
     <span class="section-dot" style="background:#888"></span>
     共有・特殊
@@ -4352,5 +4475,67 @@ a { color: inherit; text-decoration: none; }
 </section>
     </main>
   </div>
+<script>
+(function () {
+  var sections    = document.querySelectorAll('.section[data-char]');
+  var searchInput = document.getElementById('card-search');
+
+  function getActive(attrName) {
+    var btn = document.querySelector('.filter-btn[data-' + attrName + '].active');
+    return btn ? btn.getAttribute('data-' + attrName) : 'all';
+  }
+
+  function applyFilters() {
+    var charFilter   = getActive('filter');
+    var typeFilter   = getActive('type');
+    var rarityFilter = getActive('rarity');
+    var query        = searchInput.value.trim().toLowerCase();
+
+    sections.forEach(function (sec) {
+      var charMatch = charFilter === 'all' || sec.dataset.char === charFilter;
+      if (!charMatch) { sec.style.display = 'none'; return; }
+
+      if (typeFilter === 'all' && rarityFilter === 'all' && query === '') {
+        sec.style.display = '';
+        sec.querySelectorAll('tbody tr').forEach(function (r) { r.style.display = ''; });
+        return;
+      }
+
+      var visibleCount = 0;
+      sec.querySelectorAll('tbody tr').forEach(function (row) {
+        var typeBadge   = row.querySelector('.col-type .badge');
+        var rarityBadge = row.querySelector('.col-rarity .badge');
+        var nameLink    = row.querySelector('.card-name-link');
+        var nameJa      = row.querySelector('.card-name-ja');
+        var typeClass   = typeBadge   ? Array.from(typeBadge.classList).find(function (c) { return c.startsWith('type-'); })   : '';
+        var rarityClass = rarityBadge ? Array.from(rarityBadge.classList).find(function (c) { return c.startsWith('rarity-'); }) : '';
+        var nameEn      = nameLink ? nameLink.textContent.toLowerCase() : '';
+        var nameJaText  = nameJa   ? nameJa.textContent.toLowerCase()   : '';
+        var typeMatch   = typeFilter   === 'all' || typeClass   === 'type-'   + typeFilter;
+        var rarityMatch = rarityFilter === 'all' || rarityClass === 'rarity-' + rarityFilter;
+        var nameMatch   = query === '' || nameEn.includes(query) || nameJaText.includes(query);
+        if (typeMatch && rarityMatch && nameMatch) { row.style.display = ''; visibleCount++; }
+        else { row.style.display = 'none'; }
+      });
+      sec.style.display = visibleCount > 0 ? '' : 'none';
+    });
+  }
+
+  function bindGroup(selector) {
+    document.querySelectorAll(selector).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll(selector).forEach(function (b) { b.classList.remove('active'); });
+        this.classList.add('active');
+        applyFilters();
+      });
+    });
+  }
+
+  searchInput.addEventListener('input', applyFilters);
+  bindGroup('.filter-btn[data-filter]');
+  bindGroup('.filter-btn[data-type]');
+  bindGroup('.filter-btn[data-rarity]');
+})();
+</script>
 </body>
 </html>
