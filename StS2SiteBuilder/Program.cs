@@ -48,9 +48,10 @@ foreach (var cardId in allCardIds)
     var dir     = GetCardDir(cardId, chars);
     var cardDir = Path.Combine(distDir, "cards", dir);
     Directory.CreateDirectory(cardDir);
-    File.WriteAllText(
-        Path.Combine(cardDir, $"{RawId(cardId)}.html"),
-        BuildCardPage(cardId, chars, basePath: "../../"),
+    var outPath = Path.Combine(cardDir, $"{RawId(cardId)}.html");
+    var review  = ExtractReview(outPath);
+    File.WriteAllText(outPath,
+        BuildCardPage(cardId, chars, basePath: "../../", review: review),
         System.Text.Encoding.UTF8);
 }
 
@@ -456,7 +457,7 @@ static string BuildCardListPage(string[] allCardIds, CharData[] chars)
         """, extraHead: FILTER_CSS, extraFoot: FILTER_JS);
 }
 
-static string BuildCardPage(string cardId, CharData[] chars, string basePath)
+static string BuildCardPage(string cardId, CharData[] chars, string basePath, string review = "")
 {
     var rawId    = RawId(cardId);
     var nameEn   = CardDatabaseService.GetName(cardId);
@@ -517,6 +518,47 @@ static string BuildCardPage(string cardId, CharData[] chars, string basePath)
         </section>
         """ : "";
 
+    // マーカー区間：ビルドで上書きされない手書きセクション
+    const string REVIEW_GUIDE = """
+
+        <!-- REVIEW_START -->
+        <!--
+          【評価・メモ】
+          このコメントブロック全体を削除し、かわりにHTMLを書いてください。
+          ビルド（dotnet run --project StS2SiteBuilder）後も上書きされません。
+
+          ▼ テンプレート（コピーして使ってください） ▼
+
+          <section class="section">
+            <h2 class="section-title">評価・メモ</h2>
+            <p>ここに感想や評価を書く。</p>
+          </section>
+
+          ▼ 使えるCSSクラス ▼
+
+          テキスト段落：
+            <p>テキスト</p>
+
+          キー/値テーブル：
+            <table class="stat-table">
+              <tr><td class="stat-key">評価</td><td class="stat-val">A</td></tr>
+              <tr><td class="stat-key">習得時期</td><td class="stat-val">序盤</td></tr>
+            </table>
+
+          タグ・バッジ：
+            <span class="mec-tag">Strength</span>
+            <span class="badge rarity-rare">Rare</span>
+        -->
+        <!-- REVIEW_END -->
+        """;
+
+    var reviewZone = review == ""
+        ? REVIEW_GUIDE
+        : $"""
+
+        <!-- REVIEW_START -->{review}<!-- REVIEW_END -->
+        """;
+
     var content = $"""
         <div class="card-detail-header" style="border-left:5px solid {accent};background:{lightBg}">
           <div>
@@ -527,6 +569,7 @@ static string BuildCardPage(string cardId, CharData[] chars, string basePath)
           </div>
         </div>
         {descSection}
+        {reviewZone}
         {statsSection}
         {flagsSection}
         """;
@@ -823,6 +866,18 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
         </body>
         </html>
         """;
+}
+
+static string ExtractReview(string filePath)
+{
+    const string START = "<!-- REVIEW_START -->";
+    const string END   = "<!-- REVIEW_END -->";
+    if (!File.Exists(filePath)) return "";
+    var content = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
+    var s = content.IndexOf(START, StringComparison.Ordinal);
+    var e = content.IndexOf(END,   StringComparison.Ordinal);
+    if (s < 0 || e <= s) return "";
+    return content[(s + START.Length)..e];
 }
 
 // ── records & flag definitions ────────────────────────────────────────────────
