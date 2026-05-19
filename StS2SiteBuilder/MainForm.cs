@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.Web.WebView2.Core;
 
 public partial class MainForm : Form
 {
@@ -41,5 +42,11 @@ public partial class MainForm : Form
     {
         if (InvokeRequired) { Invoke(() => AppendLog(message)); return; }
         _logBox.AppendText(message + Environment.NewLine);
+    }
+
+    private async void MainForm_Load(object? sender, EventArgs e)
+    {
+        await _webView2.EnsureCoreWebView2Async(null);
+        _webView2.CoreWebView2.Navigate("https://www.microsoft.com");
     }
 }
