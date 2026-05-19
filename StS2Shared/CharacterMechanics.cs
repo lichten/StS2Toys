@@ -1,48 +1,52 @@
 namespace StS2Shared.Services;
 
+public record MechanicDef(string EnLabel, string JaLabel, Func<string, bool> Filter);
+public record CharGroup(string EnLabel, string JaLabel, MechanicDef[] Mechanics);
+
 public static class CharacterMechanics
 {
-    public static readonly (string CharLabel, (string MecLabel, Func<string, bool> Filter)[] Mechanics)[] All =
+    public static readonly CharGroup[] All =
     [
-        ("Necrobinder",
+        new("Necrobinder", "ネクロバインダー",
         [
-            ("Osty",  CardDatabaseService.IsNecroOsty),
-            ("Soul",  CardDatabaseService.IsNecroSoul),
-            ("Doom",  CardDatabaseService.IsNecroDoom),
+            new("Osty", "Osty", CardDatabaseService.IsNecroOsty),
+            new("Soul", "Soul", CardDatabaseService.IsNecroSoul),
+            new("Doom", "Doom", CardDatabaseService.IsNecroDoom),
         ]),
-        ("Ironclad",
+        new("Ironclad", "アイアンクラッド",
         [
-            ("Strength", CardDatabaseService.IsIroncladStrength),
-            ("Exhaust",  CardDatabaseService.IsIroncladExhaust),
-            ("Strike",   CardDatabaseService.IsIroncladStrike),
+            new("Strength", "ストレングス",   CardDatabaseService.IsIroncladStrength),
+            new("Exhaust",  "エグゾースト",   CardDatabaseService.IsIroncladExhaust),
+            new("Strike",   "ストライク",     CardDatabaseService.IsIroncladStrike),
         ]),
-        ("Silent",
+        new("Silent", "サイレント",
         [
-            ("Poison", CardDatabaseService.IsSilentPoison),
-            ("Shiv",   CardDatabaseService.IsSilentShiv),
+            new("Poison", "毒",   CardDatabaseService.IsSilentPoison),
+            new("Shiv",   "Shiv", CardDatabaseService.IsSilentShiv),
         ]),
-        ("Defect",
+        new("Defect", "ディフェクト",
         [
-            ("Channel",                      CardDatabaseService.IsDefectChannel),
-            ("Evoke",                        CardDatabaseService.IsDefectEvoke),
-            ("Focus",                        CardDatabaseService.IsDefectFocus),
-            ("0 Energy (Scrape / All for One)", CardDatabaseService.IsDefectZeroEnergy),
+            new("Channel",  "チャネル",     CardDatabaseService.IsDefectChannel),
+            new("Evoke",    "発動",         CardDatabaseService.IsDefectEvoke),
+            new("Focus",    "フォーカス",   CardDatabaseService.IsDefectFocus),
+            new("0 Energy", "0エネルギー",  CardDatabaseService.IsDefectZeroEnergy),
         ]),
-        ("Regent",
+        new("Regent", "リージェント",
         [
-            ("Forge / Sovereign Blade", id => CardDatabaseService.IsRegentForge(id) || CardDatabaseService.IsRegentBlade(id)),
-            ("カード作成シナジー",        CardDatabaseService.IsRegentCreate),
-            ("Starを得る",              CardDatabaseService.IsRegentStarGain),
-            ("Starを使用する",           CardDatabaseService.IsRegentStarSpend),
+            new("Forge / Sovereign Blade", "Forge / Sovereign Blade",
+                id => CardDatabaseService.IsRegentForge(id) || CardDatabaseService.IsRegentBlade(id)),
+            new("Card Creation", "カード作成シナジー", CardDatabaseService.IsRegentCreate),
+            new("Star Gain",     "Starを得る",         CardDatabaseService.IsRegentStarGain),
+            new("Star Spend",    "Starを使用する",     CardDatabaseService.IsRegentStarSpend),
         ]),
-        ("その他", []),
-        ("共通",
+        new("Other", "その他", []),
+        new("Common", "共通",
         [
-            ("脱力 (Weak)",       CardDatabaseService.IsWeak),
-            ("弱体 (Vulnerable)", CardDatabaseService.IsVulnerable),
+            new("Weak",       "脱力", CardDatabaseService.IsWeak),
+            new("Vulnerable", "弱体", CardDatabaseService.IsVulnerable),
         ]),
     ];
 
-    public static (string MecLabel, Func<string, bool> Filter)[] MechanicsFor(string charLabel) =>
-        All.FirstOrDefault(c => c.CharLabel == charLabel).Mechanics ?? [];
+    public static MechanicDef[] MechanicsFor(string enLabel) =>
+        All.FirstOrDefault(g => g.EnLabel == enLabel)?.Mechanics ?? [];
 }

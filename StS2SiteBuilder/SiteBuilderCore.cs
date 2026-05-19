@@ -34,8 +34,8 @@ CharData[] chars =
 ];
 
 var mechanicsMap = CharacterMechanics.All
-    .ToDictionary(c => c.CharLabel,
-                  c => c.Mechanics.Select(m => m.MecLabel).ToArray(),
+    .ToDictionary(g => g.EnLabel,
+                  g => g.Mechanics.Select(m => (m.EnLabel, m.JaLabel)).ToArray(),
                   StringComparer.OrdinalIgnoreCase);
 
 var allCardIds   = CardDatabaseService.GetAllCardIds().ToArray();
@@ -1404,10 +1404,13 @@ static string BuildCardPage(string cardId, CharData[] chars, string basePath, st
     return Layout(nameEn, "cards", accent, chars, content, basePath, extraFoot: extraFoot);
 }
 
-static string BuildCharPage(CharData ch, CharData[] chars, string[] mecs)
+static string BuildCharPage(CharData ch, CharData[] chars, (string En, string Ja)[] mecs)
 {
     var mecHtml = mecs.Length > 0
-        ? $"""<div class="mec-tags">{string.Concat(mecs.Select(m => $"""<span class="mec-tag">{m}</span>"""))}</div>"""
+        ? $"""<div class="mec-tags">{string.Concat(mecs.Select(m =>
+            m.En == m.Ja
+                ? $"""<span class="mec-tag">{m.En}</span>"""
+                : $"""<span class="mec-tag">{m.Ja}<span class="mec-sub">{m.En}</span></span>"""))}</div>"""
         : """<p class="placeholder">メカニクス情報なし</p>""";
 
     return Layout(ch.EnName, ch.Id, ch.Accent, chars, $"""
@@ -1596,6 +1599,7 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
           padding: 5px 13px; background: #f5f6f8; border: 1px solid #e4e6ea;
           border-radius: 20px; font-size: 13px; color: #444;
         }
+        .mec-sub  { display: block; font-size: 10.5px; color: #999; margin-top: 1px; }
         .placeholder { font-size: 13.5px; color: #bbb; font-style: italic; }
 
         /* ── Page list ── */

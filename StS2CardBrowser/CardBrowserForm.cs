@@ -10,8 +10,7 @@ public class CardBrowserForm : Form
     const int SidebarBtnH = 28;
 
     // ---- キャラクター × メカニクス定義（StS2Shared.CharacterMechanics で一元管理）----
-    static readonly (string CharLabel, (string MecLabel, Func<string, bool> Filter)[] Mechanics)[] Characters =
-        CharacterMechanics.All;
+    static readonly CharGroup[] Characters = CharacterMechanics.All;
 
     // ---- データ ----
     List<CardEntry> _allCards = [];
@@ -133,7 +132,7 @@ public class CardBrowserForm : Form
         for (int i = Characters.Length - 1; i >= 0; i--)
         {
             int idx = i;
-            charBtns.Insert(0, AddSidebarButton(_charPanel, Characters[i].CharLabel, () => SelectChar(idx)));
+            charBtns.Insert(0, AddSidebarButton(_charPanel, Characters[i].JaLabel, () => SelectChar(idx)));
         }
         charBtns.Insert(0, AddSidebarButton(_charPanel, "全て", () => SelectChar(-1)));
         _charButtons = [.. charBtns];
@@ -407,17 +406,17 @@ public class CardBrowserForm : Form
         // キャラクターフィルタ
         if (_selectedChar >= 0)
         {
-            var charLabel = Characters[_selectedChar].CharLabel;
+            var enLabel   = Characters[_selectedChar].EnLabel;
             var mechanics = Characters[_selectedChar].Mechanics;
             if (_selectedMechanics.Count > 0)
                 // サブメカニクス選択時: そのシナジーに該当するカード
                 query = query.Where(c => _selectedMechanics.Any(i => mechanics[i].Filter(c.Id)));
             else
                 // キャラクター選択のみ: キャラクター帰属データで絞り込む
-                // 「その他」は帰属なし（空文字）のカードを対象とする
-                query = query.Where(c => charLabel == "その他"
+                // "Other" は帰属なし（空文字）のカードを対象とする
+                query = query.Where(c => enLabel == "Other"
                     ? c.Character == ""
-                    : c.Character == charLabel);
+                    : c.Character == enLabel);
         }
 
         // コストフィルタ
@@ -573,10 +572,10 @@ public class CardBrowserForm : Form
     List<string> CollectSynergies(string id)
     {
         var result = new List<string>();
-        foreach (var (charLabel, mechanics) in Characters)
-            foreach (var (mecLabel, filter) in mechanics)
-                if (filter(id))
-                    result.Add($"{charLabel}:{mecLabel}");
+        foreach (var group in Characters)
+            foreach (var mec in group.Mechanics)
+                if (mec.Filter(id))
+                    result.Add($"{group.EnLabel}:{mec.EnLabel}");
         return result;
     }
 
@@ -841,7 +840,7 @@ public class CardBrowserForm : Form
         for (int i = mechanics.Length - 1; i >= 0; i--)
         {
             int idx = i;
-            var btn = AddSidebarButton(_subPanel, mechanics[i].MecLabel, () => ToggleMechanic(idx), leftPad: 16);
+            var btn = AddSidebarButton(_subPanel, mechanics[i].JaLabel, () => ToggleMechanic(idx), leftPad: 16);
             _subButtons[i] = btn;
         }
 

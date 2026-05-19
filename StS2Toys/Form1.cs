@@ -531,7 +531,7 @@ namespace StS2Toys
                     _necroOverview = new DeckOverviewForm();
                     _necroOverview.SetKeywordGroups(
                         CharacterMechanics.MechanicsFor("Necrobinder")
-                            .Select(m => (m.MecLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
+                            .Select(m => (m.JaLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
                         "Necrobinder概観");
                     ApplySubWindowSettings(_necroOverview, _necroOverviewSettings, new Point(Right + 4, Top));
                     _necroOverview.FormClosed += (_, _) =>
@@ -574,7 +574,7 @@ namespace StS2Toys
                     _ironcladOverview = new DeckOverviewForm();
                     _ironcladOverview.SetKeywordGroups(
                         CharacterMechanics.MechanicsFor("Ironclad")
-                            .Select(m => (m.MecLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
+                            .Select(m => (m.JaLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
                         "Ironclad概観");
                     ApplySubWindowSettings(_ironcladOverview, _ironcladOverviewSettings, new Point(Right + 4, Top));
                     _ironcladOverview.FormClosed += (_, _) =>
@@ -617,7 +617,7 @@ namespace StS2Toys
                     _silentOverview = new DeckOverviewForm();
                     _silentOverview.SetKeywordGroups(
                         CharacterMechanics.MechanicsFor("Silent")
-                            .Select(m => (m.MecLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
+                            .Select(m => (m.JaLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
                         "Silent概観");
                     ApplySubWindowSettings(_silentOverview, _silentOverviewSettings, new Point(Right + 4, Top));
                     _silentOverview.FormClosed += (_, _) =>
@@ -660,7 +660,7 @@ namespace StS2Toys
                     _defectOverview = new DeckOverviewForm();
                     _defectOverview.SetKeywordGroups(
                         CharacterMechanics.MechanicsFor("Defect")
-                            .Select(m => (m.MecLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
+                            .Select(m => (m.JaLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
                         "Defect概観");
                     ApplySubWindowSettings(_defectOverview, _defectOverviewSettings, new Point(Right + 4, Top));
                     _defectOverview.FormClosed += (_, _) =>
@@ -703,7 +703,7 @@ namespace StS2Toys
                     _regentOverview = new DeckOverviewForm();
                     _regentOverview.SetKeywordGroups(
                         CharacterMechanics.MechanicsFor("Regent")
-                            .Select(m => (m.MecLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
+                            .Select(m => (m.JaLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
                         "Regent概観");
                     ApplySubWindowSettings(_regentOverview, _regentOverviewSettings, new Point(Right + 4, Top));
                     _regentOverview.FormClosed += (_, _) =>
@@ -745,8 +745,8 @@ namespace StS2Toys
                 {
                     _commonOverview = new DeckOverviewForm();
                     _commonOverview.SetKeywordGroups(
-                        CharacterMechanics.MechanicsFor("共通")
-                            .Select(m => (m.MecLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
+                        CharacterMechanics.MechanicsFor("Common")
+                            .Select(m => (m.JaLabel, (Func<DeckCard, bool>)(c => m.Filter(c.Id)))).ToArray(),
                         "共通概観");
                     ApplySubWindowSettings(_commonOverview, _commonOverviewSettings, new Point(Right + 4, Top));
                     _commonOverview.FormClosed += (_, _) =>
@@ -777,12 +777,12 @@ namespace StS2Toys
             if (_commonOverview is null || _commonOverview.IsDisposed || !_commonOverview.Visible) return;
             if (_lastDeckCards is null) return;
             _commonOverview.UpdateDeck(_lastDeckCards);
-            _commonOverview.SetStatsText(BuildStatsText("共通", _lastDeckCards));
+            _commonOverview.SetStatsText(BuildStatsText("Common", _lastDeckCards));
         }
 
         static string BuildStatsText(string charLabel, IReadOnlyList<DeckCard> deck) =>
             string.Join("  ", CharacterMechanics.MechanicsFor(charLabel)
-                .Select(m => $"{m.MecLabel}: {deck.Where(c => m.Filter(c.Id)).Sum(c => c.Count)}枚"));
+                .Select(m => $"{m.JaLabel}: {deck.Where(c => m.Filter(c.Id)).Sum(c => c.Count)}枚"));
 
         void ListViewDeck_ColumnClick(object? sender, ColumnClickEventArgs e)
         {
