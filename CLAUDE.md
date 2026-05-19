@@ -99,6 +99,25 @@ $pck = "C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\SlayTheSp
 - イベント画像は `tools/extracted/images/events/{id}.png.import` → `.ctex` パス解決 → BC7 デコードまたは WebP デコードで PNG 変換してキャッシュ
 - 画像キャッシュ先: `tools/extracted/images/events_png/`
 
+### StS2MonsterBrowser — モンスターアニメーションビューア
+
+- Spine スケルタルアニメーション（tools/extracted/animations/monsters/{name}/）を読み込んで表示
+- 「全スナップショット生成」ボタンで全モンスターの idle ポーズを 256×256 PNG として `tools/extracted/images/monsters/` に出力する
+
+### StS2SiteBuilder — 静的サイトジェネレータ
+
+ビルドは「生成」ボタンまたは `dotnet run --project StS2SiteBuilder` で実行。
+
+**エンカウンターページのモンスター画像ワークフロー（git 管理外のため要手順）：**
+1. `StS2MonsterBrowser` を起動して「全スナップショット生成」をクリック
+   → `tools/extracted/images/monsters/*.png` が生成される
+2. `StS2SiteBuilder` でビルドを実行
+   → `dist/images/monsters/` にコピーされ、エンカウンターページにモンスターグリッドが表示される
+
+モンスター画像が未生成の場合はエンカウンターページに `?` プレースホルダーが表示される。
+エンカウンター→モンスターの対応は `StS2Shared/Resources/encounter_monsters.json` で管理。
+モンスターの EN/JA 名は `StS2Shared/Resources/monster_names.json` で管理。
+
 ### ローカライゼーションの構造（ancients.json）
 
 Ancient NPC のデータは `tools/extracted/localization/{eng,jpn}/ancients.json` に格納され、キー構造は：
