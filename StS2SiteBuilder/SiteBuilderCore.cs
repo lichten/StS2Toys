@@ -33,10 +33,17 @@ CharData[] chars =
         "創造と王権のキャラクター。武器を鍛え、カードを生み出し、Starを消費して強力な効果を発動する。"),
 ];
 
+var commonMecs = CharacterMechanics.All
+    .FirstOrDefault(g => g.EnLabel == "Common")?.Mechanics
+    .Select(m => (m.EnLabel, m.JaLabel, "common"))
+    .ToArray() ?? [];
 var mechanicsMap = CharacterMechanics.All
-    .ToDictionary(g => g.EnLabel,
-                  g => g.Mechanics.Select(m => (m.EnLabel, m.JaLabel)).ToArray(),
-                  StringComparer.OrdinalIgnoreCase);
+    .Where(g => g.Mechanics.Length > 0 && g.EnLabel != "Common")
+    .ToDictionary(
+        g => g.EnLabel,
+        g => g.Mechanics.Select(m => (m.EnLabel, m.JaLabel, g.EnLabel.ToLowerInvariant()))
+             .Concat(commonMecs).ToArray(),
+        StringComparer.OrdinalIgnoreCase);
 
 var allCardIds   = CardDatabaseService.GetAllCardIds().ToArray();
 var allRelicIds  = CardDatabaseService.GetAllRelicIds().ToArray();
@@ -69,6 +76,8 @@ PageEntry[] pages =
         $"全{allEventIds.Length}件のイベントをテキスト・選択肢付きで一覧表示。", "#1a6678"),
     new PageEntry("エンカウンター", "encounters.html", "Encounter List", "エンカウンター一覧",
         $"全{allEncounterIds.Length}件のエンカウンターをタイプ別に一覧表示。", "#8b2222"),
+    new PageEntry("メカニクス", "mechanics.html", "Mechanic List", "メカニクス一覧",
+        $"全{CharacterMechanics.All.Sum(g => g.Mechanics.Length)}件のメカニクスをキャラクター別に一覧表示。", "#4a5568"),
 ];
 
 // favicon を assets/ から dist/ にコピー
@@ -138,7 +147,27 @@ foreach (var encId in allEncounterIds)
         System.Text.Encoding.UTF8);
 }
 
-        log($"Generated {6 + chars.Length + allCardIds.Length + allRelicIds.Length + allEventIds.Length + allEncounterIds.Length} files -> {distDir}");
+// 個別メカニクスページ（dist/mechanics/{groupDir}/{MecFileName}.html）
+var mecOutDir = Path.Combine(distDir, "mechanics");
+Directory.CreateDirectory(mecOutDir);
+File.WriteAllText(Path.Combine(distDir, "mechanics.html"),
+    BuildMechanicListPage(chars), System.Text.Encoding.UTF8);
+foreach (var group in CharacterMechanics.All.Where(g => g.Mechanics.Length > 0))
+{
+    var groupDir = Path.Combine(mecOutDir, group.EnLabel.ToLowerInvariant());
+    Directory.CreateDirectory(groupDir);
+    foreach (var mec in group.Mechanics)
+    {
+        var outPath = Path.Combine(groupDir, MecFileName(mec.EnLabel));
+        var review  = ExtractReview(outPath);
+        File.WriteAllText(outPath,
+            BuildMechanicPage(group, mec, allCardIds, chars, review),
+            System.Text.Encoding.UTF8);
+    }
+}
+
+var totalMecs = CharacterMechanics.All.Sum(g => g.Mechanics.Length);
+        log($"Generated {7 + chars.Length + allCardIds.Length + allRelicIds.Length + allEventIds.Length + allEncounterIds.Length + 1 + totalMecs} files -> {distDir}");
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────────
@@ -1404,13 +1433,13 @@ static string BuildCardPage(string cardId, CharData[] chars, string basePath, st
     return Layout(nameEn, "cards", accent, chars, content, basePath, extraFoot: extraFoot);
 }
 
-static string BuildCharPage(CharData ch, CharData[] chars, (string En, string Ja)[] mecs)
+static string BuildCharPage(CharData ch, CharData[] chars, (string En, string Ja, string MecDir)[] mecs)
 {
     var mecHtml = mecs.Length > 0
         ? $"""<div class="mec-tags">{string.Concat(mecs.Select(m =>
             m.En == m.Ja
-                ? $"""<span class="mec-tag">{m.En}</span>"""
-                : $"""<span class="mec-tag">{m.Ja}<span class="mec-sub">{m.En}</span></span>"""))}</div>"""
+                ? $"""<a href="mechanics/{m.MecDir}/{MecFileName(m.En)}" class="mec-tag">{m.En}</a>"""
+                : $"""<a href="mechanics/{m.MecDir}/{MecFileName(m.En)}" class="mec-tag">{m.Ja}<span class="mec-sub">{m.En}</span></a>"""))}</div>"""
         : """<p class="placeholder">メカニクス情報なし</p>""";
 
     return Layout(ch.EnName, ch.Id, ch.Accent, chars, $"""
@@ -1431,6 +1460,167 @@ static string BuildCharPage(CharData ch, CharData[] chars, (string En, string Ja
           <p class="placeholder">準備中...</p>
         </section>
         """);
+}
+
+static string MecFileName(string enLabel) =>
+    Regex.Replace(enLabel, @"[^A-Za-z0-9]+", "_").Trim('_') + ".html";
+
+static string BuildMechanicListPage(CharData[] chars)
+{
+    const string basePath = "./";
+    const string accent   = "#4a5568";
+    var totalCount = CharacterMechanics.All.Sum(g => g.Mechanics.Length);
+
+    var sections = string.Concat(
+        CharacterMechanics.All
+            .Where(g => g.Mechanics.Length > 0)
+            .Select(group =>
+            {
+                var ch       = chars.FirstOrDefault(c => c.EnName == group.EnLabel);
+                var grpAccent = ch?.Accent ?? "#4a5568";
+                var grpBg    = ch?.LightBg ?? "#f5f6f8";
+                var titleLink = ch != null
+                    ? $"""<a href="{basePath}{ch.Id}.html" class="char-back-link" style="color:{grpAccent}">{group.JaLabel}</a>"""
+                    : $"""<span style="color:{grpAccent}">{group.JaLabel}</span>""";
+                var tags = string.Concat(group.Mechanics.Select(mec =>
+                {
+                    var href = $"mechanics/{group.EnLabel.ToLowerInvariant()}/{MecFileName(mec.EnLabel)}";
+                    return mec.EnLabel == mec.JaLabel
+                        ? $"""<a href="{href}" class="mec-tag">{mec.EnLabel}</a>"""
+                        : $"""<a href="{href}" class="mec-tag">{mec.JaLabel}<span class="mec-sub">{mec.EnLabel}</span></a>""";
+                }));
+                return $"""
+                    <section class="section" style="border-left:3px solid {grpAccent}">
+                      <h2 class="section-title">{titleLink}</h2>
+                      <div class="mec-tags">{tags}</div>
+                    </section>
+                    """;
+            }));
+
+    return Layout("メカニクス一覧", "mechanics", accent, chars, $"""
+        <div class="page-hero">
+          <div class="hero-title">メカニクス一覧</div>
+          <div class="hero-sub">Mechanic List</div>
+          <div class="hero-desc">全{totalCount}件のメカニクスをキャラクター別に表示。</div>
+        </div>
+        {sections}
+        """, basePath);
+}
+
+static string BuildMechanicPage(CharGroup group, MechanicDef mec, string[] allCardIds, CharData[] chars, string review = "")
+{
+    const string basePath = "../../";
+    var ch       = chars.FirstOrDefault(c => c.EnName == group.EnLabel);
+    var accent   = ch?.Accent ?? "#4a5568";
+    var lightBg  = ch?.LightBg ?? "#f5f6f8";
+    var charDir  = group.EnLabel.ToLowerInvariant();
+
+    var crumbChar = ch != null
+        ? $"""<a href="{basePath}{ch.Id}.html" class="char-back-link" style="color:{accent}">{group.JaLabel}</a>"""
+        : $"""<span class="char-back-neutral">{group.JaLabel}</span>""";
+
+    static int RarityOrd(string r) => r.ToLower() switch
+    {
+        "starter"  => 0, "common"   => 1, "uncommon" => 2, "rare"  => 3,
+        "ancient"  => 4, "event"    => 5, "shop"     => 6, _       => 99,
+    };
+
+    var matchingCards = allCardIds
+        .Where(id => mec.Filter(id))
+        .Select(id =>
+        {
+            var nameEn  = CardDatabaseService.GetName(id);
+            var nameJa  = CardDatabaseService.GetName(id, japanese: true);
+            var type    = CardDatabaseService.GetCardType(id);
+            var rarity  = CardDatabaseService.GetCardRarity(id);
+            var cost    = CardDatabaseService.GetCardCost(id);
+            var cDir    = GetCardDir(id, chars);
+            return (Id: id, NameEn: nameEn, NameJa: nameJa, Type: type, Rarity: rarity, Cost: cost, CDir: cDir);
+        })
+        .OrderBy(c => RarityOrd(c.Rarity))
+        .ThenBy(c => c.NameEn)
+        .ToList();
+
+    var cardSections = string.Concat(
+        matchingCards
+            .GroupBy(c => c.Rarity)
+            .OrderBy(g => RarityOrd(g.Key))
+            .Select(g =>
+            {
+                var rarity = g.Key;
+                var rows   = string.Concat(g.Select(c =>
+                {
+                    var jaSpan    = c.NameJa != c.NameEn ? $"""<span class="card-name-ja">{c.NameJa}</span>""" : "";
+                    var typeBadge = c.Type   != ""       ? $"""<span class="badge type-{c.Type.ToLower()}">{c.Type}</span>""" : "";
+                    var costBadge = c.Cost   != ""       ? $"""<span class="badge cost-badge">{c.Cost}</span>""" : "";
+                    var href      = $"{basePath}cards/{c.CDir}/{RawId(c.Id)}.html";
+                    return $"""
+                              <tr>
+                                <td class="col-name"><a href="{href}" class="card-name-link">{c.NameEn}</a>{jaSpan}</td>
+                                <td class="col-type">{typeBadge}</td>
+                                <td class="col-cost">{costBadge}</td>
+                              </tr>
+                        """;
+                }));
+                var rarityBadge = $"""<span class="badge rarity-{rarity.ToLower()}">{rarity}</span>""";
+                return $"""
+                    <section class="section">
+                      <h2 class="section-title">
+                        {rarityBadge}
+                        <span class="section-meta">{g.Count()}枚</span>
+                      </h2>
+                      <table class="card-table">
+                        <thead><tr>
+                          <th>カード名</th><th>タイプ</th><th>コスト</th>
+                        </tr></thead>
+                        <tbody>{rows}</tbody>
+                      </table>
+                    </section>
+                    """;
+            }));
+
+    var noCards = matchingCards.Count == 0
+        ? """<section class="section"><p class="placeholder">該当カードなし</p></section>"""
+        : "";
+
+    const string REVIEW_GUIDE = """
+
+        <!-- REVIEW_START -->
+        <!--
+          【評価・メモ】
+          このコメントブロック全体を削除し、かわりにHTMLを書いてください。
+
+          ▼ テンプレート ▼
+          <section class="section">
+            <h2 class="section-title">評価・メモ</h2>
+            <p>ここに感想や評価を書く。</p>
+          </section>
+        -->
+        <!-- REVIEW_END -->
+        """;
+
+    var reviewZone = review == ""
+        ? REVIEW_GUIDE
+        : $"""
+
+        <!-- REVIEW_START -->{review}<!-- REVIEW_END -->
+        """;
+
+    var content = $"""
+        <div class="card-detail-header" style="border-left:5px solid {accent};background:{lightBg}">
+          <div class="card-breadcrumb">
+            {crumbChar}
+            <span style="color:#bbb"> / メカニクス</span>
+          </div>
+          <h1 class="card-title-en" style="color:{accent}">{(mec.EnLabel == mec.JaLabel ? mec.EnLabel : mec.JaLabel)}</h1>
+          {(mec.EnLabel != mec.JaLabel ? $"""<div class="card-title-ja">{mec.EnLabel}</div>""" : "")}
+        </div>
+        {reviewZone}
+        {cardSections}
+        {noCards}
+        """;
+
+    return Layout(mec.JaLabel, "mechanics", accent, chars, content, basePath);
 }
 
 static HashSet<string> ComputeFlags(string id)
@@ -1596,9 +1786,10 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
         .section-meta { font-size: 12px; font-weight: 400; color: #bbb; margin-left: 8px; }
         .mec-tags { display: flex; flex-wrap: wrap; gap: 8px; }
         .mec-tag  {
-          padding: 5px 13px; background: #f5f6f8; border: 1px solid #e4e6ea;
-          border-radius: 20px; font-size: 13px; color: #444;
+          display: inline-block; padding: 5px 13px; background: #f5f6f8; border: 1px solid #e4e6ea;
+          border-radius: 20px; font-size: 13px; color: #444; text-decoration: none;
         }
+        a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
         .mec-sub  { display: block; font-size: 10.5px; color: #999; margin-top: 1px; }
         .placeholder { font-size: 13.5px; color: #bbb; font-style: italic; }
 
@@ -1686,6 +1877,9 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
     var encountersActive = activeId == "encounters";
     var encountersStyle  = encountersActive ? " style=\"border-left-color:#8b2222\"" : "";
     var encountersClass  = encountersActive ? " active" : "";
+    var mecsActive  = activeId == "mechanics";
+    var mecsStyle   = mecsActive  ? " style=\"border-left-color:#4a5568\"" : "";
+    var mecsClass   = mecsActive  ? " active" : "";
 
     var navItems = string.Concat(chars.Select(ch => {
         var isActive    = ch.Id == activeId;
@@ -1739,6 +1933,9 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
                 </a>
                 <a href="{basePath}encounters.html" class="nav-link{encountersClass}"{encountersStyle}>
                   <span class="nav-icon">&#9876;</span>エンカウンター一覧
+                </a>
+                <a href="{basePath}mechanics.html" class="nav-link{mecsClass}"{mecsStyle}>
+                  <span class="nav-icon">&#9881;</span>メカニクス一覧
                 </a>
               </div>
               <div class="nav-section">
