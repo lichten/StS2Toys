@@ -1,15 +1,22 @@
 using System.Runtime.InteropServices;
 
-if (args.Length > 0)
+static class Program
 {
-    NativeMethods.AttachConsole(-1);
-    var distDir = SiteBuilderCore.GetDistDir();
-    SiteBuilderCore.Build(distDir, Console.WriteLine);
-}
-else
-{
-    ApplicationConfiguration.Initialize();
-    Application.Run(new MainForm());
+    [STAThread]
+    static void Main(string[] args)
+    {
+        if (args.Length > 0)
+        {
+            NativeMethods.AttachConsole(-1);
+            var distDir = SiteBuilderCore.GetDistDir();
+            SiteBuilderCore.Build(distDir, Console.WriteLine);
+        }
+        else
+        {
+            ApplicationConfiguration.Initialize();
+            Application.Run(new MainForm());
+        }
+    }
 }
 
 static class NativeMethods
