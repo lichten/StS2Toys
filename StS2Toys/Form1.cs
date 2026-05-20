@@ -447,14 +447,20 @@ namespace StS2Toys
                     cards.Where(c => CardDatabaseService.IsNecroSummon(c.Id)).OrderBy(c => ja ? c.NameJa : c.NameEn).ToList(),
                     []));
 
-            // 5. 共通キーワード
+            // 5. 共通キーワード（レリックも振り分ける）
+            var claimedRelics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var m in CharacterMechanics.MechanicsFor("Common"))
+            {
+                var kwRelics = relics.Where(r => m.Filter(r.Id)).ToList();
+                foreach (var r in kwRelics) claimedRelics.Add(r.Id);
                 sections.Add(new OverviewSection(m.EnLabel, m.JaLabel,
                     cards.Where(c => m.Filter(c.Id)).OrderBy(c => ja ? c.NameJa : c.NameEn).ToList(),
-                    []));
+                    kwRelics));
+            }
 
-            // 6. その他のレリック
-            sections.Add(new OverviewSection("Other Relics", "その他のレリック", [], otherRelics));
+            // 6. その他のレリック（共通キーワードに振り分け済みのものは除外）
+            var finalOtherRelics = otherRelics.Where(r => !claimedRelics.Contains(r.Id)).ToList();
+            sections.Add(new OverviewSection("Other Relics", "その他のレリック", [], finalOtherRelics));
 
             _combinedOverview.SetSections(sections, deckTotal);
         }
