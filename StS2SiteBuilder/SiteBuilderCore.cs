@@ -99,7 +99,8 @@ var cardsWithImg = toolsRoot is not null
 
 PageEntry[] pages =
 [
-    ..chars.Select(ch => new PageEntry("キャラクター", $"{ch.Id}.html", ch.EnName, ch.JaName, ch.Desc, ch.Accent)),
+    new PageEntry("キャラクター", "characters.html", "Character List", "キャラクター一覧",
+        "5人のキャラクターのカード・メカニクスを確認できます。", "#4a90d9"),
     new PageEntry("カード", "cards.html", "Card List", "カード一覧",
         "全カードをタイプ・レアリティ・フラグ付きで一覧表示。", "#2c3e50"),
     new PageEntry("レリック", "relics.html", "Relic List", "レリック一覧",
@@ -117,7 +118,8 @@ var faviconSrc = Path.Combine(Path.GetDirectoryName(distDir)!, "assets", "favico
 var faviconDst = Path.Combine(distDir, "favicon.png");
 if (File.Exists(faviconSrc)) File.Copy(faviconSrc, faviconDst, overwrite: true);
 
-File.WriteAllText(Path.Combine(distDir, "index.html"),  BuildIndex(chars),                      System.Text.Encoding.UTF8);
+File.WriteAllText(Path.Combine(distDir, "index.html"),      BuildIndex(chars),         System.Text.Encoding.UTF8);
+File.WriteAllText(Path.Combine(distDir, "characters.html"), BuildCharListPage(chars),  System.Text.Encoding.UTF8);
 var aboutPath     = Path.Combine(distDir, "about.html");
 File.WriteAllText(aboutPath, BuildAboutPage(chars, ExtractReview(aboutPath)), System.Text.Encoding.UTF8);
 var changelogPath = Path.Combine(distDir, "changelog.html");
@@ -294,6 +296,33 @@ static string BuildIndex(CharData[] chars)
         <div class="page-hero">
           <h1 class="hero-title">Slay the Spire 2</h1>
           <p class="hero-sub">攻略メモメモ</p>
+          <p class="hero-desc">5人のキャラクターのカード・メカニクスを確認できます。</p>
+        </div>
+        <div class="char-grid">
+          {cards}
+        </div>
+        """);
+}
+
+static string BuildCharListPage(CharData[] chars)
+{
+    var cards = string.Concat(chars.Select(ch => $"""
+              <a href="{ch.Id}.html" class="char-card">
+                <div class="char-card-header" style="background:{ch.Accent}">
+                  <div class="char-name-en">{ch.EnName}</div>
+                  <div class="char-name-ja">{ch.JaName}</div>
+                </div>
+                <div class="char-card-body">
+                  <p class="char-desc">{ch.Desc}</p>
+                </div>
+                <div class="char-card-footer">詳細を見る &rarr;</div>
+              </a>
+        """));
+
+    return Layout("キャラクター一覧", "characters", "#4a90d9", chars, $"""
+        <div class="page-hero">
+          <h1 class="hero-title">キャラクター一覧</h1>
+          <p class="hero-sub">Character List</p>
           <p class="hero-desc">5人のキャラクターのカード・メカニクスを確認できます。</p>
         </div>
         <div class="char-grid">
@@ -2094,19 +2123,10 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
     var mecsActive  = activeId == "mechanics";
     var mecsStyle   = mecsActive  ? " style=\"border-left-color:#4a5568\"" : "";
     var mecsClass   = mecsActive  ? " active" : "";
-
-    var navItems = string.Concat(chars.Select(ch => {
-        var isActive    = ch.Id == activeId;
-        var activeStyle = isActive ? $" style=\"border-left-color:{ch.Accent}\"" : "";
-        var cls         = isActive ? " active" : "";
-        return $"""
-                  <a href="{basePath}{ch.Id}.html" class="nav-link{cls}"{activeStyle}>
-                    <span class="nav-dot" style="background:{ch.Accent}"></span>
-                    {ch.EnName}
-                    <span class="nav-name-ja">{ch.JaName}</span>
-                  </a>
-            """;
-    }));
+    var charsActive = activeId == "characters" || chars.Any(c => c.Id == activeId);
+    var charsAccent = chars.FirstOrDefault(c => c.Id == activeId)?.Accent ?? "#4a90d9";
+    var charsStyle  = charsActive ? $" style=\"border-left-color:{charsAccent}\"" : "";
+    var charsClass  = charsActive ? " active" : "";
 
     return $"""
         <!DOCTYPE html>
@@ -2142,6 +2162,9 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
                 <a href="{basePath}pages.html" class="nav-link{pagesClass}"{pagesStyle}>
                   <span class="nav-icon">&#9776;</span>ページ一覧
                 </a>
+                <a href="{basePath}characters.html" class="nav-link{charsClass}"{charsStyle}>
+                  <span class="nav-icon">&#9786;</span>キャラクター一覧
+                </a>
                 <a href="{basePath}cards.html" class="nav-link{cardsClass}"{cardsStyle}>
                   <span class="nav-icon">&#9670;</span>カード一覧
                 </a>
@@ -2157,10 +2180,6 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
                 <a href="{basePath}mechanics.html" class="nav-link{mecsClass}"{mecsStyle}>
                   <span class="nav-icon">&#9881;</span>メカニクス一覧
                 </a>
-              </div>
-              <div class="nav-section">
-                <div class="nav-group-label">キャラクター</div>
-                {navItems}
               </div>
             </nav>
             <main class="main">
