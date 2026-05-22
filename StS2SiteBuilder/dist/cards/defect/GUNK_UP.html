@@ -92,6 +92,13 @@ a { color: inherit; text-decoration: none; }
   border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 
+/* ── Card detail header ── */
+.card-header-inner { display: flex; align-items: flex-start; gap: 20px; }
+.card-portrait {
+  width: 200px; height: auto; object-fit: contain;
+  border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
 /* ── Event detail ── */
 .event-image-wrap {
   margin-bottom: 20px; border-radius: 10px; overflow: hidden;
@@ -308,11 +315,14 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
     </nav>
     <main class="main">
       <div class="card-detail-header" style="border-left:5px solid #1a5799;background:#e8f0fc">
-  <div>
-    <div class="card-breadcrumb"><a href="../../defect.html" class="char-back-link" style="color:#1a5799">Defect <span class="char-back-ja">(ディフェクト)</span></a></div>
-    <h1 class="card-title-en" style="color:#1a5799">Gunk Up</h1>
-    <div class="card-title-ja">ヘドロ投げ</div>
-    <div class="card-badges"><span class="badge type-attack">Attack</span><span class="badge rarity-common">Common</span><span class="badge cost-badge">1</span></div>
+  <div class="card-header-inner">
+    <img src="../../images/cards/defect/gunk_up.png" class="card-portrait" alt="Gunk Up">
+    <div>
+      <div class="card-breadcrumb"><a href="../../defect.html" class="char-back-link" style="color:#1a5799">Defect <span class="char-back-ja">(ディフェクト)</span></a></div>
+      <h1 class="card-title-en" style="color:#1a5799">Gunk Up</h1>
+      <div class="card-title-ja">ヘドロ投げ</div>
+      <div class="card-badges"><span class="badge type-attack">Attack</span><span class="badge rarity-common">Common</span><span class="badge cost-badge">1</span></div>
+    </div>
   </div>
 </div>
 <section class="section">

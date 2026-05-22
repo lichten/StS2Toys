@@ -90,6 +90,13 @@ if (toolsRoot is not null)
     }
 }
 
+// カードポートレートを dist/images/cards/ にコピー
+var cardImgDstDir = Path.Combine(distDir, "images", "cards");
+Directory.CreateDirectory(cardImgDstDir);
+var cardsWithImg = toolsRoot is not null
+    ? CopyCardImages(toolsRoot, cardImgDstDir, allCardIds, chars, log)
+    : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
 PageEntry[] pages =
 [
     ..chars.Select(ch => new PageEntry("キャラクター", $"{ch.Id}.html", ch.EnName, ch.JaName, ch.Desc, ch.Accent)),
@@ -136,7 +143,8 @@ foreach (var cardId in allCardIds)
     var outPath = Path.Combine(cardDir, $"{RawId(cardId)}.html");
     var review  = ExtractReview(outPath);
     File.WriteAllText(outPath,
-        BuildCardPage(cardId, chars, basePath: "../../", review: review),
+        BuildCardPage(cardId, chars, basePath: "../../",
+            hasImage: cardsWithImg.Contains(cardId), review: review),
         System.Text.Encoding.UTF8);
 }
 
@@ -1378,7 +1386,7 @@ static string BuildRelicPage(string relicId, CharData[] chars, bool hasImage = f
     return Layout(nameEn, "relics", accent, chars, content, basePath);
 }
 
-static string BuildCardPage(string cardId, CharData[] chars, string basePath, string review = "")
+static string BuildCardPage(string cardId, CharData[] chars, string basePath, bool hasImage = false, string review = "")
 {
     var rawId    = RawId(cardId);
     var nameEn   = CardDatabaseService.GetName(cardId);
@@ -1413,6 +1421,11 @@ static string BuildCardPage(string cardId, CharData[] chars, string basePath, st
     var charLink = ch is not null
         ? $"""<a href="{basePath}{ch.Id}.html" class="char-back-link" style="color:{accent}">{ch.EnName} <span class="char-back-ja">({ch.JaName})</span></a>"""
         : """<span class="char-back-link char-back-neutral">共有・特殊</span>""";
+
+    var charDir  = GetCardDir(cardId, chars);
+    var imgHtml  = hasImage
+        ? $"""<img src="{basePath}images/cards/{charDir}/{rawId.ToLowerInvariant()}.png" class="card-portrait" alt="{nameEn}">"""
+        : "";
 
     string descSection;
     if (descEn == "")
@@ -1515,11 +1528,14 @@ static string BuildCardPage(string cardId, CharData[] chars, string basePath, st
 
     var content = $"""
         <div class="card-detail-header" style="border-left:5px solid {accent};background:{lightBg}">
-          <div>
-            <div class="card-breadcrumb">{charLink}</div>
-            <h1 class="card-title-en" style="color:{accent}">{nameEn}</h1>
-            {(nameJa != nameEn ? $"""<div class="card-title-ja">{nameJa}</div>""" : "")}
-            <div class="card-badges">{typeBadge}{rarityBadge}{costBadge}</div>
+          <div class="card-header-inner">
+            {imgHtml}
+            <div>
+              <div class="card-breadcrumb">{charLink}</div>
+              <h1 class="card-title-en" style="color:{accent}">{nameEn}</h1>
+              {(nameJa != nameEn ? $"""<div class="card-title-ja">{nameJa}</div>""" : "")}
+              <div class="card-badges">{typeBadge}{rarityBadge}{costBadge}</div>
+            </div>
           </div>
         </div>
         {descSection}
@@ -1857,6 +1873,13 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
           border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.12);
         }
 
+        /* ── Card detail header ── */
+        .card-header-inner { display: flex; align-items: flex-start; gap: 20px; }
+        .card-portrait {
+          width: 200px; height: auto; object-fit: contain;
+          border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+
         /* ── Event detail ── */
         .event-image-wrap {
           margin-bottom: 20px; border-radius: 10px; overflow: hidden;
@@ -2162,6 +2185,50 @@ static string? FindToolsRoot(string startDir)
         dir = Path.GetDirectoryName(dir);
     }
     return null;
+}
+
+static HashSet<string> CopyCardImages(string toolsRoot, string dstDir, string[] ids, CharData[] chars, Action<string> log)
+{
+    var copied      = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    var portBaseDir = Path.Combine(toolsRoot, "images", "card_portraits_png");
+    if (!Directory.Exists(portBaseDir))
+    {
+        log("カード画像: card_portraits_png/ が見つかりません");
+        return copied;
+    }
+
+    string[] fallbackDirs = ["colorless", "curse", "status", "token", "event", "quest"];
+
+    foreach (var cardId in ids)
+    {
+        var rawId   = RawId(cardId).ToLowerInvariant();
+        var charDir = GetCardDir(cardId, chars);
+
+        string? srcPng = null;
+        if (charDir != "shared")
+        {
+            var p = Path.Combine(portBaseDir, charDir, rawId + ".png");
+            if (File.Exists(p)) srcPng = p;
+        }
+        if (srcPng is null)
+        {
+            foreach (var sub in fallbackDirs)
+            {
+                var p = Path.Combine(portBaseDir, sub, rawId + ".png");
+                if (File.Exists(p)) { srcPng = p; break; }
+            }
+        }
+        if (srcPng is null) continue;
+
+        var outDir = Path.Combine(dstDir, charDir);
+        Directory.CreateDirectory(outDir);
+        var dstPng = Path.Combine(outDir, rawId + ".png");
+        if (!File.Exists(dstPng) || File.GetLastWriteTimeUtc(srcPng) > File.GetLastWriteTimeUtc(dstPng))
+            File.Copy(srcPng, dstPng, overwrite: true);
+        copied.Add(cardId);
+    }
+    log($"カード画像: {copied.Count} 件コピー");
+    return copied;
 }
 
 static HashSet<string> ConvertImages(string toolsRoot, string imgSubdir, string dstDir, string[] ids, string label, Action<string> log)
