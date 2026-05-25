@@ -8,12 +8,21 @@ using System.Text.RegularExpressions;
 const string defaultDll = @"C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\data_sts2_windows_x86_64\sts2.dll";
 var dllPath = (args.Length > 0 && !args[0].StartsWith("--")) ? args[0] : defaultDll;
 
-// デフォルト出力先: リポジトリルートの StS2Toys/Resources/
+// バージョン文字列を release_info.json から取得（sts2.dll の一つ上のフォルダ）
+var releaseInfoPath = Path.GetFullPath(
+    Path.Combine(Path.GetDirectoryName(dllPath)!, "..", "release_info.json"));
+var gameVersion = File.Exists(releaseInfoPath)
+    ? System.Text.Json.JsonDocument.Parse(File.ReadAllText(releaseInfoPath))
+          .RootElement.GetProperty("version").GetString()!
+    : "unknown";
+
+// デフォルト出力先: StS2Shared/Resources/{version}/
 // AppContext.BaseDirectory = .../card-type-extractor/bin/Debug/net10.0/
 // 4階層上がるとリポジトリルート
 var defaultOut = Path.GetFullPath(
-    Path.Combine(AppContext.BaseDirectory, @"..\..\..\..\StS2Shared\Resources\card_types.json"));
+    Path.Combine(AppContext.BaseDirectory, $@"..\..\..\..\StS2Shared\Resources\{gameVersion}\card_types.json"));
 var outPath = args.Length > 1 ? args[1] : defaultOut;
+Directory.CreateDirectory(Path.GetDirectoryName(outPath)!);
 
 using var stream = File.OpenRead(dllPath);
 using var peReader = new PEReader(stream);

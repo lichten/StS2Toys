@@ -21,6 +21,7 @@
       "LEAFY_POULTICE",
       "NEOWS_BONES",
       "PRECARIOUS_SHEARS",
+      "SILKEN_TRESS",
       "SILVER_CRUCIBLE"
     ],
     "LavaRockOption": [
@@ -38,7 +39,9 @@
     "PositiveOptions": [
       "ARCANE_SCROLL",
       "BOOMING_CONCH",
+      "FISHING_ROD",
       "GOLDEN_PEARL",
+      "KALEIDOSCOPE",
       "LEAD_PAPERWEIGHT",
       "LOST_COFFER",
       "MASSIVE_SCROLL",
@@ -46,10 +49,8 @@
       "NEW_LEAF",
       "PHIAL_HOLSTER",
       "PRECISE_SCISSORS",
+      "SCROLL_BOXES",
       "WINGED_BOOTS"
-    ],
-    "ScrollBoxesOption": [
-      "SCROLL_BOXES"
     ],
     "SmallCapsuleOption": [
       "SMALL_CAPSULE"
@@ -75,9 +76,6 @@
     ]
   },
   "OROBAS": {
-    "DiscoveryTotems": [
-      "SEA_GLASS"
-    ],
     "OptionPool1": [
       "ELECTRIC_SHRYMP",
       "GLASS_EYE",
@@ -94,6 +92,9 @@
     ],
     "PrismaticGemOption": [
       "PRISMATIC_GEM"
+    ],
+    "SeaGlassOptions": [
+      "SEA_GLASS"
     ]
   },
   "PAEL": {
@@ -139,20 +140,22 @@
     ]
   },
   "TEZCATARA": {
+    "NutritiousSoupOption": [
+      "NUTRITIOUS_SOUP"
+    ],
     "OptionPool1": [
-      "NUTRITIOUS_SOUP",
       "VERY_HOT_COCOA",
       "YUMMY_COOKIE"
     ],
     "OptionPool2": [
       "BIIIG_HUG",
-      "SEAL_OF_GOLD",
       "STORYBOOK",
       "TOASTY_MITTENS"
     ],
     "OptionPool3": [
       "GOLDEN_COMPASS",
       "PUMPKIN_CANDLE",
+      "SEAL_OF_GOLD",
       "TOY_BOX"
     ]
   },

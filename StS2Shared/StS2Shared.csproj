@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\*.json" />
+    <EmbeddedResource Include="Resources\v*\*.json" />
     <EmbeddedResource Include="..\tools\extracted\localization\eng\cards.json" LogicalName="StS2Shared.localization.eng.cards.json" />
     <EmbeddedResource Include="..\tools\extracted\localization\jpn\cards.json" LogicalName="StS2Shared.localization.jpn.cards.json" />
     <EmbeddedResource Include="..\tools\extracted\localization\eng\relics.json" LogicalName="StS2Shared.localization.eng.relics.json" />
