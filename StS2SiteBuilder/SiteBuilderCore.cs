@@ -820,6 +820,25 @@ static string BuildCardListPage(string[] allCardIds, CharData[] chars)
               }
             });
           });
+          // URL パラメーターによるフィルタ初期化
+          (function() {
+            var p = new URLSearchParams(window.location.search);
+            function setActive(attr, val) {
+              if (!val) return;
+              document.querySelectorAll('.filter-btn[data-' + attr + ']')
+                .forEach(function(b) { b.classList.remove('active'); });
+              var t = document.querySelector('.filter-btn[data-' + attr + '="' + val + '"]');
+              if (t) t.classList.add('active');
+            }
+            var cf = p.get('char'), tf = p.get('type'), rf = p.get('rarity'), sq = p.get('search');
+            if (cf || tf || rf || sq) {
+              setActive('filter', cf);
+              setActive('type', tf);
+              setActive('rarity', rf);
+              if (sq) searchInput.value = sq;
+              applyFilters();
+            }
+          })();
         })();
         </script>
         """;
@@ -1770,7 +1789,7 @@ static string BuildCharPage(CharData ch, CharData[] chars, (string En, string Ja
         </section>
         <section class="section">
           <h2 class="section-title">カード一覧</h2>
-          <p class="placeholder">準備中...</p>
+          <a href="cards.html?char={ch.Id}" class="pagelist-list-link">{ch.JaName}のカード一覧を見る →</a>
         </section>
         """);
 }
