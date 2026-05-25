@@ -263,7 +263,16 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
 .tab-btn.active { border-color: #4a90d9; color: #1a5799; background: #eef3fc; }
 .tab-panel.hidden { display: none; }
   </style>
-  
+  <style>
+.author-card { display: flex; gap: 16px; align-items: flex-start; }
+.author-avatar { width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0;
+                 object-fit: cover; border: 2px solid #e0e0e0; }
+.author-body { display: flex; flex-direction: column; gap: 4px; }
+.author-name { font-size: 16px; font-weight: 700; }
+.author-handle { font-size: 13px; color: #1d9bf0; text-decoration: none; }
+.author-handle:hover { text-decoration: underline; }
+.author-bio { font-size: 13px; color: #555; margin-top: 6px; }
+</style>
 </head>
 <body>
   <div class="layout">
@@ -315,9 +324,7 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
   <h2 class="section-title">概要</h2>
   <!-- REVIEW_START -->
 <script type="text/markdown">
-このサイトはゲーム好きのプローバが **Slay the Spire 2** の感想を書き連ねた個人サイトです。
-
-ゲームデータをもとにAIにHTMLを生成させて、そこにコメントを追記する形でサイトを構築しています。
+ゲームの感想というのは、どこに記録されるべきなのでしょうか？　少なくともSteamレビューと、Amazonレビューと、Twitterと、Discordと、Youtubeコメントに分散して記録されるべきではないと思います。しかしパソコンのハードディスクの中に、1つのテキストファイルとして記録するだけではそこには関連する情報が何もなく、ただ詩的な記録が残るだけです。詩と批評だけが重要だ、という割り切った考えも魅力的です。しかし1つのアイデアが生まれました。まずAIサービスにより、無個性な攻略サイトを構築します。しかるのちに、個人の感想をそのサイトに付け加えていく、という形式です。それがこのサイトです。
 
 </script>
 <!-- REVIEW_END -->
@@ -340,6 +347,22 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
     本サイトはゲームのアーリーアクセス版データをもとに生成されており、内容はゲームのアップデートにより変更される場合があります。
     公式情報については <a href="https://store.steampowered.com/app/646570/Slay_the_Spire_2/" class="wiki-link" target="_blank" rel="noopener">Steam ストアページ</a> をご確認ください。
   </p>
+</section>
+<section class="section">
+  <h2 class="section-title">作者</h2>
+  <div class="author-card">
+    <img src="images/author/avatar.jpg" class="author-avatar" alt="@Plover2064"
+         onerror="this.style.display='none'">
+    <div class="author-body">
+      <div class="author-name">（表示名）</div>
+      <a href="https://x.com/Plover2064" target="_blank" rel="noopener noreferrer"
+         class="author-handle">@Plover2064</a>
+      <div class="author-bio"><!-- BIO_START -->
+<!-- プロフィールテキストをここに入力してください -->
+ゲーム好きのプローバ
+<!-- BIO_END --></div>
+    </div>
+  </div>
 </section>
     </main>
   </div>
