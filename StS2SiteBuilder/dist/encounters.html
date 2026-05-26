@@ -22,6 +22,7 @@ a { color: inherit; text-decoration: none; }
   position: sticky; top: 0; height: 100vh; overflow-y: auto;
 }
 .sidebar-brand { padding: 18px 20px 16px; background: #1e2128; border-bottom: 1px solid #2c3040; }
+.sidebar-buildtime { padding: 10px 20px 14px; font-size: 10.5px; color: #b0b0b0; margin-top: auto; border-top: 1px solid #f0f0f0; }
 .brand-game  { font-size: 13px; font-weight: 700; color: #f0f0f0; letter-spacing: 0.3px; }
 .brand-label { font-size: 11px; color: #8899aa; margin-top: 3px; }
 .nav-section { padding: 14px 0 6px; }
@@ -142,6 +143,27 @@ a { color: inherit; text-decoration: none; }
 .card-title-ja  { font-size: 13px; color: #777; margin-top: 5px; }
 .mec-title-en   { font-size: 13px; color: #777; margin-top: 5px; }
 .card-badges    { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.page-updated   { font-size: 11px; color: #b0b8c0; margin-top: 8px; font-variant-numeric: tabular-nums; }
+.run-win    { background:#27ae60; color:#fff; border-radius:4px; padding:2px 8px; font-size:12px; }
+.run-lose   { background:#c0392b; color:#fff; border-radius:4px; padding:2px 8px; font-size:12px; }
+.run-abandon{ background:#7f8c8d; color:#fff; border-radius:4px; padding:2px 8px; font-size:12px; }
+.node-badge   { border-radius:4px; padding:1px 6px; font-size:11px; font-weight:600; margin-right:6px; }
+.node-monster { background:#fee8e8; color:#a00; }
+.node-elite   { background:#f0e6ff; color:#600; }
+.node-boss    { background:#ffecd0; color:#a30; }
+.node-shop    { background:#e8f5e9; color:#2a6; }
+.node-treasure{ background:#fff8e1; color:#996; }
+.node-rest_site{background:#e3f2fd; color:#166; }
+.node-ancient { background:#ede7f6; color:#512da8; }
+.node-unknown { background:#f5f5f5; color:#888; }
+.floor-row  { display:flex; align-items:baseline; gap:10px; padding:6px 0; border-bottom:1px solid #f0f0f0; font-size:13px; }
+.floor-hp   { font-size:12px; color:#888; white-space:nowrap; }
+.floor-picked { color:#1a5799; font-weight:600; }
+.floor-skipped{ color:#bbb; text-decoration:line-through; }
+.run-summary-grid { display:flex; gap:24px; flex-wrap:wrap; margin:16px 0; }
+.run-stat   { display:flex; flex-direction:column; align-items:center; }
+.run-stat-val { font-size:24px; font-weight:700; }
+.run-stat-label { font-size:11px; color:#888; }
 .desc-main   { font-size: 14px; color: #333; line-height: 1.75; }
 .desc-sub   { font-size: 13px; color: #777; line-height: 1.75; margin-top: 12px; }
 .stat-table     { border-collapse: collapse; }
@@ -345,7 +367,11 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
         <a href="mechanics.html" class="nav-link">
           <span class="nav-icon">&#9881;</span>メカニクス一覧
         </a>
+        <a href="runs.html" class="nav-link">
+          <span class="nav-icon">&#9654;</span>ラン一覧
+        </a>
       </div>
+      <div class="sidebar-buildtime">ビルド日: 2026-05-26</div>
     </nav>
     <main class="main">
       <div class="page-hero">
@@ -376,9 +402,14 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
     <thead>
       <tr><th>エンカウンター名</th><th>タイプ</th></tr>
     </thead>
-    <tbody>      <tr data-etype="normal">
+    <tbody>      <tr data-etype="boss">
         <td class="col-name">
-          <a href="encounters/AXEBOTS_NORMAL.html" class="card-name-link">Bot Buddies</a><span class="card-name-ja">マシンの仲間たち</span>
+          <a href="encounters/AEONGLASS_BOSS.html" class="card-name-link">Aeonglass</a><span class="card-name-ja">永劫の砂時計</span>
+        </td>
+        <td class="col-type"><span class="badge enc-boss">Boss</span></td>
+      </tr>      <tr data-etype="normal">
+        <td class="col-name">
+          <a href="encounters/AXEBOTS_NORMAL.html" class="card-name-link">Axebot</a><span class="card-name-ja">アックスマシン</span>
         </td>
         <td class="col-type"><span class="badge enc-normal">Normal</span></td>
       </tr>      <tr data-etype="event">
@@ -461,11 +492,6 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
           <a href="encounters/DEVOTED_SCULPTOR_WEAK.html" class="card-name-link">Devoted Sculptor</a><span class="card-name-ja">狂信の彫刻家</span>
         </td>
         <td class="col-type"><span class="badge enc-weak">Weak</span></td>
-      </tr>      <tr data-etype="boss">
-        <td class="col-name">
-          <a href="encounters/DOORMAKER_BOSS.html" class="card-name-link">The Doormaker</a><span class="card-name-ja">ドアメーカー</span>
-        </td>
-        <td class="col-type"><span class="badge enc-boss">Boss</span></td>
       </tr>      <tr data-etype="elite">
         <td class="col-name">
           <a href="encounters/ENTOMANCER_ELITE.html" class="card-name-link">Entomancer</a><span class="card-name-ja">エントマンサー</span>

@@ -16,6 +16,13 @@ partial class MainForm
         _tabControl           = new TabControl();
         _tabPreview           = new TabPage();
         _tabBuild             = new TabPage();
+        _tabHistory           = new TabPage();
+        _historySplit         = new SplitContainer();
+        _historyToolbar       = new FlowLayoutPanel();
+        _refreshHistoryButton = new Button();
+        _generateRunButton    = new Button();
+        _historyList          = new ListView();
+        _historyWebView2      = new Microsoft.Web.WebView2.WinForms.WebView2();
         _previewSplit         = new SplitContainer();
         _webView2             = new Microsoft.Web.WebView2.WinForms.WebView2();
         _reviewPanel          = new Panel();
@@ -36,6 +43,11 @@ partial class MainForm
         _tabControl.SuspendLayout();
         _tabPreview.SuspendLayout();
         _tabBuild.SuspendLayout();
+        _tabHistory.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)_historySplit).BeginInit();
+        _historySplit.SuspendLayout();
+        _historyToolbar.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)_historyWebView2).BeginInit();
         ((System.ComponentModel.ISupportInitialize)_previewSplit).BeginInit();
         _previewSplit.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)_webView2).BeginInit();
@@ -66,6 +78,7 @@ partial class MainForm
         //
         _tabControl.Controls.Add(_tabPreview);
         _tabControl.Controls.Add(_tabBuild);
+        _tabControl.Controls.Add(_tabHistory);
         _tabControl.Dock = DockStyle.Fill;
         _tabControl.Name = "_tabControl";
         _tabControl.SelectedIndex = 0;
@@ -89,6 +102,84 @@ partial class MainForm
         _tabBuild.Padding = new Padding(0);
         _tabBuild.TabIndex = 1;
         _tabBuild.Text = "ビルド";
+        //
+        // _tabHistory
+        //
+        _tabHistory.Controls.Add(_historySplit);
+        _tabHistory.Dock = DockStyle.Fill;
+        _tabHistory.Name = "_tabHistory";
+        _tabHistory.Padding = new Padding(0);
+        _tabHistory.TabIndex = 2;
+        _tabHistory.Text = "ラン履歴";
+        //
+        // _historySplit
+        //
+        _historySplit.Dock = DockStyle.Fill;
+        _historySplit.Name = "_historySplit";
+        _historySplit.Orientation = Orientation.Vertical;
+        _historySplit.SplitterDistance = 520;
+        _historySplit.TabIndex = 0;
+        _historySplit.Panel1.Controls.Add(_historyList);
+        _historySplit.Panel1.Controls.Add(_historyToolbar);
+        _historySplit.Panel2.Controls.Add(_historyWebView2);
+        //
+        // _historyToolbar
+        //
+        _historyToolbar.Controls.Add(_refreshHistoryButton);
+        _historyToolbar.Controls.Add(_generateRunButton);
+        _historyToolbar.Dock = DockStyle.Top;
+        _historyToolbar.Name = "_historyToolbar";
+        _historyToolbar.Padding = new Padding(8, 6, 8, 6);
+        _historyToolbar.Size = new Size(520, 52);
+        _historyToolbar.TabIndex = 0;
+        //
+        // _refreshHistoryButton
+        //
+        _refreshHistoryButton.AutoSize = true;
+        _refreshHistoryButton.Margin = new Padding(0, 0, 8, 0);
+        _refreshHistoryButton.Name = "_refreshHistoryButton";
+        _refreshHistoryButton.Padding = new Padding(12, 4, 12, 4);
+        _refreshHistoryButton.TabIndex = 0;
+        _refreshHistoryButton.Text = "更新";
+        //
+        // _generateRunButton
+        //
+        _generateRunButton.AutoSize = true;
+        _generateRunButton.Enabled = false;
+        _generateRunButton.Name = "_generateRunButton";
+        _generateRunButton.Padding = new Padding(12, 4, 12, 4);
+        _generateRunButton.TabIndex = 1;
+        _generateRunButton.Text = "HTMLを生成";
+        //
+        // _historyList
+        //
+        _historyList.Dock = DockStyle.Fill;
+        _historyList.FullRowSelect = true;
+        _historyList.GridLines = true;
+        _historyList.HideSelection = false;
+        _historyList.MultiSelect = false;
+        _historyList.Name = "_historyList";
+        _historyList.TabIndex = 1;
+        _historyList.UseCompatibleStateImageBehavior = false;
+        _historyList.View = View.Details;
+        _historyList.Columns.AddRange(new ColumnHeader[]
+        {
+            new ColumnHeader { Text = "日付",   Width = 170 },
+            new ColumnHeader { Text = "キャラ", Width = 110 },
+            new ColumnHeader { Text = "結果",   Width = 70  },
+            new ColumnHeader { Text = "A#",     Width = 45  },
+            new ColumnHeader { Text = "時間",   Width = 75  },
+        });
+        //
+        // _historyWebView2
+        //
+        _historyWebView2.AllowExternalDrop = true;
+        _historyWebView2.CreationProperties = null;
+        _historyWebView2.DefaultBackgroundColor = Color.White;
+        _historyWebView2.Dock = DockStyle.Fill;
+        _historyWebView2.Name = "_historyWebView2";
+        _historyWebView2.TabIndex = 0;
+        _historyWebView2.ZoomFactor = 1D;
         //
         // _previewSplit  (horizontal: left=webview, right=review panel, Panel2 collapsed)
         //
@@ -269,6 +360,12 @@ partial class MainForm
         _tabControl.ResumeLayout(false);
         _tabPreview.ResumeLayout(false);
         _tabBuild.ResumeLayout(false);
+        _tabHistory.ResumeLayout(false);
+        ((System.ComponentModel.ISupportInitialize)_historySplit).EndInit();
+        _historySplit.ResumeLayout(false);
+        _historyToolbar.ResumeLayout(false);
+        _historyToolbar.PerformLayout();
+        ((System.ComponentModel.ISupportInitialize)_historyWebView2).EndInit();
         ((System.ComponentModel.ISupportInitialize)_previewSplit).EndInit();
         _previewSplit.ResumeLayout(false);
         ((System.ComponentModel.ISupportInitialize)_webView2).EndInit();
@@ -305,4 +402,11 @@ partial class MainForm
     private Button               _buildButton;
     private Button               _openDistButton;
     private TextBox              _logBox;
+    private TabPage              _tabHistory;
+    private SplitContainer       _historySplit;
+    private FlowLayoutPanel      _historyToolbar;
+    private Button               _refreshHistoryButton;
+    private Button               _generateRunButton;
+    private ListView             _historyList;
+    private Microsoft.Web.WebView2.WinForms.WebView2 _historyWebView2;
 }

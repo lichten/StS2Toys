@@ -134,6 +134,7 @@ File.WriteAllText(aboutPath,
     System.Text.Encoding.UTF8);
 var changelogPath = Path.Combine(distDir, "changelog.html");
 File.WriteAllText(changelogPath, BuildChangelogPage(chars, ExtractReview(changelogPath)), System.Text.Encoding.UTF8);
+var changelogDates = ParseChangelogDates(changelogPath);
 File.WriteAllText(Path.Combine(distDir, "pages.html"),
     BuildPageList(pages, chars, allCardIds, allRelicIds, allEventIds, allEncounterIds),
     System.Text.Encoding.UTF8);
@@ -154,11 +155,13 @@ foreach (var cardId in allCardIds)
     var dir     = GetCardDir(cardId, chars);
     var cardDir = Path.Combine(distDir, "cards", dir);
     Directory.CreateDirectory(cardDir);
-    var outPath = Path.Combine(cardDir, $"{RawId(cardId)}.html");
-    var review  = ExtractReview(outPath);
+    var outPath     = Path.Combine(cardDir, $"{RawId(cardId)}.html");
+    var review      = ExtractReview(outPath);
+    var relPath     = Path.GetRelativePath(distDir, outPath).Replace('\\', '/');
+    var lastUpdated = changelogDates.GetValueOrDefault(relPath, "");
     File.WriteAllText(outPath,
         BuildCardPage(cardId, chars, basePath: "../../",
-            hasImage: cardsWithImg.Contains(cardId), review: review),
+            hasImage: cardsWithImg.Contains(cardId), review: review, lastUpdated: lastUpdated),
         System.Text.Encoding.UTF8);
 }
 
@@ -167,10 +170,12 @@ var relicOutDir = Path.Combine(distDir, "relics");
 Directory.CreateDirectory(relicOutDir);
 foreach (var relicId in allRelicIds)
 {
-    var outPath = Path.Combine(relicOutDir, $"{relicId}.html");
-    var review  = ExtractReview(outPath);
+    var outPath     = Path.Combine(relicOutDir, $"{relicId}.html");
+    var review      = ExtractReview(outPath);
+    var relPath     = Path.GetRelativePath(distDir, outPath).Replace('\\', '/');
+    var lastUpdated = changelogDates.GetValueOrDefault(relPath, "");
     File.WriteAllText(outPath,
-        BuildRelicPage(relicId, chars, relicsWithImg.Contains(relicId), review: review),
+        BuildRelicPage(relicId, chars, relicsWithImg.Contains(relicId), review: review, lastUpdated: lastUpdated),
         System.Text.Encoding.UTF8);
 }
 
@@ -179,10 +184,12 @@ var eventOutDir = Path.Combine(distDir, "events");
 Directory.CreateDirectory(eventOutDir);
 foreach (var eventId in allEventIds)
 {
-    var outPath = Path.Combine(eventOutDir, $"{eventId}.html");
-    var review  = ExtractReview(outPath);
+    var outPath     = Path.Combine(eventOutDir, $"{eventId}.html");
+    var review      = ExtractReview(outPath);
+    var relPath     = Path.GetRelativePath(distDir, outPath).Replace('\\', '/');
+    var lastUpdated = changelogDates.GetValueOrDefault(relPath, "");
     File.WriteAllText(outPath,
-        BuildEventPage(eventId, chars, eventsWithImg.Contains(eventId), review: review),
+        BuildEventPage(eventId, chars, eventsWithImg.Contains(eventId), review: review, lastUpdated: lastUpdated),
         System.Text.Encoding.UTF8);
 }
 
@@ -191,10 +198,12 @@ var encounterOutDir = Path.Combine(distDir, "encounters");
 Directory.CreateDirectory(encounterOutDir);
 foreach (var encId in allEncounterIds)
 {
-    var outPath = Path.Combine(encounterOutDir, $"{encId}.html");
-    var review  = ExtractReview(outPath);
+    var outPath     = Path.Combine(encounterOutDir, $"{encId}.html");
+    var review      = ExtractReview(outPath);
+    var relPath     = Path.GetRelativePath(distDir, outPath).Replace('\\', '/');
+    var lastUpdated = changelogDates.GetValueOrDefault(relPath, "");
     File.WriteAllText(outPath,
-        BuildEncounterPage(encId, chars, monstersWithImg, review: review),
+        BuildEncounterPage(encId, chars, monstersWithImg, review: review, lastUpdated: lastUpdated),
         System.Text.Encoding.UTF8);
 }
 
@@ -209,10 +218,12 @@ foreach (var group in CharacterMechanics.All.Where(g => g.Mechanics.Length > 0))
     Directory.CreateDirectory(groupDir);
     foreach (var mec in group.Mechanics)
     {
-        var outPath = Path.Combine(groupDir, MecFileName(mec.EnLabel));
-        var review  = ExtractReview(outPath);
+        var outPath     = Path.Combine(groupDir, MecFileName(mec.EnLabel));
+        var review      = ExtractReview(outPath);
+        var relPath     = Path.GetRelativePath(distDir, outPath).Replace('\\', '/');
+        var lastUpdated = changelogDates.GetValueOrDefault(relPath, "");
         File.WriteAllText(outPath,
-            BuildMechanicPage(group, mec, allCardIds, chars, review),
+            BuildMechanicPage(group, mec, allCardIds, chars, review: review, lastUpdated: lastUpdated),
             System.Text.Encoding.UTF8);
     }
 }
@@ -314,6 +325,343 @@ static string BuildAboutPage(CharData[] chars, string review = "", string bioRev
         </section>
         """, extraHead: AUTHOR_CSS);
 }
+
+// ── ラン履歴 ─────────────────────────────────────────────────────────────────
+
+static string NodeBadge(string type)
+{
+    var (label, cls) = type switch
+    {
+        "monster"   => ("通常", "node-monster"),
+        "elite"     => ("エリート", "node-elite"),
+        "boss"      => ("ボス", "node-boss"),
+        "shop"      => ("ショップ", "node-shop"),
+        "treasure"  => ("宝箱", "node-treasure"),
+        "rest_site" => ("焚き火", "node-rest_site"),
+        "ancient"   => ("Ancient", "node-ancient"),
+        _           => ("？", "node-unknown"),
+    };
+    return $"""<span class="node-badge {cls}">{label}</span>""";
+}
+
+static string BuildRunPage(RunHistoryData run, CharData[] chars)
+{
+    var player  = run.Players.Count > 0 ? run.Players[0] : new RunPlayerData();
+    var charId  = RawId(player.Character).ToLowerInvariant();
+    var ch      = chars.FirstOrDefault(c => c.Id == charId);
+    var accent  = ch?.Accent  ?? "#4a5568";
+    var lightBg = ch?.LightBg ?? "#f5f6f8";
+    var charJa  = ch?.JaName  ?? charId;
+    var charEn  = ch?.EnName  ?? charId;
+
+    var resultBadge = run.Win
+        ? """<span class="run-win">勝利</span>"""
+        : run.WasAbandoned
+          ? """<span class="run-abandon">離脱</span>"""
+          : """<span class="run-lose">敗北</span>""";
+
+    var startDt   = DateTimeOffset.FromUnixTimeSeconds(run.StartTime).LocalDateTime;
+    var dateStr   = startDt.ToString("yyyy-MM-dd HH:mm");
+    var durMin    = run.RunTime / 60;
+    var durSec    = run.RunTime % 60;
+    var durStr    = $"{durMin}:{durSec:D2}";
+    var totalFloors = run.MapPointHistory.Sum(a => a.Count);
+
+    // death info
+    var killedBy = run.KilledByEncounter is { Length: > 0 } kb && kb != "NONE.NONE"
+        ? EncounterDatabaseService.GetEncounterName(kb, japanese: true)
+        : "";
+
+    // ── サマリー ──
+    var lastPs = run.MapPointHistory.SelectMany(a => a)
+        .LastOrDefault()?.PlayerStats?.FirstOrDefault();
+    var finalHp   = lastPs is not null ? $"{lastPs.CurrentHp}/{lastPs.MaxHp}" : "—";
+    var finalGold = lastPs is not null ? lastPs.CurrentGold.ToString() : "—";
+
+    var summaryHtml = $"""
+        <div class="run-summary-grid">
+          <div class="run-stat"><div class="run-stat-val">{finalHp}</div><div class="run-stat-label">最終HP</div></div>
+          <div class="run-stat"><div class="run-stat-val">{finalGold}</div><div class="run-stat-label">最終Gold</div></div>
+          <div class="run-stat"><div class="run-stat-val">{totalFloors}</div><div class="run-stat-label">総フロア</div></div>
+          <div class="run-stat"><div class="run-stat-val">{player.Deck.Count}</div><div class="run-stat-label">デッキ枚数</div></div>
+          <div class="run-stat"><div class="run-stat-val">{player.Relics.Count}</div><div class="run-stat-label">レリック数</div></div>
+        </div>
+        """;
+
+    // ── フロアタイムライン ──
+    var timelineHtml = new System.Text.StringBuilder();
+    for (int ai = 0; ai < run.MapPointHistory.Count; ai++)
+    {
+        var actId = ai < run.Acts.Count ? run.Acts[ai] : $"ACT {ai + 1}";
+        var actName = EncounterDatabaseService.GetActName(actId, japanese: true);
+        timelineHtml.AppendLine($"""<section class="section"><h2 class="section-title">{actName}</h2>""");
+
+        var act = run.MapPointHistory[ai];
+        for (int fi = 0; fi < act.Count; fi++)
+        {
+            var mp = act[fi];
+            var ps = mp.PlayerStats?.FirstOrDefault();
+
+            var badge = NodeBadge(mp.MapPointType);
+            var encName = mp.Rooms?.ModelId is { Length: > 0 } mid
+                ? EncounterDatabaseService.GetEncounterName(mid, japanese: true)
+                : "";
+            var turns = mp.Rooms?.TurnsTaken > 0
+                ? $"""<span style="color:#aaa;font-size:11px">{mp.Rooms.TurnsTaken}T</span>"""
+                : "";
+
+            var hpStr = ps is not null
+                ? $"""<span class="floor-hp">HP {ps.CurrentHp}/{ps.MaxHp}"""
+                  + (ps.DamageTaken > 0 ? $""" <span style="color:#c00">-{ps.DamageTaken}</span>""" : "")
+                  + (ps.HpHealed > 0    ? $""" <span style="color:#2a6">+{ps.HpHealed}</span>""" : "")
+                  + "</span>"
+                : "";
+
+            // カード選択
+            var cardPickHtml = "";
+            if (ps?.CardChoices is { Count: > 0 } choices)
+            {
+                var parts = choices.Select(c =>
+                {
+                    var cid = c.Card?.Id ?? "";
+                    var cname = cid.Length > 0 ? CardDatabaseService.GetName(cid, japanese: true) : "?";
+                    return c.WasPicked
+                        ? $"""<span class="floor-picked">▶{cname}</span>"""
+                        : $"""<span class="floor-skipped">{cname}</span>""";
+                });
+                cardPickHtml = string.Join(" ", parts);
+            }
+            else if (ps?.CardsGained is { Count: > 0 } gained)
+            {
+                var parts = gained.Select(c =>
+                    $"""<span class="floor-picked">▶{CardDatabaseService.GetName(c.Id, japanese: true)}</span>""");
+                cardPickHtml = string.Join(" ", parts);
+            }
+
+            // カード除外
+            var cardRemoveHtml = "";
+            if (ps?.CardsRemoved is { Count: > 0 } removed)
+            {
+                var parts = removed.Select(c =>
+                    $"""<span style="color:#888;font-size:12px">✕{CardDatabaseService.GetName(c.Id, japanese: true)}</span>""");
+                cardRemoveHtml = " " + string.Join(" ", parts);
+            }
+
+            // レリック取得
+            var relicHtml = "";
+            if (ps?.RelicChoices is { Count: > 0 } relics)
+            {
+                var picked = relics.Where(r => r.WasPicked)
+                    .Select(r => CardDatabaseService.GetRelicTitle(RawId(r.Choice), japanese: true));
+                if (picked.Any())
+                    relicHtml = $""" <span style="color:#a0600c">🔮{string.Join(", ", picked)}</span>""";
+            }
+            else if (ps?.BoughtRelics is { Count: > 0 } bought)
+            {
+                var names = bought.Select(r => CardDatabaseService.GetRelicTitle(RawId(r), japanese: true));
+                relicHtml = $""" <span style="color:#a0600c">🛒{string.Join(", ", names)}</span>""";
+            }
+            else if (ps?.AncientChoice is { Count: > 0 } ancient)
+            {
+                var picked2 = ancient.Where(a => a.WasChosen)
+                    .Select(a => CardDatabaseService.GetRelicTitle(a.TextKey, japanese: true));
+                if (picked2.Any())
+                    relicHtml = $""" <span style="color:#a0600c">🔮{string.Join(", ", picked2)}</span>""";
+            }
+
+            // 焚き火
+            var restHtml = "";
+            if (ps?.RestSiteChoices is { Count: > 0 } rest)
+                restHtml = $""" <span style="color:#166;font-size:12px">[{string.Join("/", rest)}]</span>""";
+
+            timelineHtml.AppendLine($"""
+              <div class="floor-row">{badge}{encName}{turns} {cardPickHtml}{cardRemoveHtml}{relicHtml}{restHtml} {hpStr}</div>
+              """);
+        }
+        timelineHtml.AppendLine("</section>");
+    }
+
+    // ── 最終デッキ ──
+    var deckRows = player.Deck
+        .GroupBy(c => CardDatabaseService.GetCardRarity(c.Id))
+        .OrderBy(g => RarityOrder(g.Key))
+        .Select(g =>
+        {
+            var rows = g.Select(c =>
+            {
+                var name = CardDatabaseService.GetName(c.Id, japanese: true);
+                var upg  = c.CurrentUpgradeLevel > 0
+                    ? $"""<span style="color:#1a5799;font-size:11px"> +{c.CurrentUpgradeLevel}</span>"""
+                    : "";
+                return $"""<span class="mec-tag">{name}{upg}</span>""";
+            });
+            var rarityBadge = $"""<span class="badge rarity-{g.Key.ToLower()}">{g.Key}</span>""";
+            return $"""
+                <div style="margin-bottom:8px">{rarityBadge} {string.Join(" ", rows)}</div>
+                """;
+        });
+    var deckHtml = $"""
+        <section class="section">
+          <h2 class="section-title">最終デッキ <span class="section-meta">{player.Deck.Count}枚</span></h2>
+          {string.Join("", deckRows)}
+        </section>
+        """;
+
+    // ── 最終レリック ──
+    var relicItems = player.Relics.Select(r =>
+    {
+        var name = CardDatabaseService.GetRelicTitle(RawId(r.Id), japanese: true);
+        var floor = r.FloorAddedToDeck > 0 ? $"""<span style="color:#aaa;font-size:11px"> F{r.FloorAddedToDeck}</span>""" : "";
+        return $"""<span class="mec-tag">{name}{floor}</span>""";
+    });
+    var relicsHtml = $"""
+        <section class="section">
+          <h2 class="section-title">最終レリック <span class="section-meta">{player.Relics.Count}個</span></h2>
+          <div class="mec-tags">{string.Join(" ", relicItems)}</div>
+        </section>
+        """;
+
+    // ── 死因 ──
+    var killedSection = killedBy != ""
+        ? $"""<section class="section"><h2 class="section-title">最後の戦闘</h2><p class="desc-main">{killedBy}</p></section>"""
+        : "";
+
+    var content = $"""
+        <div class="card-detail-header" style="border-left:5px solid {accent};background:{lightBg}">
+          <div class="card-breadcrumb">
+            <a href="../runs.html" class="char-back-link" style="color:{accent}">ラン一覧</a>
+          </div>
+          <h1 class="card-title-en" style="color:{accent}">{charJa} {resultBadge}</h1>
+          <div class="card-title-ja">{charEn}</div>
+          <div class="card-badges">
+            <span class="badge" style="background:#eee;color:#555">A{run.Ascension}</span>
+            <span class="badge" style="background:#eee;color:#555">{dateStr}</span>
+            <span class="badge" style="background:#eee;color:#555">⏱ {durStr}</span>
+            <span class="badge" style="background:#eee;color:#555">Seed: {run.Seed}</span>
+          </div>
+        </div>
+        <section class="section">
+          <h2 class="section-title">サマリー</h2>
+          {summaryHtml}
+        </section>
+        {killedSection}
+        {timelineHtml}
+        {deckHtml}
+        {relicsHtml}
+        """;
+
+    var title = $"{charJa} {(run.Win ? "勝利" : run.WasAbandoned ? "離脱" : "敗北")} {dateStr}";
+    return Layout(title, "runs", accent, chars, content, basePath: "../");
+}
+
+internal static string WriteRunPage(RunHistoryData run, CharData[] chars, string distDir)
+{
+    var runDir = Path.Combine(distDir, "run");
+    Directory.CreateDirectory(runDir);
+
+    var html    = BuildRunPage(run, chars);
+    var outPath = Path.Combine(runDir, $"{run.StartTime}.html");
+    var metaJson = System.Text.Json.JsonSerializer.Serialize(new {
+        win       = run.Win,
+        abandoned = run.WasAbandoned,
+        charId    = run.Players.Count > 0 ? RunHistoryService.StripPrefix(run.Players[0].Character).ToLowerInvariant() : "",
+        ascension = run.Ascension,
+        startTime = run.StartTime,
+        runTime   = run.RunTime,
+    });
+    var fullHtml = $"<!-- RUN_META: {metaJson} -->\n{html}";
+    File.WriteAllText(outPath, fullHtml, System.Text.Encoding.UTF8);
+
+    // ラン一覧を再生成
+    var listHtml = BuildRunListPage(chars, runDir);
+    File.WriteAllText(Path.Combine(distDir, "runs.html"), listHtml, System.Text.Encoding.UTF8);
+
+    return outPath;
+}
+
+static string BuildRunListPage(CharData[] chars, string runDir)
+{
+    if (!Directory.Exists(runDir))
+        return Layout("ラン一覧", "runs", "#4a90d9", chars, """
+            <div class="page-hero"><h1 class="hero-title">ラン一覧</h1></div>
+            <section class="section"><p class="placeholder">ランがまだ生成されていません。</p></section>
+            """);
+
+    // RUN_META コメントから軽量に情報を読む
+    var metaPattern = new System.Text.RegularExpressions.Regex(
+        @"<!-- RUN_META: (\{.+?\}) -->");
+
+    var runs = new List<(long StartTime, string CharId, bool Win, bool Abandoned, int Ascension, int RunTime, string FileName)>();
+    foreach (var file in Directory.EnumerateFiles(runDir, "*.html"))
+    {
+        try
+        {
+            var first = File.ReadLines(file).Take(3).FirstOrDefault() ?? "";
+            var m = metaPattern.Match(first);
+            if (!m.Success) continue;
+            var meta = System.Text.Json.JsonSerializer.Deserialize<RunMeta>(
+                m.Groups[1].Value, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            if (meta is null) continue;
+            runs.Add((meta.StartTime, meta.Char, meta.Win, meta.Abandoned,
+                      meta.Ascension, meta.RunTime, Path.GetFileName(file)));
+        }
+        catch { }
+    }
+    runs.Sort((a, b) => b.StartTime.CompareTo(a.StartTime));
+
+    string Rows()
+    {
+        if (runs.Count == 0)
+            return """<tr><td colspan="6" style="text-align:center;color:#aaa">まだラン詳細が生成されていません</td></tr>""";
+        return string.Concat(runs.Select(r =>
+        {
+            var ch     = chars.FirstOrDefault(c => c.Id == r.CharId);
+            var charJa = ch?.JaName ?? r.CharId;
+            var dt     = DateTimeOffset.FromUnixTimeSeconds(r.StartTime).LocalDateTime.ToString("yyyy-MM-dd HH:mm");
+            var result = r.Win ? """<span class="run-win">勝利</span>"""
+                       : r.Abandoned ? """<span class="run-abandon">離脱</span>"""
+                       : """<span class="run-lose">敗北</span>""";
+            var dur    = $"{r.RunTime / 60}:{r.RunTime % 60:D2}";
+            return $"""
+                <tr>
+                  <td>{dt}</td>
+                  <td>{charJa}</td>
+                  <td>{result}</td>
+                  <td>A{r.Ascension}</td>
+                  <td>{dur}</td>
+                  <td><a href="run/{r.FileName}">詳細</a></td>
+                </tr>
+                """;
+        }));
+    }
+
+    var content = $"""
+        <div class="page-hero">
+          <h1 class="hero-title">ラン一覧</h1>
+          <p class="hero-sub">Run History</p>
+        </div>
+        <section class="section">
+          <table class="card-table">
+            <thead><tr>
+              <th>日付</th><th>キャラ</th><th>結果</th><th>A#</th><th>時間</th><th></th>
+            </tr></thead>
+            <tbody>{Rows()}</tbody>
+          </table>
+        </section>
+        """;
+
+    return Layout("ラン一覧", "runs", "#4a90d9", chars, content, basePath: "");
+}
+
+// RUN_META コメントのデシリアライズ用
+record RunMeta(
+    [property: System.Text.Json.Serialization.JsonPropertyName("win")]       bool Win,
+    [property: System.Text.Json.Serialization.JsonPropertyName("abandoned")] bool Abandoned,
+    [property: System.Text.Json.Serialization.JsonPropertyName("char")]      string Char,
+    [property: System.Text.Json.Serialization.JsonPropertyName("ascension")] int Ascension,
+    [property: System.Text.Json.Serialization.JsonPropertyName("startTime")] long StartTime,
+    [property: System.Text.Json.Serialization.JsonPropertyName("runTime")]   int RunTime
+);
 
 static string BuildChangelogPage(CharData[] chars, string review = "") =>
     Layout("更新履歴", "changelog", "#4a90d9", chars, $"""
@@ -1158,7 +1506,7 @@ static string BuildEventListPage(string[] allEventIds, CharData[] chars, HashSet
         """, extraHead: EVENT_FILTER_CSS, extraFoot: EVENT_FILTER_JS);
 }
 
-static string BuildEventPage(string eventId, CharData[] chars, bool hasImage = false, string review = "")
+static string BuildEventPage(string eventId, CharData[] chars, bool hasImage = false, string review = "", string lastUpdated = "")
 {
     const string basePath = "../";
     const string accent   = "#1a6678";
@@ -1246,6 +1594,7 @@ static string BuildEventPage(string eventId, CharData[] chars, bool hasImage = f
           </div>
           <h1 class="card-title-en" style="color:{accent}">{nameEn}</h1>
           {(nameJa != nameEn ? $"""<div class="card-title-ja">{nameJa}</div>""" : "")}
+          <!-- LAST_UPDATED_START -->{(lastUpdated != "" ? $"""<div class="page-updated">最終更新: {lastUpdated}</div>""" : "")}<!-- LAST_UPDATED_END -->
         </div>
         {imgSection}
         {descSection}
@@ -1402,7 +1751,7 @@ static string BuildEncounterListPage(string[] allEncounterIds, CharData[] chars)
         """, extraHead: ENC_FILTER_CSS, extraFoot: ENC_FILTER_JS);
 }
 
-static string BuildEncounterPage(string encId, CharData[] chars, HashSet<string> monstersWithImg, string review = "")
+static string BuildEncounterPage(string encId, CharData[] chars, HashSet<string> monstersWithImg, string review = "", string lastUpdated = "")
 {
     const string basePath = "../";
 
@@ -1514,6 +1863,7 @@ static string BuildEncounterPage(string encId, CharData[] chars, HashSet<string>
           <h1 class="card-title-en" style="color:{accent}">{nameEn}</h1>
           {(nameJa != nameEn ? $"""<div class="card-title-ja">{nameJa}</div>""" : "")}
           <div class="card-badges">{typeBadge}</div>
+          <!-- LAST_UPDATED_START -->{(lastUpdated != "" ? $"""<div class="page-updated">最終更新: {lastUpdated}</div>""" : "")}<!-- LAST_UPDATED_END -->
         </div>
         {monsterSection}
         {lossSection}
@@ -1532,7 +1882,7 @@ static string FormatLoss(string raw, string encName, bool japanese = false)
     return DescriptionFormatter.Clean(s, japanese);
 }
 
-static string BuildRelicPage(string relicId, CharData[] chars, bool hasImage = false, string review = "")
+static string BuildRelicPage(string relicId, CharData[] chars, bool hasImage = false, string review = "", string lastUpdated = "")
 {
     const string basePath = "../";
     var nameEn  = CardDatabaseService.GetRelicTitle(relicId);
@@ -1605,6 +1955,7 @@ static string BuildRelicPage(string relicId, CharData[] chars, bool hasImage = f
               <h1 class="card-title-en" style="color:{accent}">{nameEn}</h1>
               {(nameJa != nameEn ? $"""<div class="card-title-ja">{nameJa}</div>""" : "")}
               {(rarityBadge != "" ? $"""<div class="card-badges">{rarityBadge}</div>""" : "")}
+              <!-- LAST_UPDATED_START -->{(lastUpdated != "" ? $"""<div class="page-updated">最終更新: {lastUpdated}</div>""" : "")}<!-- LAST_UPDATED_END -->
             </div>
           </div>
         </div>
@@ -1616,7 +1967,7 @@ static string BuildRelicPage(string relicId, CharData[] chars, bool hasImage = f
     return Layout(nameEn, "relics", accent, chars, content, basePath);
 }
 
-static string BuildCardPage(string cardId, CharData[] chars, string basePath, bool hasImage = false, string review = "")
+static string BuildCardPage(string cardId, CharData[] chars, string basePath, bool hasImage = false, string review = "", string lastUpdated = "")
 {
     var rawId    = RawId(cardId);
     var nameEn   = CardDatabaseService.GetName(cardId);
@@ -1765,6 +2116,7 @@ static string BuildCardPage(string cardId, CharData[] chars, string basePath, bo
               <h1 class="card-title-en" style="color:{accent}">{nameEn}</h1>
               {(nameJa != nameEn ? $"""<div class="card-title-ja">{nameJa}</div>""" : "")}
               <div class="card-badges">{typeBadge}{rarityBadge}{costBadge}</div>
+              <!-- LAST_UPDATED_START -->{(lastUpdated != "" ? $"""<div class="page-updated">最終更新: {lastUpdated}</div>""" : "")}<!-- LAST_UPDATED_END -->
             </div>
           </div>
         </div>
@@ -1873,7 +2225,7 @@ static string BuildMechanicListPage(CharData[] chars)
         """, basePath);
 }
 
-static string BuildMechanicPage(CharGroup group, MechanicDef mec, string[] allCardIds, CharData[] chars, string review = "")
+static string BuildMechanicPage(CharGroup group, MechanicDef mec, string[] allCardIds, CharData[] chars, string review = "", string lastUpdated = "")
 {
     const string basePath = "../../";
     var ch       = chars.FirstOrDefault(c => c.EnName == group.EnLabel);
@@ -1984,6 +2336,7 @@ static string BuildMechanicPage(CharGroup group, MechanicDef mec, string[] allCa
           </div>
           <h1 class="card-title-en" style="color:{accent}">{(mec.EnLabel == mec.JaLabel ? mec.EnLabel : mec.JaLabel)}</h1>
           {(mec.EnLabel != mec.JaLabel ? $"""<div class="mec-title-en">{mec.EnLabel}</div>""" : "")}
+          <!-- LAST_UPDATED_START -->{(lastUpdated != "" ? $"""<div class="page-updated">最終更新: {lastUpdated}</div>""" : "")}<!-- LAST_UPDATED_END -->
         </div>
         {reviewZone}
         {cardSections}
@@ -2010,6 +2363,15 @@ static int TypeOrder(string type) => type switch
     "Status" => 3, "Curse" => 4, "Quest" => 5,
     _ => 99,
 };
+
+internal static CharData[] GetBaseChars() =>
+[
+    new("ironclad",    "Ironclad",    "アイアンクラッド", "#c0392b", "#fde8e8", ""),
+    new("silent",      "Silent",      "サイレント",       "#1a7a4a", "#e8f8f0", ""),
+    new("defect",      "Defect",      "ディフェクト",     "#1a5799", "#e8f0fc", ""),
+    new("necrobinder", "Necrobinder", "ネクロバインダー", "#6c3483", "#f4ecf7", ""),
+    new("regent",      "Regent",      "リージェント",     "#7d6608", "#fdf8e8", ""),
+];
 
 static int RarityOrder(string rarity) => rarity switch
 {
@@ -2046,6 +2408,7 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
           position: sticky; top: 0; height: 100vh; overflow-y: auto;
         }
         .sidebar-brand { padding: 18px 20px 16px; background: #1e2128; border-bottom: 1px solid #2c3040; }
+        .sidebar-buildtime { padding: 10px 20px 14px; font-size: 10.5px; color: #b0b0b0; margin-top: auto; border-top: 1px solid #f0f0f0; }
         .brand-game  { font-size: 13px; font-weight: 700; color: #f0f0f0; letter-spacing: 0.3px; }
         .brand-label { font-size: 11px; color: #8899aa; margin-top: 3px; }
         .nav-section { padding: 14px 0 6px; }
@@ -2166,6 +2529,27 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
         .card-title-ja  { font-size: 13px; color: #777; margin-top: 5px; }
         .mec-title-en   { font-size: 13px; color: #777; margin-top: 5px; }
         .card-badges    { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+        .page-updated   { font-size: 11px; color: #b0b8c0; margin-top: 8px; font-variant-numeric: tabular-nums; }
+        .run-win    { background:#27ae60; color:#fff; border-radius:4px; padding:2px 8px; font-size:12px; }
+        .run-lose   { background:#c0392b; color:#fff; border-radius:4px; padding:2px 8px; font-size:12px; }
+        .run-abandon{ background:#7f8c8d; color:#fff; border-radius:4px; padding:2px 8px; font-size:12px; }
+        .node-badge   { border-radius:4px; padding:1px 6px; font-size:11px; font-weight:600; margin-right:6px; }
+        .node-monster { background:#fee8e8; color:#a00; }
+        .node-elite   { background:#f0e6ff; color:#600; }
+        .node-boss    { background:#ffecd0; color:#a30; }
+        .node-shop    { background:#e8f5e9; color:#2a6; }
+        .node-treasure{ background:#fff8e1; color:#996; }
+        .node-rest_site{background:#e3f2fd; color:#166; }
+        .node-ancient { background:#ede7f6; color:#512da8; }
+        .node-unknown { background:#f5f5f5; color:#888; }
+        .floor-row  { display:flex; align-items:baseline; gap:10px; padding:6px 0; border-bottom:1px solid #f0f0f0; font-size:13px; }
+        .floor-hp   { font-size:12px; color:#888; white-space:nowrap; }
+        .floor-picked { color:#1a5799; font-weight:600; }
+        .floor-skipped{ color:#bbb; text-decoration:line-through; }
+        .run-summary-grid { display:flex; gap:24px; flex-wrap:wrap; margin:16px 0; }
+        .run-stat   { display:flex; flex-direction:column; align-items:center; }
+        .run-stat-val { font-size:24px; font-weight:700; }
+        .run-stat-label { font-size:11px; color:#888; }
         .desc-main   { font-size: 14px; color: #333; line-height: 1.75; }
         .desc-sub   { font-size: 13px; color: #777; line-height: 1.75; margin-top: 12px; }
         .stat-table     { border-collapse: collapse; }
@@ -2351,6 +2735,9 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
     var mecsActive  = activeId == "mechanics";
     var mecsStyle   = mecsActive  ? " style=\"border-left-color:#4a5568\"" : "";
     var mecsClass   = mecsActive  ? " active" : "";
+    var runsActive  = activeId == "runs";
+    var runsStyle   = runsActive  ? " style=\"border-left-color:#4a90d9\"" : "";
+    var runsClass   = runsActive  ? " active" : "";
     var charsActive = activeId == "characters" || chars.Any(c => c.Id == activeId);
     var charsAccent = chars.FirstOrDefault(c => c.Id == activeId)?.Accent ?? "#4a90d9";
     var charsStyle  = charsActive ? $" style=\"border-left-color:{charsAccent}\"" : "";
@@ -2408,7 +2795,11 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
                 <a href="{basePath}mechanics.html" class="nav-link{mecsClass}"{mecsStyle}>
                   <span class="nav-icon">&#9881;</span>メカニクス一覧
                 </a>
+                <a href="{basePath}runs.html" class="nav-link{runsClass}"{runsStyle}>
+                  <span class="nav-icon">&#9654;</span>ラン一覧
+                </a>
               </div>
+              <div class="sidebar-buildtime">ビルド日: {DateTime.Now:yyyy-MM-dd}</div>
             </nav>
             <main class="main">
               {content}
@@ -2596,6 +2987,22 @@ static string ExtractMarker(string filePath, string marker)
 
 static string ExtractReview(string filePath) => ExtractMarker(filePath, "REVIEW");
 
+static Dictionary<string, string> ParseChangelogDates(string changelogPath)
+{
+    var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    if (!File.Exists(changelogPath)) return result;
+    var review = ExtractMarker(changelogPath, "REVIEW");
+    foreach (Match m in Regex.Matches(review, @"<!--\s*CL:(\d{4}-\d{2}-\d{2}):([^\s>]+)\s*-->"))
+    {
+        var date = m.Groups[1].Value;
+        var rel  = m.Groups[2].Value;
+        if (!result.TryGetValue(rel, out var existing) ||
+            string.Compare(date, existing, StringComparison.Ordinal) > 0)
+            result[rel] = date;
+    }
+    return result;
+}
+
 public static string? ExtractReviewPublic(string filePath)
 {
     const string START = "<!-- REVIEW_START -->";
@@ -2618,6 +3025,20 @@ public static void SaveReview(string filePath, string reviewHtml)
     File.WriteAllText(filePath, newContent, System.Text.Encoding.UTF8);
 }
 
+static void UpdatePageLastUpdated(string filePath, string date)
+{
+    const string START = "<!-- LAST_UPDATED_START -->";
+    const string END   = "<!-- LAST_UPDATED_END -->";
+    if (!File.Exists(filePath)) return;
+    var content = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
+    var s = content.IndexOf(START, StringComparison.Ordinal);
+    var e = content.IndexOf(END,   StringComparison.Ordinal);
+    if (s < 0 || e <= s) return;
+    var div = $"""<div class="page-updated">最終更新: {date}</div>""";
+    var newContent = content[..(s + START.Length)] + div + content[e..];
+    File.WriteAllText(filePath, newContent, System.Text.Encoding.UTF8);
+}
+
 public static void AppendChangelogEntry(string reviewedFilePath)
 {
     var distDir      = Path.GetFullPath(GetDistDir());
@@ -2634,6 +3055,7 @@ public static void AppendChangelogEntry(string reviewedFilePath)
     var pageTitle = ExtractPageTitle(reviewedFilePath);
     var newEntry  = $"{marker}\n      <li class=\"cl-entry\"><span class=\"cl-date\">{today}</span><a href=\"{relPath}\" class=\"cl-link\">{pageTitle}</a> のレビューを更新しました。</li>";
     InsertChangelogEntry(changelogPath, newEntry);
+    UpdatePageLastUpdated(reviewedFilePath, today);
 }
 
 public static void AppendManualChangelogEntry(string entryText)
@@ -2670,6 +3092,8 @@ static string ExtractPageTitle(string filePath)
 {
     if (!File.Exists(filePath)) return Path.GetFileNameWithoutExtension(filePath);
     var html = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
+    var mJa = Regex.Match(html, @"<div class=""card-title-ja"">(.+?)</div>");
+    if (mJa.Success) return mJa.Groups[1].Value.Trim();
     var m = Regex.Match(html, @"<title>(.+?)\s*\|");
     return m.Success ? m.Groups[1].Value.Trim() : Path.GetFileNameWithoutExtension(filePath);
 }

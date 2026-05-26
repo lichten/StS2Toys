@@ -22,6 +22,7 @@ a { color: inherit; text-decoration: none; }
   position: sticky; top: 0; height: 100vh; overflow-y: auto;
 }
 .sidebar-brand { padding: 18px 20px 16px; background: #1e2128; border-bottom: 1px solid #2c3040; }
+.sidebar-buildtime { padding: 10px 20px 14px; font-size: 10.5px; color: #b0b0b0; margin-top: auto; border-top: 1px solid #f0f0f0; }
 .brand-game  { font-size: 13px; font-weight: 700; color: #f0f0f0; letter-spacing: 0.3px; }
 .brand-label { font-size: 11px; color: #8899aa; margin-top: 3px; }
 .nav-section { padding: 14px 0 6px; }
@@ -142,6 +143,27 @@ a { color: inherit; text-decoration: none; }
 .card-title-ja  { font-size: 13px; color: #777; margin-top: 5px; }
 .mec-title-en   { font-size: 13px; color: #777; margin-top: 5px; }
 .card-badges    { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.page-updated   { font-size: 11px; color: #b0b8c0; margin-top: 8px; font-variant-numeric: tabular-nums; }
+.run-win    { background:#27ae60; color:#fff; border-radius:4px; padding:2px 8px; font-size:12px; }
+.run-lose   { background:#c0392b; color:#fff; border-radius:4px; padding:2px 8px; font-size:12px; }
+.run-abandon{ background:#7f8c8d; color:#fff; border-radius:4px; padding:2px 8px; font-size:12px; }
+.node-badge   { border-radius:4px; padding:1px 6px; font-size:11px; font-weight:600; margin-right:6px; }
+.node-monster { background:#fee8e8; color:#a00; }
+.node-elite   { background:#f0e6ff; color:#600; }
+.node-boss    { background:#ffecd0; color:#a30; }
+.node-shop    { background:#e8f5e9; color:#2a6; }
+.node-treasure{ background:#fff8e1; color:#996; }
+.node-rest_site{background:#e3f2fd; color:#166; }
+.node-ancient { background:#ede7f6; color:#512da8; }
+.node-unknown { background:#f5f5f5; color:#888; }
+.floor-row  { display:flex; align-items:baseline; gap:10px; padding:6px 0; border-bottom:1px solid #f0f0f0; font-size:13px; }
+.floor-hp   { font-size:12px; color:#888; white-space:nowrap; }
+.floor-picked { color:#1a5799; font-weight:600; }
+.floor-skipped{ color:#bbb; text-decoration:line-through; }
+.run-summary-grid { display:flex; gap:24px; flex-wrap:wrap; margin:16px 0; }
+.run-stat   { display:flex; flex-direction:column; align-items:center; }
+.run-stat-val { font-size:24px; font-weight:700; }
+.run-stat-label { font-size:11px; color:#888; }
 .desc-main   { font-size: 14px; color: #333; line-height: 1.75; }
 .desc-sub   { font-size: 13px; color: #777; line-height: 1.75; margin-top: 12px; }
 .stat-table     { border-collapse: collapse; }
@@ -347,18 +369,22 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
         <a href="mechanics.html" class="nav-link">
           <span class="nav-icon">&#9881;</span>メカニクス一覧
         </a>
+        <a href="runs.html" class="nav-link">
+          <span class="nav-icon">&#9654;</span>ラン一覧
+        </a>
       </div>
+      <div class="sidebar-buildtime">ビルド日: 2026-05-26</div>
     </nav>
     <main class="main">
       <div class="page-hero">
   <h1 class="hero-title">レリック一覧</h1>
-  <p class="hero-sub">全306件</p>
+  <p class="hero-sub">全309件</p>
 </div>
 <div class="relic-filter-panel">
   <div class="relic-filter-section">
     <span class="relic-filter-label">検索</span>
     <input type="text" id="relic-search" class="relic-search-input" placeholder="名前・説明文で検索…" autocomplete="off">
-    <span class="relic-count" id="relic-count">306件</span>
+    <span class="relic-count" id="relic-count">309件</span>
   </div>
   <div class="relic-filter-section">
     <span class="relic-filter-label">レアリティ</span>
@@ -466,7 +492,7 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
         <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
       </tr>      <tr data-rarity="event" data-desc="Whenever you add a card to your Deck, add one additional copy. デッキにカードを追加するたび、そのコピーを1枚追加する。">
         <td class="col-name">
-          <a href="relics/BING_BONG.html" class="card-name-link">Bing Bong</a><span class="card-name-ja">ビン・ボン</span>
+          <a href="relics/BING_BONG.html" class="card-name-link">Bing Bong</a><span class="card-name-ja">ビンボン</span>
         </td>
         <td class="col-rarity"><span class="badge rarity-event">Event</span></td>
       </tr>      <tr data-rarity="starter" data-desc="At the end of combat, heal [Heal] HP. 戦闘終了時、HPを[Heal]回復する。">
@@ -519,7 +545,7 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
           <a href="relics/BOOK_REPAIR_KNIFE.html" class="card-name-link">Book Repair Knife</a><span class="card-name-ja">製本用ナイフ</span>
         </td>
         <td class="col-rarity"><span class="badge rarity-uncommon">Uncommon</span></td>
-      </tr>      <tr data-rarity="ancient" data-desc="At the start of Elite combats, draw [Cards] additional card. エリートとの戦闘開始時、追加でカードを[Cards]枚引く。">
+      </tr>      <tr data-rarity="ancient" data-desc="At the start of Elite combats, draw [Cards] additional card and gain [Energy]. エリートとの戦闘開始時、追加でカードを[Cards]枚引き、[Energy]を得る。">
         <td class="col-name">
           <a href="relics/BOOMING_CONCH.html" class="card-name-link">Booming Conch</a><span class="card-name-ja">轟音のほら貝</span>
         </td>
@@ -539,7 +565,7 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
           <a href="relics/BREAD.html" class="card-name-link">Bread</a><span class="card-name-ja">パン</span>
         </td>
         <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
-      </tr>      <tr data-rarity="ancient" data-desc="The 5th card you play each turn is free. 毎ターンにプレイする5枚目のカードは、コストを支払わずにプレイできる。">
+      </tr>      <tr data-rarity="ancient" data-desc="The 5th card you play from your hand each turn is free. 各ターンに手札からプレイする5枚目のカードは、コストを支払わずにプレイできる。">
         <td class="col-name">
           <a href="relics/BRILLIANT_SCARF.html" class="card-name-link">Brilliant Scarf</a><span class="card-name-ja">鮮やかなスカーフ</span>
         </td>
@@ -834,6 +860,11 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
           <a href="relics/FIDDLE.html" class="card-name-link">Fiddle</a><span class="card-name-ja">フィドル</span>
         </td>
         <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient" data-desc="Every normal combat normal combats}, Upgrade a random card in your Deck. 通常戦闘[Combats]回ごとに、デッキのランダムなカードを1枚アップグレードする。">
+        <td class="col-name">
+          <a href="relics/FISHING_ROD.html" class="card-name-link">Fishing Rod</a><span class="card-name-ja">釣り竿</span>
+        </td>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
       </tr>      <tr data-rarity="event" data-desc="Whenever you Exhaust a card, deal [Damage] damage to a random enemy. カードを廃棄するたび、ランダムな敵に[Damage]ダメージを与える。">
         <td class="col-name">
           <a href="relics/FORGOTTEN_SOUL.html" class="card-name-link">Forgotten Soul</a><span class="card-name-ja">忘れ去られし魂</span>
@@ -969,7 +1000,7 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
           <a href="relics/ICE_CREAM.html" class="card-name-link">Ice Cream</a><span class="card-name-ja">アイスクリーム</span>
         </td>
         <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
-      </tr>      <tr data-rarity="starter" data-desc="At the start of each combat, Channel [Lightning] Lightning. 戦闘開始時、ライトニング[Lightning]を生成する。">
+      </tr>      <tr data-rarity="starter" data-desc="At the start of each combat, Channel [Lightning] Lightning. Lightning deals [ExtraDamage] additional damage. 戦闘開始時、ライトニング[Lightning]を生成する。ライトニングの与えるダメージが[ExtraDamage]増加する。">
         <td class="col-name">
           <a href="relics/INFUSED_CORE.html" class="card-name-link">Infused Core</a><span class="card-name-ja">インフューズドコア</span>
         </td>
@@ -994,7 +1025,7 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
           <a href="relics/IVORY_TILE.html" class="card-name-link">Ivory Tile</a><span class="card-name-ja">象牙の牌</span>
         </td>
         <td class="col-rarity"><span class="badge rarity-rare">Rare</span></td>
-      </tr>      <tr data-rarity="ancient" data-desc="At the start of combat put a random Power from your Draw Pile into your Hand, it&#39;s free to play. 戦闘開始時、山札からランダムなパワーを1枚手札に加える。それはコストを支払わずにプレイできる。">
+      </tr>      <tr data-rarity="ancient" data-desc="At the start of each combat, put a random Power from your Draw Pile into your Hand. It&#39;s free to play this combat. 戦闘開始時、山札からランダムなパワーを1枚手札に加える。この戦闘中、それはコストを支払わずにプレイできる。">
         <td class="col-name">
           <a href="relics/JEWELED_MASK.html" class="card-name-link">Jeweled Mask</a><span class="card-name-ja">宝飾の仮面</span>
         </td>
@@ -1014,6 +1045,11 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
           <a href="relics/JUZU_BRACELET.html" class="card-name-link">Juzu Bracelet</a><span class="card-name-ja">数珠</span>
         </td>
         <td class="col-rarity"><span class="badge rarity-common">Common</span></td>
+      </tr>      <tr data-rarity="ancient" data-desc="Upon pickup, obtain [Cards] card reward from other characters. 取得時、他のキャラクターのカード報酬を[Cards]回獲得する。">
+        <td class="col-name">
+          <a href="relics/KALEIDOSCOPE.html" class="card-name-link">Kaleidoscope</a><span class="card-name-ja">万華鏡</span>
+        </td>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
       </tr>      <tr data-rarity="shop" data-desc="Upon pickup, Enchant up to [Cards] card with Adroit. 取得時、最大[Cards]枚までのカードに、巧妙をエンチャントする。">
         <td class="col-name">
           <a href="relics/KIFUDA.html" class="card-name-link">Kifuda</a><span class="card-name-ja">木札</span>
@@ -1089,7 +1125,7 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
           <a href="relics/LORDS_PARASOL.html" class="card-name-link">Lord's Parasol</a><span class="card-name-ja">王のパラソル</span>
         </td>
         <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
-      </tr>      <tr data-rarity="ancient" data-desc="Upon pickup, gain 1 card reward and procure 1 random potion. 取得時、カード報酬を1枚と、ランダムなポーションを11個獲得する。">
+      </tr>      <tr data-rarity="ancient" data-desc="Upon pickup, gain 1 card reward and procure 1 random potion. 取得時、カード報酬を1枚と、ランダムなポーションを1個獲得する。">
         <td class="col-name">
           <a href="relics/LOST_COFFER.html" class="card-name-link">Lost Coffer</a><span class="card-name-ja">失われし金庫</span>
         </td>
@@ -1299,7 +1335,7 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
           <a href="relics/PAELS_HORN.html" class="card-name-link">Pael's Horn</a><span class="card-name-ja">パエルの角</span>
         </td>
         <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
-      </tr>      <tr data-rarity="ancient" data-desc="Doubles Block gained from a card, then goes to sleep for [Turns] turn. カードから得るブロックを2倍にし、その後[Turns]ターンの間眠りにつく。">
+      </tr>      <tr data-rarity="ancient" data-desc="Doubles Block gained from a card, then goes to sleep for [Turns] turn. カードから得るブロックを2倍にする。その後、肉兵は[Turns]ターンの間眠りにつく。">
         <td class="col-name">
           <a href="relics/PAELS_LEGION.html" class="card-name-link">Pael's Legion</a><span class="card-name-ja">パエルの肉兵</span>
         </td>
@@ -1439,7 +1475,7 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
           <a href="relics/PRISMATIC_GEM.html" class="card-name-link">Prismatic Gem</a><span class="card-name-ja">プリズムジェム</span>
         </td>
         <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
-      </tr>      <tr data-rarity="ancient" data-desc="Gain [Energy] at the start of each turn. Extinguishes at the start of Act 3. ターン開始時、[Energy]を得る。第3層の開始時に火は消える。">
+      </tr>      <tr data-rarity="ancient" data-desc="Gain [Energy] at the start of each turn. Extinguishes after [CombatCount] combats. Can be Kindled at Rest Sites. ターン開始時、[Energy]を得る。[CombatCount]回の戦闘後に火は消える。休憩所で火を灯すことができる。">
         <td class="col-name">
           <a href="relics/PUMPKIN_CANDLE.html" class="card-name-link">Pumpkin Candle</a><span class="card-name-ja">カボチャのキャンドル</span>
         </td>
@@ -1554,7 +1590,7 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
           <a href="relics/SCREAMING_FLAGON.html" class="card-name-link">Screaming Flagon</a><span class="card-name-ja">絶叫のフラゴン</span>
         </td>
         <td class="col-rarity"><span class="badge rarity-shop">Shop</span></td>
-      </tr>      <tr data-rarity="ancient" data-desc="Upon pickup, lose all Gold and choose 1 of 2 packs of cards to add to your Deck. 取得時、すべてのゴールドを失い、2つのカードパックから1枚を選び、デッキに追加する。">
+      </tr>      <tr data-rarity="ancient" data-desc="Upon pickup, choose 1 of 2 packs of cards to add to your Deck. 取得時、2つのカードパックから1つを選び、デッキに追加する。">
         <td class="col-name">
           <a href="relics/SCROLL_BOXES.html" class="card-name-link">Scroll Boxes</a><span class="card-name-ja">巻物箱</span>
         </td>
@@ -1617,6 +1653,11 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
       </tr>      <tr data-rarity="ancient" data-desc="Upon pickup, gain [Gold] Gold. 取得時、[Gold]ゴールドを獲得する。">
         <td class="col-name">
           <a href="relics/SIGNET_RING.html" class="card-name-link">Signet Ring</a><span class="card-name-ja">シグネットリング</span>
+        </td>
+        <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
+      </tr>      <tr data-rarity="ancient" data-desc="Upon pickup, lose all Gold. Enchant all cards in the first card reward with Glam. 取得時、すべてのゴールドを失う。最初のカード報酬のすべてのカードに魅惑をエンチャントする。">
+        <td class="col-name">
+          <a href="relics/SILKEN_TRESS.html" class="card-name-link">Silken Tress</a><span class="card-name-ja">絹の髪束</span>
         </td>
         <td class="col-rarity"><span class="badge rarity-ancient">Ancient</span></td>
       </tr>      <tr data-rarity="ancient" data-desc="The first [Cards] card rewards you see are Upgraded. The first Treasure Chest you open is empty. 最初の[Cards]回分のカード報酬は、アップグレードされた状態になる。最初に開ける宝箱はからっぽになる。">
