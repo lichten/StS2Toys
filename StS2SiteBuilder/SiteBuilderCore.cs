@@ -572,7 +572,7 @@ internal static string WriteRunPage(RunHistoryData run, CharData[] chars, string
     var metaJson = System.Text.Json.JsonSerializer.Serialize(new {
         win       = run.Win,
         abandoned = run.WasAbandoned,
-        charId    = run.Players.Count > 0 ? RunHistoryService.StripPrefix(run.Players[0].Character).ToLowerInvariant() : "",
+        @char     = run.Players.Count > 0 ? RunHistoryService.StripPrefix(run.Players[0].Character).ToLowerInvariant() : "",
         ascension = run.Ascension,
         startTime = run.StartTime,
         runTime   = run.RunTime,
