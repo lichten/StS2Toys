@@ -1,0 +1,473 @@
+﻿<!-- RUN_META: {"win":true,"abandoned":false,"char":"regent","ascension":10,"startTime":1779010251,"runTime":4506} -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>リージェント A10 勝利 2026-05-17 | Slay the Spire 2 攻略メモメモ</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial,
+               'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  background: #f5f7fa; color: #2c2c2c; line-height: 1.6;
+}
+a { color: inherit; text-decoration: none; }
+.layout { display: flex; min-height: 100vh; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 240px; min-width: 240px; background: #fff;
+  border-right: 1px solid #e8e8e8; display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.sidebar-brand { padding: 18px 20px 16px; background: #1e2128; border-bottom: 1px solid #2c3040; }
+.sidebar-buildtime { padding: 10px 20px 14px; font-size: 10.5px; color: #b0b0b0; margin-top: auto; border-top: 1px solid #f0f0f0; }
+.brand-game  { font-size: 13px; font-weight: 700; color: #f0f0f0; letter-spacing: 0.3px; }
+.brand-label { font-size: 11px; color: #8899aa; margin-top: 3px; }
+.nav-section { padding: 14px 0 6px; }
+.nav-group-label {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 1px; color: #c0c0c0; padding: 0 20px 8px;
+}
+.nav-link {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 20px; font-size: 13.5px; color: #555;
+  border-left: 3px solid transparent; transition: background 0.1s;
+}
+.nav-link:hover  { background: #f7f8fa; color: #222; }
+.nav-link.active { background: #f3f4f6; color: #111; font-weight: 600; }
+.nav-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.nav-icon { font-size: 15px; line-height: 1; }
+.nav-name-ja { font-size: 11px; color: #aaa; margin-left: auto; }
+.nav-link.active .nav-name-ja { color: #888; }
+
+/* ── Main ── */
+.main { flex: 1; padding: 40px 48px; min-width: 0; }
+
+/* ── Hero ── */
+.page-hero { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #e8e8e8; }
+.hero-title { font-size: 28px; font-weight: 800; color: #1a1a2e; letter-spacing: -0.5px; }
+.hero-sub   { font-size: 15px; color: #666; margin-top: 4px; }
+.hero-desc  { font-size: 13.5px; color: #999; margin-top: 10px; }
+
+/* ── Character grid ── */
+.char-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px;
+}
+.char-card {
+  display: flex; flex-direction: column; background: #fff;
+  border-radius: 10px; overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08); transition: box-shadow 0.15s, transform 0.15s;
+}
+.char-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.13); transform: translateY(-3px); }
+.char-card-header { padding: 20px 18px 14px; color: #fff; }
+.char-name-en     { font-size: 19px; font-weight: 800; letter-spacing: -0.3px; }
+.char-name-ja     { font-size: 11px; opacity: 0.82; margin-top: 3px; }
+.char-card-body   { padding: 14px 18px; flex: 1; }
+.char-desc        { font-size: 12.5px; color: #666; line-height: 1.65; }
+.char-card-footer {
+  padding: 9px 18px 11px; font-size: 12px; color: #aaa;
+  border-top: 1px solid #f0f0f0; font-weight: 500;
+}
+.char-card:hover .char-card-footer { color: #666; }
+
+/* ── Character page header ── */
+.char-header {
+  border-radius: 10px; padding: 28px 32px; margin-bottom: 24px;
+  display: flex; align-items: center; gap: 28px; overflow: hidden;
+}
+.char-header-body { flex: 1; min-width: 0; }
+.char-title-en  { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; }
+.char-title-ja  { font-size: 13px; color: #777; margin-top: 5px; }
+.char-desc-full { font-size: 14px; color: #555; margin-top: 14px; max-width: 560px; line-height: 1.75; }
+.char-hero-img  {
+  width: 132px; height: 195px; object-fit: cover; border-radius: 8px;
+  flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.15); image-rendering: auto;
+}
+
+/* ── Relic detail header ── */
+.relic-header-inner { display: flex; align-items: center; gap: 20px; }
+.relic-icon {
+  width: 80px; height: 80px; object-fit: contain;
+  border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+/* ── Card detail header ── */
+.card-header-inner { display: flex; align-items: flex-start; gap: 20px; }
+.card-portrait {
+  width: 200px; height: auto; object-fit: contain;
+  border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+/* ── 全ページ一覧 ── */
+.pagelist-sub { margin-top: 14px; }
+.pagelist-sub-title {
+  font-size: 11.5px; font-weight: 700; color: #999; letter-spacing: 0.05em;
+  text-transform: uppercase; margin-bottom: 6px;
+}
+.pagelist-top-links { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+.pagelist-list-link {
+  display: inline-block; padding: 5px 14px;
+  background: #e8f0fe; border-radius: 6px; font-size: 13px;
+  color: #1a5799; font-weight: 600;
+}
+.pagelist-list-link:hover { background: #d0e3ff; }
+
+/* ── Event detail ── */
+.event-image-wrap {
+  margin-bottom: 20px; border-radius: 10px; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.event-image { width: 100%; max-height: 360px; object-fit: cover; display: block; }
+.event-options { display: flex; flex-direction: column; gap: 12px; }
+.event-option {
+  border: 1.5px solid #e8e8e8; border-radius: 8px; padding: 14px 18px;
+  background: #fafafa;
+}
+.event-option-title { font-weight: 700; font-size: 14px; color: #222; }
+.event-option-title-ja { font-size: 11px; color: #999; margin-left: 6px; font-weight: 400; }
+.event-option-desc { font-size: 13px; color: #444; line-height: 1.75; margin-top: 6px; }
+.event-option-desc-ja { font-size: 12px; color: #888; line-height: 1.75; margin-top: 4px; }
+
+/* ── Card detail header ── */
+.card-detail-header {
+  border-radius: 10px; padding: 28px 32px; margin-bottom: 24px; overflow: hidden;
+}
+.card-breadcrumb  { font-size: 12px; margin-bottom: 10px; }
+.char-back-link   { font-weight: 600; }
+.char-back-link:hover { text-decoration: underline; }
+.char-back-ja     { font-weight: 400; opacity: 0.8; }
+.char-back-neutral { color: #888; }
+.card-title-en  { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; }
+.card-title-ja  { font-size: 13px; color: #777; margin-top: 5px; }
+.mec-title-en   { font-size: 13px; color: #777; margin-top: 5px; }
+.card-badges    { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.page-updated   { font-size: 11px; color: #b0b8c0; margin-top: 8px; font-variant-numeric: tabular-nums; }
+.run-win    { background:#27ae60; color:#fff; border-radius:4px; padding:2px 8px; font-size:12px; }
+.run-lose   { background:#c0392b; color:#fff; border-radius:4px; padding:2px 8px; font-size:12px; }
+.run-abandon{ background:#7f8c8d; color:#fff; border-radius:4px; padding:2px 8px; font-size:12px; }
+.node-badge   { border-radius:4px; padding:1px 6px; font-size:11px; font-weight:600; margin-right:6px; }
+.node-monster { background:#fee8e8; color:#a00; }
+.node-elite   { background:#f0e6ff; color:#600; }
+.node-boss    { background:#ffecd0; color:#a30; }
+.node-shop    { background:#e8f5e9; color:#2a6; }
+.node-treasure{ background:#fff8e1; color:#996; }
+.node-rest_site{background:#e3f2fd; color:#166; }
+.node-ancient { background:#ede7f6; color:#512da8; }
+.node-unknown { background:#f5f5f5; color:#888; }
+.floor-row  { display:flex; align-items:baseline; gap:10px; padding:6px 0; border-bottom:1px solid #f0f0f0; font-size:13px; }
+.auto-link { color:#1a5799; }
+.auto-link:hover { text-decoration:underline; }
+.floor-hp   { font-size:12px; color:#888; white-space:nowrap; }
+.floor-picked { color:#1a5799; font-weight:600; }
+.floor-skipped{ color:#bbb; text-decoration:line-through; }
+.run-summary-grid { display:flex; gap:24px; flex-wrap:wrap; margin:16px 0; }
+.run-stat   { display:flex; flex-direction:column; align-items:center; }
+.run-stat-val { font-size:24px; font-weight:700; }
+.run-stat-label { font-size:11px; color:#888; }
+.desc-main   { font-size: 14px; color: #333; line-height: 1.75; }
+.desc-sub   { font-size: 13px; color: #777; line-height: 1.75; margin-top: 12px; }
+.stat-table     { border-collapse: collapse; }
+.stat-key { font-size: 13px; color: #666; padding: 3px 20px 3px 0; }
+.stat-val { font-size: 13px; font-weight: 600; color: #222; }
+
+/* ── Sections ── */
+.section {
+  background: #fff; border-radius: 10px; padding: 24px 28px;
+  margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.section-title {
+  display: flex; align-items: center;
+  font-size: 14px; font-weight: 700; color: #333;
+  margin-bottom: 16px; padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0; letter-spacing: 0.2px;
+}
+.section-dot  { width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
+.section-meta { font-size: 12px; font-weight: 400; color: #bbb; margin-left: 8px; }
+.mec-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.mec-tag  {
+  display: inline-block; padding: 5px 13px; background: #f5f6f8; border: 1px solid #e4e6ea;
+  border-radius: 20px; font-size: 13px; color: #444; text-decoration: none;
+}
+a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
+.mec-sub  { display: block; font-size: 10.5px; color: #999; margin-top: 1px; }
+.placeholder { font-size: 13.5px; color: #bbb; font-style: italic; }
+
+/* ── Page list ── */
+.section-pending { opacity: 0.55; }
+.pending-badge {
+  display: inline-block; font-size: 10px; font-weight: 600;
+  background: #f0f0f0; color: #aaa; border-radius: 10px;
+  padding: 2px 8px; margin-left: 8px; vertical-align: middle;
+  letter-spacing: 0.5px; font-style: normal;
+}
+
+/* ── Monster grid ── */
+.monster-grid { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+.monster-card { display: flex; flex-direction: column; align-items: center; width: 120px; }
+.monster-thumb { width: 100px; height: 100px; object-fit: contain;
+  background: #1e1e23; border-radius: 6px; border: 1px solid #ddd; }
+.monster-thumb-missing { width: 100px; height: 100px; display: flex; align-items: center;
+  justify-content: center; background: #f0f0f0; border-radius: 6px;
+  border: 1px dashed #ccc; color: #aaa; font-size: 28px; }
+.monster-name-ja { font-size: 12px; font-weight: 600; text-align: center; margin-top: 4px; }
+.monster-name-en { font-size: 10px; color: #888; text-align: center; }
+
+/* ── Card table ── */
+.card-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.card-table th {
+  text-align: left; font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px; color: #bbb;
+  padding: 0 16px 8px 0; border-bottom: 1px solid #f0f0f0;
+}
+.card-table td { padding: 5px 16px 5px 0; border-bottom: 1px solid #f8f8f8; vertical-align: middle; }
+.card-table tr:last-child td { border-bottom: none; }
+.col-name   { min-width: 180px; }
+.col-type   { white-space: nowrap; }
+.col-rarity { white-space: nowrap; }
+.card-name-link { color: #1a5799; }
+.card-name-link:hover { text-decoration: underline; }
+.card-name-ja   { font-size: 11px; color: #bbb; margin-left: 6px; }
+.flag-cell  { display: flex; gap: 4px; flex-wrap: wrap; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-block; padding: 2px 7px;
+  border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap;
+}
+.type-attack    { background: #fde8e8; color: #c0392b; }
+.type-skill     { background: #e8f0fc; color: #1a5799; }
+.type-power     { background: #fdf8e8; color: #7d6608; }
+.type-status    { background: #f0f0f0; color: #777; }
+.type-curse     { background: #f4ecf7; color: #6c3483; }
+.type-quest     { background: #e8f8f0; color: #1a7a4a; }
+.rarity-starter  { background: #efefef;  color: #999; }
+.rarity-common   { background: #e8eaed;  color: #555; }
+.rarity-uncommon { background: #dde8f5;  color: #1a5799; }
+.rarity-rare     { background: #fde8e8;  color: #c0392b; }
+.rarity-ancient  { background: #fff0d8;  color: #a0600c; }
+.rarity-event    { background: #e8f8f0;  color: #1a7a4a; }
+.rarity-shop     { background: #fdf0fc;  color: #7d1a7d; }
+.cost-badge      { background: #e8eaed;  color: #333; }
+.flag-badge      { background: #e8eaf0;  color: #445566; }
+.enc-boss   { background: #fde8e8; color: #b03030; }
+.enc-elite  { background: #f4ecf7; color: #6c3483; }
+.enc-normal { background: #dde8f5; color: #1a5799; }
+.enc-weak   { background: #e8eaed; color: #555; }
+.enc-event  { background: #eef6f8; color: #1a6678; }
+.enc-other  { background: #f0f0f0; color: #777; }
+.wiki-link { display: inline-block; margin-top: 12px; font-size: 12.5px; color: #1a5799; }
+.wiki-link:hover { text-decoration: underline; }
+
+/* ── Changelog list ── */
+.changelog-list { list-style: none; margin: 0; padding: 0; }
+.cl-entry { display: flex; align-items: baseline; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; line-height: 1.6; }
+.cl-entry:last-child { border-bottom: none; }
+.cl-date { font-size: 12px; color: #999; white-space: nowrap; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.cl-link { color: #1a5799; }
+.cl-link:hover { text-decoration: underline; }
+
+/* ── Markdown body ── */
+.md-body p { font-size: 14px; color: #333; line-height: 1.75; margin-top: 1em; }
+.md-body p:first-child { margin-top: 0; }
+.md-body ul { margin: 1em 0 0 1.5em; font-size: 14px; color: #333; line-height: 1.75; }
+.md-body ul:first-child { margin-top: 0; }
+.md-body li + li { margin-top: 0.3em; }
+.md-body a { color: #1a5799; }
+.md-body a:hover { text-decoration: underline; }
+
+/* ── Upgrade tabs ── */
+.tab-bar { display: flex; gap: 6px; margin-bottom: 14px; }
+.tab-btn {
+  padding: 4px 14px; border: 1.5px solid #ddd; border-radius: 16px;
+  font-size: 12px; font-weight: 600; cursor: pointer; background: #fff;
+  color: #999; font-family: inherit; transition: all 0.15s;
+}
+.tab-btn.active { border-color: #4a90d9; color: #1a5799; background: #eef3fc; }
+.tab-panel.hidden { display: none; }
+  </style>
+  
+</head>
+<body>
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-game">Slay the Spire 2</div>
+        <div class="brand-label">攻略メモメモ</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-group-label">ページ</div>
+        <a href="../index.html" class="nav-link">
+          <span class="nav-icon">&#8962;</span>トップ
+        </a>
+        <a href="../about.html" class="nav-link">
+          <span class="nav-icon">&#9432;</span>このサイトについて
+        </a>
+        <a href="../changelog.html" class="nav-link">
+          <span class="nav-icon">&#9711;</span>更新履歴
+        </a>
+        <a href="../pages.html" class="nav-link">
+          <span class="nav-icon">&#9776;</span>全ページ一覧
+        </a>
+        <a href="../characters.html" class="nav-link">
+          <span class="nav-icon">&#9786;</span>キャラクター一覧
+        </a>
+        <a href="../cards.html" class="nav-link">
+          <span class="nav-icon">&#9670;</span>カード一覧
+        </a>
+        <a href="../relics.html" class="nav-link">
+          <span class="nav-icon">&#9671;</span>レリック一覧
+        </a>
+        <a href="../events.html" class="nav-link">
+          <span class="nav-icon">&#9830;</span>イベント一覧
+        </a>
+        <a href="../encounters.html" class="nav-link">
+          <span class="nav-icon">&#9876;</span>エンカウンター一覧
+        </a>
+        <a href="../mechanics.html" class="nav-link">
+          <span class="nav-icon">&#9881;</span>メカニクス一覧
+        </a>
+        <a href="../runs.html" class="nav-link active" style="border-left-color:#4a90d9">
+          <span class="nav-icon">&#9654;</span>ラン一覧
+        </a>
+      </div>
+      <div class="sidebar-buildtime">ビルド日: 2026-05-26</div>
+    </nav>
+    <main class="main">
+      <div class="card-detail-header" style="border-left:5px solid #7d6608;background:#fdf8e8">
+  <div class="card-breadcrumb">
+    <a href="../runs.html" class="char-back-link" style="color:#7d6608">ラン一覧</a>
+  </div>
+  <h1 class="card-title-en" style="color:#7d6608">リージェント <span class="run-win">勝利</span></h1>
+  <div class="card-title-ja">Regent</div>
+  <div class="card-badges">
+    <span class="badge" style="background:#eee;color:#555">A10</span>
+    <span class="badge" style="background:#eee;color:#555">2026-05-17 18:30</span>
+    <span class="badge" style="background:#eee;color:#555">⏱ 75:06</span>
+    <span class="badge" style="background:#eee;color:#555">Seed: 26VFA3ZFCM</span>
+    <span class="badge" style="background:#eee;color:#555">vv0.103.2</span>
+  </div>
+  <!-- LAST_UPDATED_START --><!-- LAST_UPDATED_END -->
+</div>
+<!-- REVIEW_START -->
+<!--
+  【感想・メモ】
+  このコメントブロック全体を削除し、かわりにHTMLを書いてください。
+-->
+<!-- REVIEW_END -->
+<section class="section">
+  <h2 class="section-title">サマリー</h2>
+  <div class="run-summary-grid">
+  <div class="run-stat"><div class="run-stat-val">51/75</div><div class="run-stat-label">最終HP</div></div>
+  <div class="run-stat"><div class="run-stat-val">100</div><div class="run-stat-label">最終Gold</div></div>
+  <div class="run-stat"><div class="run-stat-val">49</div><div class="run-stat-label">総フロア</div></div>
+  <div class="run-stat"><div class="run-stat-val">24</div><div class="run-stat-label">デッキ枚数</div></div>
+  <div class="run-stat"><div class="run-stat-val">17</div><div class="run-stat-label">レリック数</div></div>
+</div>
+</section>
+<section class="section">
+  <h2 class="section-title">最終デッキ <span class="section-meta">24枚</span></h2>
+  <div class="mec-tags"><a class="mec-tag" href="../cards/shared/ASCENDERS_BANE.html">アセンダーの災厄<span style="color:#aaa;font-size:11px"> F1</span></a> <a class="mec-tag" href="../cards/regent/DEFEND_REGENT.html">防御<span style="color:#aaa;font-size:11px"> F1</span><span style="color:#888;font-size:11px"> ×3</span></a> <a class="mec-tag" href="../cards/regent/FALLING_STAR.html">落星<span style="color:#aaa;font-size:11px"> F1</span></a> <a class="mec-tag" href="../cards/regent/VENERATE.html">畏敬<span style="color:#aaa;font-size:11px"> F1</span></a> <a class="mec-tag" href="../cards/regent/STARDUST.html">星屑<span style="color:#1a5799;font-size:11px"> +1</span><span style="color:#aaa;font-size:11px"> F2</span></a> <a class="mec-tag" href="../cards/shared/FASTEN.html">締め直し<span style="color:#1a5799;font-size:11px"> +1</span><span style="color:#aaa;font-size:11px"> F3</span></a> <a class="mec-tag" href="../cards/regent/HIDDEN_CACHE.html">隠し財産<span style="color:#aaa;font-size:11px"> F4</span></a> <a class="mec-tag" href="../cards/regent/GLOW.html">輝き<span style="color:#aaa;font-size:11px"> F5</span></a> <a class="mec-tag" href="../cards/regent/PATTER.html">小盾の展開<span style="color:#1a5799;font-size:11px"> +1</span><span style="color:#aaa;font-size:11px"> F7</span></a> <a class="mec-tag" href="../cards/regent/KNOW_THY_PLACE.html">身の程を知れ<span style="color:#1a5799;font-size:11px"> +1</span><span style="color:#aaa;font-size:11px"> F13</span></a> <a class="mec-tag" href="../cards/regent/PATTER.html">小盾の展開<span style="color:#aaa;font-size:11px"> F14</span></a> <a class="mec-tag" href="../cards/regent/BIG_BANG.html">ビッグバン<span style="color:#aaa;font-size:11px"> F17</span></a> <a class="mec-tag" href="../cards/regent/TERRAFORMING.html">テラフォーミング<span style="color:#aaa;font-size:11px"> F19</span></a> <a class="mec-tag" href="../cards/regent/COSMIC_INDIFFERENCE.html">宇宙的無関心<span style="color:#aaa;font-size:11px"> F20</span></a> <a class="mec-tag" href="../cards/regent/GLITTERSTREAM.html">煌めく激流<span style="color:#1a5799;font-size:11px"> +1</span><span style="color:#aaa;font-size:11px"> F21</span></a> <a class="mec-tag" href="../cards/regent/FURNACE.html">溶鉱炉<span style="color:#1a5799;font-size:11px"> +1</span><span style="color:#aaa;font-size:11px"> F27</span></a> <a class="mec-tag" href="../cards/regent/NEUTRON_AEGIS.html">ニュートロン・イージス<span style="color:#1a5799;font-size:11px"> +1</span><span style="color:#aaa;font-size:11px"> F28</span></a> <a class="mec-tag" href="../cards/regent/BIG_BANG.html">ビッグバン<span style="color:#aaa;font-size:11px"> F33</span></a> <a class="mec-tag" href="../cards/regent/ROYAL_GAMBLE.html">ロイヤルギャンブル<span style="color:#1a5799;font-size:11px"> +1</span><span style="color:#aaa;font-size:11px"> F35</span></a> <a class="mec-tag" href="../cards/shared/MAD_SCIENCE.html">マッド・サイエンス<span style="color:#1a5799;font-size:11px"> +1</span><span style="color:#aaa;font-size:11px"> F37</span></a> <a class="mec-tag" href="../cards/regent/TYRANNY.html">専制<span style="color:#1a5799;font-size:11px"> +1</span><span style="color:#aaa;font-size:11px"> F38</span></a> <a class="mec-tag" href="../cards/regent/MONOLOGUE.html">モノローグ<span style="color:#1a5799;font-size:11px"> +1</span><span style="color:#aaa;font-size:11px"> F45</span></a></div>
+</section>
+<section class="section">
+  <h2 class="section-title">最終レリック <span class="section-meta">17個</span></h2>
+  <div class="mec-tags"><a class="mec-tag" href="../relics/DIVINE_RIGHT.html">神授王権<span style="color:#aaa;font-size:11px"> F1</span></a> <a class="mec-tag" href="../relics/PRECARIOUS_SHEARS.html">危険な大鋏<span style="color:#aaa;font-size:11px"> F1</span></a> <a class="mec-tag" href="../relics/BEATING_REMNANT.html">脈打つ亡骸<span style="color:#aaa;font-size:11px"> F7</span></a> <a class="mec-tag" href="../relics/LUCKY_FYSH.html">幸運の魚<span style="color:#aaa;font-size:11px"> F10</span></a> <a class="mec-tag" href="../relics/REGAL_PILLOW.html">高貴な枕<span style="color:#aaa;font-size:11px"> F11</span></a> <a class="mec-tag" href="../relics/RADIANT_PEARL.html">光り輝く真珠<span style="color:#aaa;font-size:11px"> F18</span></a> <a class="mec-tag" href="../relics/VAMBRACE.html">ヴァンプレイス<span style="color:#aaa;font-size:11px"> F22</span></a> <a class="mec-tag" href="../relics/HORN_CLEAT.html">ホーンクリート<span style="color:#aaa;font-size:11px"> F22</span></a> <a class="mec-tag" href="../relics/ANCHOR.html">イカリ<span style="color:#aaa;font-size:11px"> F25</span></a> <a class="mec-tag" href="../relics/ODDLY_SMOOTH_STONE.html">すべすべ石<span style="color:#aaa;font-size:11px"> F26</span></a> <a class="mec-tag" href="../relics/MUMMIFIED_HAND.html">ミイラの手<span style="color:#aaa;font-size:11px"> F27</span></a> <a class="mec-tag" href="../relics/PETRIFIED_TOAD.html">石化したカエル<span style="color:#aaa;font-size:11px"> F31</span></a> <a class="mec-tag" href="../relics/THROWING_AXE.html">手投げ斧<span style="color:#aaa;font-size:11px"> F34</span></a> <a class="mec-tag" href="../relics/BLOOD_VIAL.html">血のガラス瓶<span style="color:#aaa;font-size:11px"> F41</span></a> <a class="mec-tag" href="../relics/RED_MASK.html">レッドマスク<span style="color:#aaa;font-size:11px"> F42</span></a> <a class="mec-tag" href="../relics/POTION_BELT.html">ポーションベルト<span style="color:#aaa;font-size:11px"> F44</span></a> <a class="mec-tag" href="../relics/VAJRA.html">ヴァジュラ<span style="color:#aaa;font-size:11px"> F46</span></a></div>
+</section>
+
+<section class="section"><h2 class="section-title">繁茂の地</h2>
+<div class="floor-row"><span class="node-badge node-ancient">Ancient</span><a class="auto-link" href="../encounters/NEOW.html">Neow</a>  <span style="color:#888;font-size:12px">✕ストライク</span> <span style="color:#888;font-size:12px">✕防御</span> <span style="color:#a0600c">🔮危険な大鋏</span> <span class="floor-hp">HP 44/75 <span style="color:#c00">-16</span> <span style="color:#2a6">+60</span></span></div>
+<div class="floor-row"><span class="node-badge node-monster">通常</span><a class="auto-link" href="../encounters/SLIMES_WEAK.html">スライムの群れ</a><span style="color:#aaa;font-size:11px">6T</span> <span class="floor-picked">▶星屑</span> <span class="floor-skipped">煌めく激流</span> <span class="floor-skipped">月光波</span> <span class="floor-hp">HP 41/75 <span style="color:#c00">-3</span></span></div>
+<div class="floor-row"><span class="node-badge node-unknown">？</span><a class="auto-link" href="../events/BRAIN_LEECH.html">脳ヒル</a> <span class="floor-picked">▶締め直し</span> <span class="floor-skipped">闇の足枷</span> <span class="floor-skipped">延長</span> <span class="floor-hp">HP 36/75 <span style="color:#c00">-5</span></span></div>
+<div class="floor-row"><span class="node-badge node-monster">通常</span><a class="auto-link" href="../encounters/SHRINKER_BEETLE_WEAK.html">シュリンカービートル</a><span style="color:#aaa;font-size:11px">4T</span> <span class="floor-picked">▶隠し財産</span> <span class="floor-skipped">天の力</span> <span class="floor-skipped">三日月の槍</span> <span class="floor-hp">HP 36/75</span></div>
+<div class="floor-row"><span class="node-badge node-unknown">？</span><a class="auto-link" href="../events/WHISPERING_HOLLOW.html">囁きの窪地</a>  <span class="floor-hp">HP 27/75 <span style="color:#c00">-9</span></span></div>
+<div class="floor-row"><span class="node-badge node-monster">通常</span><a class="auto-link" href="../encounters/FUZZY_WURM_CRAWLER_WEAK.html">剛毛のワーム</a><span style="color:#aaa;font-size:11px">4T</span> <span class="floor-picked">▶テラフォーミング</span> <span class="floor-skipped">予言</span> <span class="floor-skipped">重圧</span> <span class="floor-hp">HP 27/75</span></div>
+<div class="floor-row"><span class="node-badge node-elite">エリート</span><a class="auto-link" href="../encounters/BYGONE_EFFIGY_ELITE.html">古の偶像</a><span style="color:#aaa;font-size:11px">4T</span> <span class="floor-picked">▶小盾の展開</span> <span class="floor-skipped">天の力</span> <span class="floor-skipped">溶鉱炉</span> <span style="color:#a0600c">🔮脈打つ亡骸</span> <span class="floor-hp">HP 22/75 <span style="color:#c00">-5</span></span></div>
+<div class="floor-row"><span class="node-badge node-rest_site">焚き火</span>  <span style="color:#166;font-size:12px">[SMITH]</span> <span class="floor-hp">HP 22/75</span></div>
+<div class="floor-row"><span class="node-badge node-shop">ショップ</span> <span class="floor-skipped">フォトンカット</span> <span class="floor-skipped">衝突軌道</span> <span class="floor-skipped">盾となれ！！</span> <span class="floor-skipped">モノローグ</span> <span class="floor-skipped">ペイル・ブルー・ドット</span> <span class="floor-skipped">祓い清め</span> <span class="floor-skipped">騒乱</span> <span class="floor-hp">HP 22/75</span></div>
+<div class="floor-row"><span class="node-badge node-treasure">宝箱</span>  <span style="color:#a0600c">🔮幸運の魚</span> <span class="floor-hp">HP 22/75</span></div>
+<div class="floor-row"><span class="node-badge node-elite">エリート</span><a class="auto-link" href="../encounters/PHROG_PARASITE_ELITE.html">寄生キャエル</a><span style="color:#aaa;font-size:11px">5T</span> <span class="floor-skipped">パリィ</span> <span class="floor-skipped">星の巡り</span> <span class="floor-skipped">導きの星</span> <span style="color:#a0600c">🔮高貴な枕</span> <span class="floor-hp">HP 1/75 <span style="color:#c00">-21</span></span></div>
+<div class="floor-row"><span class="node-badge node-rest_site">焚き火</span>  <span style="color:#166;font-size:12px">[HEAL]</span> <span class="floor-hp">HP 38/75 <span style="color:#2a6">+37</span></span></div>
+<div class="floor-row"><span class="node-badge node-monster">通常</span><a class="auto-link" href="../encounters/CUBEX_CONSTRUCT_NORMAL.html">キューベックス</a><span style="color:#aaa;font-size:11px">3T</span> <span class="floor-picked">▶身の程を知れ</span> <span class="floor-skipped">ガンマブラスト</span> <span class="floor-skipped">フォトンカット</span> <span class="floor-hp">HP 38/75</span></div>
+<div class="floor-row"><span class="node-badge node-unknown">？</span><a class="auto-link" href="../encounters/FLYCONID_NORMAL.html">キノコとスライム</a><span style="color:#aaa;font-size:11px">3T</span> <span class="floor-picked">▶小盾の展開</span> <span class="floor-skipped">星の外套</span> <span class="floor-skipped">身の程を知れ</span> <span class="floor-hp">HP 38/75</span></div>
+<div class="floor-row"><span class="node-badge node-unknown">？</span>  <span style="color:#a0600c">🔮青銅のウロコ</span> <span class="floor-hp">HP 38/75</span></div>
+<div class="floor-row"><span class="node-badge node-rest_site">焚き火</span>  <span style="color:#166;font-size:12px">[SMITH]</span> <span class="floor-hp">HP 38/75</span></div>
+<div class="floor-row"><span class="node-badge node-boss">ボス</span><a class="auto-link" href="../encounters/VANTOM_BOSS.html">ヴァントム</a><span style="color:#aaa;font-size:11px">6T</span> <span class="floor-picked">▶ビッグバン</span> <span class="floor-skipped">君主の睨み</span> <span class="floor-skipped">悩ましい選択</span> <span class="floor-hp">HP 31/75 <span style="color:#c00">-7</span></span></div>
+</section>
+<section class="section"><h2 class="section-title">魔窟</h2>
+<div class="floor-row"><span class="node-badge node-ancient">Ancient</span><a class="auto-link" href="../encounters/OROBAS.html">Orobas</a>  <span style="color:#a0600c">🔮光り輝く真珠</span> <span class="floor-hp">HP 66/75 <span style="color:#2a6">+35</span></span></div>
+<div class="floor-row"><span class="node-badge node-monster">通常</span><a class="auto-link" href="../encounters/THIEVING_HOPPER_WEAK.html">泥棒バッタ</a><span style="color:#aaa;font-size:11px">4T</span> <span class="floor-skipped">顕現</span> <span class="floor-skipped">星の巡り</span> <span class="floor-skipped">溶鉱炉</span> <span style="color:#888;font-size:12px">✕テラフォーミング</span> <span class="floor-hp">HP 53/75 <span style="color:#c00">-13</span></span></div>
+<div class="floor-row"><span class="node-badge node-monster">通常</span><a class="auto-link" href="../encounters/EXOSKELETONS_WEAK.html">外骨格蟲</a><span style="color:#aaa;font-size:11px">3T</span> <span class="floor-picked">▶宇宙的無関心</span> <span class="floor-skipped">星の外套</span> <span class="floor-skipped">衝突軌道</span> <span class="floor-hp">HP 53/75</span></div>
+<div class="floor-row"><span class="node-badge node-monster">通常</span><a class="auto-link" href="../encounters/LOUSE_PROGENITOR_NORMAL.html">始祖ラミー</a><span style="color:#aaa;font-size:11px">4T</span> <span class="floor-picked">▶煌めく激流</span> <span class="floor-skipped">戦利品</span> <span class="floor-skipped">パリィ</span> <span class="floor-hp">HP 41/75 <span style="color:#c00">-12</span></span></div>
+<div class="floor-row"><span class="node-badge node-unknown">？</span><a class="auto-link" href="../events/RANWID_THE_ELDER.html">長老、ランウィッド</a>  <span style="color:#a0600c">🔮ヴァンプレイス, ホーンクリート</span> <span class="floor-hp">HP 41/75</span></div>
+<div class="floor-row"><span class="node-badge node-monster">通常</span><a class="auto-link" href="../encounters/EXOSKELETONS_NORMAL.html">数多の外骨格蟲</a><span style="color:#aaa;font-size:11px">5T</span> <span class="floor-skipped">重圧</span> <span class="floor-skipped">衝突軌道</span> <span class="floor-skipped">ソーラーストライク</span> <span class="floor-hp">HP 41/75</span></div>
+<div class="floor-row"><span class="node-badge node-rest_site">焚き火</span>  <span style="color:#166;font-size:12px">[SMITH]</span> <span class="floor-hp">HP 41/75</span></div>
+<div class="floor-row"><span class="node-badge node-unknown">？</span> <span class="floor-skipped">超大質量</span> <span class="floor-skipped">ヘヴンリードリル</span> <span class="floor-skipped">城壁</span> <span class="floor-skipped">ロイヤルギャンブル</span> <span class="floor-skipped">創造の柱</span> <span class="floor-skipped">苛立ち</span> <span class="floor-skipped">ビートダウン</span> <span style="color:#888;font-size:12px">✕ストライク</span> <span style="color:#a0600c">🔮イカリ</span> <span class="floor-hp">HP 41/75</span></div>
+<div class="floor-row"><span class="node-badge node-treasure">宝箱</span>  <span style="color:#a0600c">🔮すべすべ石</span> <span class="floor-hp">HP 41/75</span></div>
+<div class="floor-row"><span class="node-badge node-elite">エリート</span><a class="auto-link" href="../encounters/INFESTED_PRISMS_ELITE.html">寄生されたプリズム</a><span style="color:#aaa;font-size:11px">6T</span> <span class="floor-picked">▶溶鉱炉</span> <span class="floor-skipped">顕現</span> <span class="floor-skipped">剣の研磨</span> <span style="color:#a0600c">🔮ミイラの手</span> <span class="floor-hp">HP 30/75 <span style="color:#c00">-11</span></span></div>
+<div class="floor-row"><span class="node-badge node-unknown">？</span><a class="auto-link" href="../encounters/CHOMPERS_NORMAL.html">オートマトンのコンビ</a><span style="color:#aaa;font-size:11px">4T</span> <span class="floor-picked">▶ニュートロン・イージス</span> <span class="floor-skipped">天の力</span> <span class="floor-skipped">身の程を知れ</span> <span class="floor-hp">HP 30/75</span></div>
+<div class="floor-row"><span class="node-badge node-rest_site">焚き火</span>  <span style="color:#166;font-size:12px">[SMITH]</span> <span class="floor-hp">HP 30/75</span></div>
+<div class="floor-row"><span class="node-badge node-shop">ショップ</span> <span class="floor-skipped">天の力</span> <span class="floor-skipped">撃滅</span> <span class="floor-skipped">共鳴</span> <span class="floor-skipped">輝き</span> <span class="floor-skipped">ペイル・ブルー・ドット</span> <span class="floor-skipped">マインドブラスト</span> <span class="floor-skipped">聖なる選別</span> <span style="color:#888;font-size:12px">✕ストライク</span> <span class="floor-hp">HP 30/75</span></div>
+<div class="floor-row"><span class="node-badge node-elite">エリート</span><a class="auto-link" href="../encounters/DECIMILLIPEDE_ELITE.html">万足ムカデ</a><span style="color:#aaa;font-size:11px">9T</span> <span class="floor-skipped">宇宙的無関心</span> <span class="floor-skipped">フォトンカット</span> <span class="floor-skipped">王様パンチ</span> <span style="color:#a0600c">🔮石化したカエル</span> <span class="floor-hp">HP 20/75 <span style="color:#c00">-10</span></span></div>
+<div class="floor-row"><span class="node-badge node-rest_site">焚き火</span>  <span style="color:#166;font-size:12px">[HEAL]</span> <span class="floor-hp">HP 57/75 <span style="color:#2a6">+37</span></span></div>
+<div class="floor-row"><span class="node-badge node-boss">ボス</span><a class="auto-link" href="../encounters/KNOWLEDGE_DEMON_BOSS.html">知識の悪魔</a><span style="color:#aaa;font-size:11px">10T</span> <span class="floor-picked">▶ビッグバン</span> <span class="floor-skipped">ヘヴンリードリル</span> <span class="floor-skipped">不時着</span> <span class="floor-hp">HP 57/75</span></div>
+</section>
+<section class="section"><h2 class="section-title">栄光の路</h2>
+<div class="floor-row"><span class="node-badge node-ancient">Ancient</span><a class="auto-link" href="../encounters/TANX.html">Tanx</a>  <span style="color:#a0600c">🔮手投げ斧</span> <span class="floor-hp">HP 71/75 <span style="color:#2a6">+14</span></span></div>
+<div class="floor-row"><span class="node-badge node-monster">通常</span><a class="auto-link" href="../encounters/DEVOTED_SCULPTOR_WEAK.html">狂信の彫刻家</a><span style="color:#aaa;font-size:11px">4T</span> <span class="floor-picked">▶ロイヤルギャンブル</span> <span class="floor-skipped">重圧</span> <span class="floor-skipped">フォトンカット</span> <span class="floor-hp">HP 71/75</span></div>
+<div class="floor-row"><span class="node-badge node-monster">通常</span><a class="auto-link" href="../encounters/TURRET_OPERATOR_WEAK.html">タレットオペレーター</a><span style="color:#aaa;font-size:11px">4T</span> <span class="floor-skipped">ソーラーストライク</span> <span class="floor-skipped">小盾の展開</span> <span class="floor-skipped">フォトンカット</span> <span class="floor-hp">HP 71/75</span></div>
+<div class="floor-row"><span class="node-badge node-unknown">？</span><a class="auto-link" href="../events/TINKER_TIME.html">発明の時間だ</a> <span class="floor-picked">▶マッド・サイエンス</span> <span class="floor-hp">HP 71/75</span></div>
+<div class="floor-row"><span class="node-badge node-unknown">？</span><a class="auto-link" href="../events/THE_FUTURE_OF_POTIONS.html">未来のポーション？</a> <span class="floor-picked">▶専制</span> <span class="floor-skipped">虚無化</span> <span class="floor-skipped">君主の睨み</span> <span class="floor-hp">HP 71/75</span></div>
+<div class="floor-row"><span class="node-badge node-monster">通常</span><a class="auto-link" href="../encounters/AXEBOTS_NORMAL.html">アックスマシン</a><span style="color:#aaa;font-size:11px">11T</span> <span class="floor-skipped">輝き</span> <span class="floor-skipped">ペイル・ブルー・ドット</span> <span class="floor-skipped">導きの星</span> <span class="floor-hp">HP 71/75</span></div>
+<div class="floor-row"><span class="node-badge node-rest_site">焚き火</span>  <span style="color:#166;font-size:12px">[SMITH]</span> <span class="floor-hp">HP 71/75</span></div>
+<div class="floor-row"><span class="node-badge node-treasure">宝箱</span>  <span style="color:#a0600c">🔮血のガラス瓶</span> <span class="floor-hp">HP 71/75</span></div>
+<div class="floor-row"><span class="node-badge node-unknown">？</span>  <span style="color:#a0600c">🔮レッドマスク</span> <span class="floor-hp">HP 71/75</span></div>
+<div class="floor-row"><span class="node-badge node-rest_site">焚き火</span>  <span style="color:#166;font-size:12px">[SMITH]</span> <span class="floor-hp">HP 71/75</span></div>
+<div class="floor-row"><span class="node-badge node-shop">ショップ</span> <span class="floor-skipped">星霊の波動</span> <span class="floor-skipped">三日月の槍</span> <span class="floor-skipped">宇宙的無関心</span> <span class="floor-skipped">身の程を知れ</span> <span class="floor-skipped">創造の柱</span> <span class="floor-skipped">オートメーション</span> <span class="floor-skipped">聖なる選別</span> <span style="color:#a0600c">🔮ポーションベルト</span> <span class="floor-hp">HP 71/75</span></div>
+<div class="floor-row"><span class="node-badge node-unknown">？</span><a class="auto-link" href="../encounters/FROG_KNIGHT_NORMAL.html">カエルの騎士</a><span style="color:#aaa;font-size:11px">4T</span> <span class="floor-picked">▶モノローグ</span> <span class="floor-skipped">身の程を知れ</span> <span class="floor-skipped">刃の戦錬</span> <span class="floor-hp">HP 73/75 <span style="color:#2a6">+2</span></span></div>
+<div class="floor-row"><span class="node-badge node-elite">エリート</span><a class="auto-link" href="../encounters/SOUL_NEXUS_ELITE.html">ソウルネクサス</a><span style="color:#aaa;font-size:11px">3T</span> <span class="floor-skipped">王様キック</span> <span class="floor-skipped">宇宙的無関心</span> <span class="floor-skipped">ロイヤリティ</span> <span style="color:#a0600c">🔮ヴァジュラ</span> <span class="floor-hp">HP 75/75 <span style="color:#2a6">+2</span></span></div>
+<div class="floor-row"><span class="node-badge node-rest_site">焚き火</span>  <span style="color:#166;font-size:12px">[SMITH]</span> <span class="floor-hp">HP 75/75</span></div>
+<div class="floor-row"><span class="node-badge node-boss">ボス</span><a class="auto-link" href="../encounters/TEST_SUBJECT_BOSS.html">実験体</a><span style="color:#aaa;font-size:11px">10T</span>  <span class="floor-hp">HP 61/75 <span style="color:#c00">-14</span></span></div>
+<div class="floor-row"><span class="node-badge node-boss">ボス</span><a class="auto-link" href="../encounters/QUEEN_BOSS.html">クイーン</a><span style="color:#aaa;font-size:11px">5T</span>  <span class="floor-hp">HP 51/75 <span style="color:#c00">-12</span> <span style="color:#2a6">+2</span></span></div>
+</section>
+
+    </main>
+  </div>
+  <script>
+(function () {
+  function esc(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function inline(s) {
+    return esc(s)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+  }
+  function renderMd(src) {
+    return src.trim().split(/\n[ \t]*\n/).map(function (block) {
+      block = block.trim();
+      if (!block) return '';
+      var lines = block.split('\n');
+      if (/^[-*]\s/.test(lines[0])) {
+        return '<ul>' + lines
+          .filter(function (l) { return /^[-*]\s/.test(l); })
+          .map(function (l) { return '<li>' + inline(l.replace(/^[-*]\s+/, '')) + '</li>'; })
+          .join('') + '</ul>';
+      }
+      return '<p>' + inline(block.replace(/\n/g, ' ')) + '</p>';
+    }).join('');
+  }
+  document.querySelectorAll('script[type="text/markdown"]').forEach(function (el) {
+    var d = document.createElement('div');
+    d.className = 'md-body';
+    d.innerHTML = renderMd(el.textContent);
+    el.parentNode.replaceChild(d, el);
+  });
+})();
+</script>
+  
+  
+</body>
+</html>

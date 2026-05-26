@@ -229,7 +229,31 @@ foreach (var group in CharacterMechanics.All.Where(g => g.Mechanics.Length > 0))
 }
 
 var totalMecs = CharacterMechanics.All.Sum(g => g.Mechanics.Length);
-        log($"Generated {9 + chars.Length + allCardIds.Length + allRelicIds.Length + allEventIds.Length + allEncounterIds.Length + 1 + totalMecs} files -> {distDir}");
+
+// 既存のランページを最新コードで再生成
+var runOutDir    = Path.Combine(distDir, "run");
+var historyDir   = RunHistoryService.GetHistoryDir();
+var runCount     = 0;
+if (!string.IsNullOrEmpty(historyDir) && Directory.Exists(historyDir) && Directory.Exists(runOutDir))
+{
+    var (runLinkMap, runLinkRegex, runEventIds) = BuildAutoLinkMap(chars);
+    foreach (var summary in RunHistoryService.LoadSummaries(historyDir))
+    {
+        var htmlPath = Path.Combine(runOutDir, $"{summary.StartTime}.html");
+        if (!File.Exists(htmlPath)) continue;
+        var run = RunHistoryService.Load(summary.FilePath);
+        WriteRunPageCore(run, chars, distDir, runLinkMap, runLinkRegex, runEventIds);
+        runCount++;
+    }
+    if (runCount > 0)
+    {
+        var listHtml = BuildRunListPage(chars, runOutDir);
+        File.WriteAllText(Path.Combine(distDir, "runs.html"), listHtml, System.Text.Encoding.UTF8);
+        log($"ラン再生成: {runCount} 件");
+    }
+}
+
+        log($"Generated {9 + chars.Length + allCardIds.Length + allRelicIds.Length + allEventIds.Length + allEncounterIds.Length + 1 + totalMecs + runCount} files -> {distDir}");
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────────
@@ -344,7 +368,9 @@ static string NodeBadge(string type)
     return $"""<span class="node-badge {cls}">{label}</span>""";
 }
 
-static string BuildRunPage(RunHistoryData run, CharData[] chars)
+static string BuildRunPage(RunHistoryData run, CharData[] chars,
+    IReadOnlyDictionary<string, string> autoLinkMap, Regex autoLinkRegex,
+    HashSet<string> eventIds, string review = "")
 {
     var player  = run.Players.Count > 0 ? run.Players[0] : new RunPlayerData();
     var charId  = RawId(player.Character).ToLowerInvariant();
@@ -404,9 +430,21 @@ static string BuildRunPage(RunHistoryData run, CharData[] chars)
 
             var badge = NodeBadge(mp.MapPointType);
             var room = mp.Rooms?.FirstOrDefault();
-            var encName = room?.ModelId is { Length: > 0 } mid
-                ? EncounterDatabaseService.GetEncounterName(mid, japanese: true)
-                : "";
+            string encLink = "";
+            if (room?.ModelId is { Length: > 0 } mid)
+            {
+                var rawId = RawId(mid);
+                if (eventIds.Contains(rawId))
+                {
+                    var name = CardDatabaseService.GetEventTitle(rawId, japanese: true);
+                    encLink = $"""<a class="auto-link" href="../events/{rawId}.html">{name}</a>""";
+                }
+                else
+                {
+                    var name = EncounterDatabaseService.GetEncounterName(mid, japanese: true);
+                    encLink = $"""<a class="auto-link" href="../encounters/{rawId}.html">{name}</a>""";
+                }
+            }
             var turns = room?.TurnsTaken > 0
                 ? $"""<span style="color:#aaa;font-size:11px">{room.TurnsTaken}T</span>"""
                 : "";
@@ -476,7 +514,7 @@ static string BuildRunPage(RunHistoryData run, CharData[] chars)
                 restHtml = $""" <span style="color:#166;font-size:12px">[{string.Join("/", rest)}]</span>""";
 
             timelineHtml.AppendLine($"""
-              <div class="floor-row">{badge}{encName}{turns} {cardPickHtml}{cardRemoveHtml}{relicHtml}{restHtml} {hpStr}</div>
+              <div class="floor-row">{badge}{encLink}{turns} {cardPickHtml}{cardRemoveHtml}{relicHtml}{restHtml} {hpStr}</div>
               """);
         }
         timelineHtml.AppendLine("</section>");
@@ -533,6 +571,21 @@ static string BuildRunPage(RunHistoryData run, CharData[] chars)
         ? $"""<section class="section"><h2 class="section-title">最後の戦闘</h2><p class="desc-main">{killedBy}</p></section>"""
         : "";
 
+    // ── 感想・メモ（REVIEW） ──
+    const string REVIEW_GUIDE = """
+        <!-- REVIEW_START -->
+        <!--
+          【感想・メモ】
+          このコメントブロック全体を削除し、かわりにHTMLを書いてください。
+        -->
+        <!-- REVIEW_END -->
+        """;
+    var strippedReview = review == "" ? "" : StripAutoLinks(review, "../");
+    var linkedReview = strippedReview == "" ? "" : AutoLinkHtml(strippedReview, autoLinkRegex, autoLinkMap, "../");
+    var reviewZone = linkedReview == ""
+        ? REVIEW_GUIDE
+        : $"<!-- REVIEW_START -->{linkedReview}<!-- REVIEW_END -->";
+
     var content = $"""
         <div class="card-detail-header" style="border-left:5px solid {accent};background:{lightBg}">
           <div class="card-breadcrumb">
@@ -547,7 +600,9 @@ static string BuildRunPage(RunHistoryData run, CharData[] chars)
             <span class="badge" style="background:#eee;color:#555">Seed: {run.Seed}</span>
             {(run.BuildId is { Length: > 0 } bid ? $"""<span class="badge" style="background:#eee;color:#555">v{bid}</span>""" : "")}
           </div>
+          <!-- LAST_UPDATED_START --><!-- LAST_UPDATED_END -->
         </div>
+        {reviewZone}
         <section class="section">
           <h2 class="section-title">サマリー</h2>
           {summaryHtml}
@@ -558,17 +613,33 @@ static string BuildRunPage(RunHistoryData run, CharData[] chars)
         {timelineHtml}
         """;
 
-    var title = $"{charJa} {(run.Win ? "勝利" : run.WasAbandoned ? "離脱" : "敗北")} {dateStr}";
+    var title = $"{charJa} A{run.Ascension} {(run.Win ? "勝利" : run.WasAbandoned ? "離脱" : "敗北")} {startDt:yyyy-MM-dd}";
     return Layout(title, "runs", accent, chars, content, basePath: "../", wikiLink: false);
 }
 
+// GUI からの呼び出し用（map を内部で構築して runs.html も更新）
 internal static string WriteRunPage(RunHistoryData run, CharData[] chars, string distDir)
+{
+    var (linkMap, linkRegex, eventIds) = BuildAutoLinkMap(chars);
+    var outPath = WriteRunPageCore(run, chars, distDir, linkMap, linkRegex, eventIds);
+
+    var runDir   = Path.Combine(distDir, "run");
+    var listHtml = BuildRunListPage(chars, runDir);
+    File.WriteAllText(Path.Combine(distDir, "runs.html"), listHtml, System.Text.Encoding.UTF8);
+
+    return outPath;
+}
+
+// Build() からの呼び出し用（map を外部から受け取る）
+static string WriteRunPageCore(RunHistoryData run, CharData[] chars, string distDir,
+    IReadOnlyDictionary<string, string> linkMap, Regex linkRegex, HashSet<string> eventIds)
 {
     var runDir = Path.Combine(distDir, "run");
     Directory.CreateDirectory(runDir);
 
-    var html    = BuildRunPage(run, chars);
-    var outPath = Path.Combine(runDir, $"{run.StartTime}.html");
+    var outPath        = Path.Combine(runDir, $"{run.StartTime}.html");
+    var existingReview = ExtractReview(outPath);
+    var html           = BuildRunPage(run, chars, linkMap, linkRegex, eventIds, existingReview);
     var metaJson = System.Text.Json.JsonSerializer.Serialize(new {
         win       = run.Win,
         abandoned = run.WasAbandoned,
@@ -577,13 +648,7 @@ internal static string WriteRunPage(RunHistoryData run, CharData[] chars, string
         startTime = run.StartTime,
         runTime   = run.RunTime,
     });
-    var fullHtml = $"<!-- RUN_META: {metaJson} -->\n{html}";
-    File.WriteAllText(outPath, fullHtml, System.Text.Encoding.UTF8);
-
-    // ラン一覧を再生成
-    var listHtml = BuildRunListPage(chars, runDir);
-    File.WriteAllText(Path.Combine(distDir, "runs.html"), listHtml, System.Text.Encoding.UTF8);
-
+    File.WriteAllText(outPath, $"<!-- RUN_META: {metaJson} -->\n{html}", System.Text.Encoding.UTF8);
     return outPath;
 }
 
@@ -2551,6 +2616,8 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
         .node-ancient { background:#ede7f6; color:#512da8; }
         .node-unknown { background:#f5f5f5; color:#888; }
         .floor-row  { display:flex; align-items:baseline; gap:10px; padding:6px 0; border-bottom:1px solid #f0f0f0; font-size:13px; }
+        .auto-link { color:#1a5799; }
+        .auto-link:hover { text-decoration:underline; }
         .floor-hp   { font-size:12px; color:#888; white-space:nowrap; }
         .floor-picked { color:#1a5799; font-weight:600; }
         .floor-skipped{ color:#bbb; text-decoration:line-through; }
@@ -3096,12 +3163,95 @@ static void InsertChangelogEntry(string changelogPath, string newEntry)
     SaveReview(changelogPath, newReview);
 }
 
+static (IReadOnlyDictionary<string, string> map, Regex regex, HashSet<string> eventIds) BuildAutoLinkMap(CharData[] chars)
+{
+    var map = new Dictionary<string, string>(StringComparer.Ordinal);
+    var eventIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+    foreach (var id in CardDatabaseService.GetAllEventIds())
+    {
+        eventIds.Add(id);
+        var ja = CardDatabaseService.GetEventTitle(id, japanese: true);
+        var en = CardDatabaseService.GetEventTitle(id, japanese: false);
+        if (ja.Length > 1) map.TryAdd(ja, $"events/{id}.html");
+        if (en.Length > 1 && en != ja) map.TryAdd(en, $"events/{id}.html");
+    }
+
+    foreach (var id in EncounterDatabaseService.GetAllEncounterIds())
+    {
+        var ja = EncounterDatabaseService.GetEncounterName(id, japanese: true);
+        var en = EncounterDatabaseService.GetEncounterName(id, japanese: false);
+        if (ja.Length > 1) map.TryAdd(ja, $"encounters/{id}.html");
+        if (en.Length > 1 && en != ja) map.TryAdd(en, $"encounters/{id}.html");
+    }
+
+    foreach (var id in CardDatabaseService.GetAllCardIds())
+    {
+        var rawId   = RawId(id);
+        var charDir = GetCardDir(id, chars);
+        var ja = CardDatabaseService.GetName(id, japanese: true);
+        var en = CardDatabaseService.GetName(id, japanese: false);
+        if (ja.Length > 1) map.TryAdd(ja, $"cards/{charDir}/{rawId}.html");
+        if (en.Length > 1 && en != ja) map.TryAdd(en, $"cards/{charDir}/{rawId}.html");
+    }
+
+    foreach (var id in CardDatabaseService.GetAllRelicIds())
+    {
+        var rawId = RawId(id);
+        var ja = CardDatabaseService.GetRelicTitle(rawId, japanese: true);
+        var en = CardDatabaseService.GetRelicTitle(rawId, japanese: false);
+        if (ja.Length > 1) map.TryAdd(ja, $"relics/{rawId}.html");
+        if (en.Length > 1 && en != ja) map.TryAdd(en, $"relics/{rawId}.html");
+    }
+
+    var regex = map.Count > 0
+        ? new Regex(string.Join("|", map.Keys.OrderByDescending(k => k.Length).Select(Regex.Escape)),
+                    RegexOptions.Compiled)
+        : new Regex("(?!)", RegexOptions.Compiled);
+
+    return (map, regex, eventIds);
+}
+
+// 既存の自動リンク <a href="{basePath}(events|encounters|cards|relics)/..."> を除去してテキストに戻す。
+// AutoLinkHtml の再適用前に呼ぶことでクラス属性を最新化できる。
+static string StripAutoLinks(string html, string basePath)
+{
+    var escaped = Regex.Escape(basePath);
+    return Regex.Replace(html,
+        $@"<a\b[^>]*\shref=""{escaped}(?:events|encounters|cards|relics)/[^""]*""[^>]*>(.*?)</a>",
+        "$1");
+}
+
+// HTML のテキストノードのみを対象にキーワードをリンクへ置換する。<a>・<script> タグ内はスキップ。
+static string AutoLinkHtml(string html, Regex termRegex, IReadOnlyDictionary<string, string> map, string basePath)
+{
+    if (string.IsNullOrEmpty(html) || map.Count == 0) return html;
+    var sb = new System.Text.StringBuilder();
+    int skipDepth = 0;
+    foreach (Match m in Regex.Matches(html, @"(<(?:a|script)\b[^>]*>)|(</(?:a|script)>)|(<[^>]+>)|([^<]+)"))
+    {
+        if      (m.Groups[1].Success) { skipDepth++; sb.Append(m.Value); }
+        else if (m.Groups[2].Success) { skipDepth--; sb.Append(m.Value); }
+        else if (m.Groups[3].Success) { sb.Append(m.Value); }
+        else if (skipDepth == 0)
+            sb.Append(termRegex.Replace(m.Value,
+                tm => $"""<a class="auto-link" href="{basePath}{map[tm.Value]}">{tm.Value}</a>"""));
+        else sb.Append(m.Value);
+    }
+    return sb.ToString();
+}
+
 static string ExtractPageTitle(string filePath)
 {
     if (!File.Exists(filePath)) return Path.GetFileNameWithoutExtension(filePath);
     var html = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
-    var mJa = Regex.Match(html, @"<div class=""card-title-ja"">(.+?)</div>");
-    if (mJa.Success) return mJa.Groups[1].Value.Trim();
+    // run pages: card-title-ja holds English char name, so use <title> instead
+    bool isRunPage = filePath.Replace('\\', '/').Contains("/run/");
+    if (!isRunPage)
+    {
+        var mJa = Regex.Match(html, @"<div class=""card-title-ja"">(.+?)</div>");
+        if (mJa.Success) return mJa.Groups[1].Value.Trim();
+    }
     var m = Regex.Match(html, @"<title>(.+?)\s*\|");
     return m.Success ? m.Groups[1].Value.Trim() : Path.GetFileNameWithoutExtension(filePath);
 }
