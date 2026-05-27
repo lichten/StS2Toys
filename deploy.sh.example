@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ---- 設定（各自の環境に合わせて編集） ----
+REMOTE_HOST="sts2-server"          # ~/.ssh/config の Host 名
+REMOTE_PATH="/home/user/public_html/sts2/"
+
+# ---- パス解決（スクリプト位置から自動決定） ----
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DIST_DIR="$SCRIPT_DIR/StS2SiteBuilder/dist/"
+
+# ---- rsync ----
+DRY_RUN=""
+if [[ "${1:-}" == "--dry-run" ]]; then
+  DRY_RUN="--dry-run"
+  echo "[DRY RUN モード] 実際の転送は行いません"
+fi
+
+rsync -rlzcv --checksum --delete $DRY_RUN \
+  "$DIST_DIR" \
+  "$REMOTE_HOST:$REMOTE_PATH"

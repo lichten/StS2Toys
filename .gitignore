@@ -28,3 +28,6 @@ desktop.ini
 
 # Tools and extracted game assets (large binary files)
 tools/
+
+# Deploy script with personal server settings
+deploy.sh

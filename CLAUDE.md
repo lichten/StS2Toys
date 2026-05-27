@@ -118,6 +118,23 @@ $pck = "C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\SlayTheSp
 エンカウンター→モンスターの対応は `StS2Shared/Resources/encounter_monsters.json` で管理。
 モンスターの EN/JA 名は `StS2Shared/Resources/monster_names.json` で管理。
 
+**デプロイ（rsync でレンタルサーバーへ転送）：**
+
+前提条件（初回のみ）：
+- SSH 公開鍵をサーバーに登録済みであること
+- `deploy.sh` 冒頭の `SERVER` / `REMOTE_PATH` / `SSH_PORT` を自分の環境に編集済みであること
+
+```powershell
+# 1. サイトを生成
+dotnet run --project StS2SiteBuilder -- --build
+
+# 2. Git Bash から差分転送
+bash deploy.sh
+
+# 転送前に確認したい場合
+bash deploy.sh --dry-run
+```
+
 ### ローカライゼーションの構造（ancients.json）
 
 Ancient NPC のデータは `tools/extracted/localization/{eng,jpn}/ancients.json` に格納され、キー構造は：
