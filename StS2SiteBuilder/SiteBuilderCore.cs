@@ -256,7 +256,22 @@ if (!string.IsNullOrEmpty(historyDir) && Directory.Exists(historyDir) && Directo
     }
 }
 
-        log($"Generated {9 + chars.Length + allCardIds.Length + allRelicIds.Length + allEventIds.Length + allEncounterIds.Length + 1 + totalMecs + runCount} files -> {distDir}");
+// 記事ページ (articles/)
+var articlesSourceDir = FindArticlesDir(distDir);
+var articleMetas = articlesSourceDir is not null
+    ? Directory.GetFiles(articlesSourceDir, "*.html")
+               .Select(ParseArticle)
+               .OrderByDescending(a => a.Date)
+               .ToArray()
+    : [];
+Directory.CreateDirectory(Path.Combine(distDir, "articles"));
+foreach (var article in articleMetas)
+    File.WriteAllText(Path.Combine(distDir, "articles", $"{article.Slug}.html"),
+        BuildArticlePage(article, chars), System.Text.Encoding.UTF8);
+File.WriteAllText(Path.Combine(distDir, "articles.html"),
+    BuildArticleListPage(articleMetas, chars), System.Text.Encoding.UTF8);
+
+        log($"Generated {9 + chars.Length + allCardIds.Length + allRelicIds.Length + allEventIds.Length + allEncounterIds.Length + 1 + totalMecs + runCount + 1 + articleMetas.Length} files -> {distDir}");
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────────
@@ -2822,6 +2837,9 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
     var runsActive  = activeId == "runs";
     var runsStyle   = runsActive  ? " style=\"border-left-color:#4a90d9\"" : "";
     var runsClass   = runsActive  ? " active" : "";
+    var articlesActive = activeId == "articles";
+    var articlesStyle  = articlesActive ? " style=\"border-left-color:#4a90d9\"" : "";
+    var articlesClass  = articlesActive ? " active" : "";
     var charsActive = activeId == "characters" || chars.Any(c => c.Id == activeId);
     var charsAccent = chars.FirstOrDefault(c => c.Id == activeId)?.Accent ?? "#4a90d9";
     var charsStyle  = charsActive ? $" style=\"border-left-color:{charsAccent}\"" : "";
@@ -2857,6 +2875,9 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
                 </a>
                 <a href="{basePath}changelog.html" class="nav-link{changelogClass}"{changelogStyle}>
                   <span class="nav-icon">&#9711;</span>更新履歴
+                </a>
+                <a href="{basePath}articles.html" class="nav-link{articlesClass}"{articlesStyle}>
+                  <span class="nav-icon">&#9997;</span>記事
                 </a>
                 <a href="{basePath}pages.html" class="nav-link{pagesClass}"{pagesStyle}>
                   <span class="nav-icon">&#9776;</span>全ページ一覧
@@ -2907,6 +2928,143 @@ static string? FindToolsRoot(string startDir)
         dir = Path.GetDirectoryName(dir);
     }
     return null;
+}
+
+static string? FindArticlesDir(string distDir)
+{
+    // Try repo root (grandparent of dist) first, then sibling of dist as fallback
+    var distParent = Path.GetDirectoryName(distDir)!;
+    string[] candidates =
+    [
+        Path.Combine(Path.GetDirectoryName(distParent)!, "articles"),
+        Path.Combine(distParent, "articles"),
+    ];
+    return candidates.FirstOrDefault(Directory.Exists);
+}
+
+static string ExtractMetaField(string line, string key)
+{
+    var search = key + ":";
+    var idx = line.IndexOf(search, StringComparison.OrdinalIgnoreCase);
+    if (idx < 0) return "";
+    var start = idx + search.Length;
+    while (start < line.Length && line[start] == ' ') start++;
+    var end = line.IndexOf(';', start);
+    if (end < 0) end = line.IndexOf("-->", start, StringComparison.Ordinal);
+    if (end < 0) end = line.Length;
+    return line[start..end].Trim();
+}
+
+static ArticleMeta ParseArticle(string filePath)
+{
+    var text  = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
+    var nl    = text.IndexOf('\n');
+    var first = nl >= 0 ? text[..nl] : text;
+    var rest  = nl >= 0 ? text[(nl + 1)..] : "";
+
+    string title, date, desc, body;
+    if (first.TrimStart().StartsWith("<!--", StringComparison.Ordinal))
+    {
+        title = ExtractMetaField(first, "title");
+        date  = ExtractMetaField(first, "date");
+        desc  = ExtractMetaField(first, "desc");
+        body  = rest;
+    }
+    else
+    {
+        title = Path.GetFileNameWithoutExtension(filePath);
+        date  = "";
+        desc  = "";
+        body  = text;
+    }
+    if (title == "") title = Path.GetFileNameWithoutExtension(filePath);
+    return new ArticleMeta(Path.GetFileNameWithoutExtension(filePath), title, date, desc, body);
+}
+
+static string BuildArticleListPage(ArticleMeta[] articles, CharData[] chars)
+{
+    const string ARTICLE_LIST_CSS = """
+        <style>
+        .article-list { display: flex; flex-direction: column; gap: 14px; }
+        .article-card {
+          background: #fff; border-radius: 10px; padding: 18px 22px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #f0f0f0;
+          display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+        }
+        .article-card-main { flex: 1; min-width: 0; }
+        .article-title { font-size: 15.5px; font-weight: 600; color: #1a1a2e; }
+        .article-title:hover { color: #4a90d9; }
+        .article-desc { font-size: 13px; color: #888; margin-top: 6px; }
+        .article-card-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+        .article-date { font-size: 12px; color: #bbb; }
+        .article-read { font-size: 13px; color: #4a90d9; font-weight: 500; white-space: nowrap; }
+        .article-read:hover { text-decoration: underline; }
+        .article-empty { color: #bbb; font-size: 14px; padding: 20px 0; }
+        </style>
+        """;
+
+    var cards = articles.Length == 0
+        ? """<div class="article-empty">まだ記事がありません。</div>"""
+        : string.Concat(articles.Select(a =>
+        {
+            var titleEnc = System.Net.WebUtility.HtmlEncode(a.Title);
+            var descHtml = a.Desc != "" ? $"""<div class="article-desc">{System.Net.WebUtility.HtmlEncode(a.Desc)}</div>""" : "";
+            var dateHtml = a.Date != "" ? $"""<span class="article-date">{a.Date}</span>""" : "";
+            return $"""
+                <div class="article-card">
+                  <div class="article-card-main">
+                    <a href="articles/{a.Slug}.html" class="article-title">{titleEnc}</a>
+                    {descHtml}
+                  </div>
+                  <div class="article-card-meta">
+                    {dateHtml}
+                    <a href="articles/{a.Slug}.html" class="article-read">読む →</a>
+                  </div>
+                </div>
+                """;
+        }));
+
+    return Layout("記事一覧", "articles", "#4a90d9", chars, $"""
+        <div class="page-hero">
+          <div class="hero-title">記事一覧</div>
+          <div class="hero-sub">{articles.Length} 件の記事</div>
+        </div>
+        <div class="article-list">
+        {cards}
+        </div>
+        """, extraHead: ARTICLE_LIST_CSS);
+}
+
+static string BuildArticlePage(ArticleMeta article, CharData[] chars)
+{
+    const string ARTICLE_PAGE_CSS = """
+        <style>
+        .article-header { margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid #e8e8e8; }
+        .article-header-title { font-size: 26px; font-weight: 800; color: #1a1a2e; letter-spacing: -0.3px; }
+        .article-header-date  { font-size: 13px; color: #aaa; margin-top: 8px; }
+        .article-body { font-size: 15px; line-height: 1.8; }
+        .article-body h2 { font-size: 20px; font-weight: 700; margin: 28px 0 12px; padding-bottom: 6px; border-bottom: 1px solid #f0f0f0; }
+        .article-body h3 { font-size: 16px; font-weight: 600; margin: 20px 0 8px; }
+        .article-body p  { margin-bottom: 14px; }
+        .article-body ul, .article-body ol { margin: 0 0 14px 24px; }
+        .article-body li { margin-bottom: 4px; }
+        .article-body a  { color: #4a90d9; text-decoration: underline; }
+        .article-body code { font-family: monospace; background: #f5f5f5; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
+        .article-back { margin-top: 40px; padding-top: 20px; border-top: 1px solid #f0f0f0; font-size: 13px; }
+        .article-back a { color: #4a90d9; }
+        .article-back a:hover { text-decoration: underline; }
+        </style>
+        """;
+
+    var dateHtml = article.Date != "" ? $"""<div class="article-header-date">{article.Date}</div>""" : "";
+    return Layout(article.Title, "articles", "#4a90d9", chars, $"""
+        <div class="article-header">
+          <div class="article-header-title">{System.Net.WebUtility.HtmlEncode(article.Title)}</div>
+          {dateHtml}
+        </div>
+        <div class="article-body">{article.BodyHtml}</div>
+        <div class="article-back"><a href="../articles.html">← 記事一覧に戻る</a></div>
+        """, basePath: "../", extraHead: ARTICLE_PAGE_CSS);
 }
 
 static HashSet<string> CopyCardImages(string toolsRoot, string dstDir, string[] ids, CharData[] chars, Action<string> log)
@@ -3271,6 +3429,7 @@ static string ExtractPageTitle(string filePath)
 record CharData(string Id, string EnName, string JaName, string Accent, string LightBg, string Desc);
 record PageEntry(string Category, string Path, string TitleEn, string TitleJa, string Desc, string Color);
 record FlagDef(string Key, string Label);
+record ArticleMeta(string Slug, string Title, string Date, string Desc, string BodyHtml);
 
 static class CardFlags
 {
