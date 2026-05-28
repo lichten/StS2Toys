@@ -425,7 +425,7 @@ partial class MainForm
         _articleBodyLabel.Padding = new Padding(0, 4, 0, 2);
         _articleBodyLabel.Size = new Size(0, 22);
         _articleBodyLabel.TabIndex = 1;
-        _articleBodyLabel.Text = "HTML本文:";
+        _articleBodyLabel.Text = "Markdown本文:";
         //
         // _articleFieldTable
         //

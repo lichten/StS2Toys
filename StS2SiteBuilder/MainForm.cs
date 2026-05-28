@@ -184,6 +184,7 @@ public partial class MainForm : Form
     private bool   _articleIsDirty;
     private bool   _articleIsNew;
     private bool   _articleSuppressDirty;
+    private string _articleCurrentFormat = "markdown";
     private string _articleSavedTitle = "";
     private string _articleSavedDate  = "";
     private string _articleSavedDesc  = "";
@@ -229,6 +230,7 @@ public partial class MainForm : Form
         var path = Path.Combine(dir, slug + ".html");
         var meta = SiteBuilderCore.ParseArticlePublic(path);
         _articleIsNew = false;
+        _articleCurrentFormat = meta.Format;
         _articleSlugBox.ReadOnly  = true;
         _articleSlugBox.BackColor = SystemColors.Control;
         SetArticleFields(meta.Title, meta.Date, meta.Desc, slug, meta.BodyHtml);
@@ -246,6 +248,7 @@ public partial class MainForm : Form
         _articleList.ClearSelected();
         _articleList.SelectedIndexChanged += ArticleList_SelectedIndexChanged;
         _articleIsNew = true;
+        _articleCurrentFormat = "markdown";
         _articleSlugBox.ReadOnly  = false;
         _articleSlugBox.BackColor = SystemColors.Window;
         SetArticleFields("", DateTime.Today.ToString("yyyy-MM-dd"), "", "", "");
@@ -322,7 +325,7 @@ public partial class MainForm : Form
         var body  = _articleBodyBox.Text.Replace("\r\n", "\n");
         if (string.IsNullOrEmpty(slug) || string.IsNullOrEmpty(title)) return false;
         var dir = SiteBuilderCore.GetOrCreateArticlesDir();
-        SiteBuilderCore.SaveArticle(dir, slug, title, date, desc, body);
+        SiteBuilderCore.SaveArticle(dir, slug, title, date, desc, body, _articleCurrentFormat);
         _articleIsNew            = false;
         _articleSlugBox.ReadOnly  = true;
         _articleSlugBox.BackColor = SystemColors.Control;
@@ -330,27 +333,37 @@ public partial class MainForm : Form
         _articleIsDirty = false;
         UpdateArticleButtons();
         RefreshArticleList();
-        _statusLabel.Text = "保存しました";
         return true;
     }
 
-    private void SaveArticle_Click(object? sender, EventArgs e) => DoSaveArticle();
+    private async void SaveArticle_Click(object? sender, EventArgs e)
+    {
+        if (!DoSaveArticle()) return;
+        await BuildArticlesOnlyAsync();
+    }
 
     private async void SavePreviewArticle_Click(object? sender, EventArgs e)
     {
         if (!DoSaveArticle()) return;
+        await BuildArticlesOnlyAsync();
+        var distDir  = SiteBuilderCore.GetDistDir();
+        var slug     = _articleSlugBox.Text.Trim();
+        var htmlPath = Path.Combine(distDir, "articles", slug + ".html");
+        _tabControl.SelectedTab = _tabPreview;
+        if (_webView2.CoreWebView2 != null && File.Exists(htmlPath))
+            _webView2.CoreWebView2.Navigate(new Uri(htmlPath).AbsoluteUri);
+    }
+
+    private async Task BuildArticlesOnlyAsync()
+    {
+        _saveArticleButton.Enabled        = false;
         _savePreviewArticleButton.Enabled = false;
         _statusLabel.Text = "記事ビルド中...";
         try
         {
             var distDir = SiteBuilderCore.GetDistDir();
             await Task.Run(() => SiteBuilderCore.BuildArticlesOnly(distDir, AppendLog));
-            _statusLabel.Text = "記事ビルド完了";
-            var slug     = _articleSlugBox.Text.Trim();
-            var htmlPath = Path.Combine(distDir, "articles", slug + ".html");
-            _tabControl.SelectedTab = _tabPreview;
-            if (_webView2.CoreWebView2 != null && File.Exists(htmlPath))
-                _webView2.CoreWebView2.Navigate(new Uri(htmlPath).AbsoluteUri);
+            _statusLabel.Text = "保存しました";
         }
         catch (Exception ex)
         {

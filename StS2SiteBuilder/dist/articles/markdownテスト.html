@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>はじめての攻略メモ | Slay the Spire 2 攻略メモメモ</title>
+  <title>Markdownテスト | Slay the Spire 2 攻略メモメモ</title>
   <link rel="icon" type="image/png" href="../favicon.png">
   <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -355,20 +355,52 @@ a.mec-tag:hover { background: #eaecf0; border-color: #c8ccd2; }
     </nav>
     <main class="main">
       <div class="article-header">
-  <div class="article-header-title">はじめての攻略メモ</div>
+  <div class="article-header-title">Markdownテスト</div>
   <div class="article-header-date">2026-05-28</div>
 </div>
-<div class="article-body"><h2>このサイトについて</h2>
-<p>Slay the Spire 2 の攻略情報をまとめたサイトです。カード・レリック・イベント・エンカウンターのデータベースとして使えます。</p>
-<h2>各ページの使い方</h2>
+<div class="article-body"><h2>見出し2のテスト</h2>
+<p>通常の段落テキストです。<strong>太字</strong>と<em>イタリック</em>と<code>インラインコード</code>が使えます。</p>
+<h3>見出し3のテスト</h3>
 <ul>
-<li><strong>カード一覧</strong>: キャラクター・レアリティでフィルタリングできます。カード名をクリックすると詳細ページへ。</li>
-<li><strong>レリック一覧</strong>: レアリティフィルタと検索に対応。各レリックの効果と初期値を確認できます。</li>
-<li><strong>イベント一覧</strong>: イベントテキストと選択肢を一覧表示します。</li>
-<li><strong>エンカウンター一覧</strong>: 出現する敵とアクト情報をまとめています。</li>
+<li>箇条書き項目 1</li>
+<li>箇条書き項目 2
+<ul>
+<li>ネストした項目</li>
 </ul>
-<h2>攻略のコツ</h2>
-<p>Slay the Spire 2 では、デッキのシナジーとレリックの組み合わせが鍵になります。各キャラクターのメカニクスページで、固有のシステムを確認してみてください。</p>
+</li>
+<li><strong>太字の項目</strong></li>
+</ul>
+<h3>番号付きリスト</h3>
+<ol>
+<li>最初の手順</li>
+<li>次の手順</li>
+<li>最後の手順</li>
+</ol>
+<h3>コードブロック</h3>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;テスト&quot;,
+  &quot;value&quot;: 42
+}
+
+リンクと区切り線
+
+カード一覧へ (../cards.html) | レリック一覧へ (../relics.html)
+
+---
+
+▎ 引用テキストです。攻略のポイントをここに書くと目立ちます。
+
+段落の末尾。
+
+確認するとよい点：
+
+| チェック項目 | 期待される動作 |
+|---|---|
+| 「保存」クリック | `articles/` にMarkdownのまま保存され、`dist/articles/` にHTMLが生成される |
+| 「元に戻す」クリック | 保存前の内容に戻る |
+| 「保存してプレビュー」 | WebView でレンダリング済みのHTMLが表示される |
+| 再度タブを開く | Markdownテキストが表示される（HTMLではなく） |
+</code></pre>
 </div>
 <div class="article-back"><a href="../articles.html">← 記事一覧に戻る</a></div>
     </main>

@@ -26,10 +26,10 @@ public static class SiteBuilderCore
         return dir;
     }
 
-    public static void SaveArticle(string articlesDir, string slug, string title, string date, string desc, string bodyHtml)
+    public static void SaveArticle(string articlesDir, string slug, string title, string date, string desc, string bodyContent, string format = "markdown")
     {
-        var meta    = $"<!-- title: {title}; date: {date}; desc: {desc} -->";
-        var content = meta + "\n" + bodyHtml.TrimStart('\r', '\n');
+        var meta    = $"<!-- title: {title}; date: {date}; desc: {desc}; format: {format} -->";
+        var content = meta + "\n" + bodyContent.TrimStart('\r', '\n');
         File.WriteAllText(Path.Combine(articlesDir, slug + ".html"), content, System.Text.Encoding.UTF8);
     }
 
@@ -41,10 +41,10 @@ public static class SiteBuilderCore
         if (File.Exists(dist)) File.Delete(dist);
     }
 
-    public static (string Title, string Date, string Desc, string BodyHtml) ParseArticlePublic(string filePath)
+    public static (string Title, string Date, string Desc, string BodyHtml, string Format) ParseArticlePublic(string filePath)
     {
         var a = ParseArticle(filePath);
-        return (a.Title, a.Date, a.Desc, a.BodyHtml);
+        return (a.Title, a.Date, a.Desc, a.BodyHtml, a.Format);
     }
 
     public static void BuildArticlesOnly(string distDir, Action<string> log)
@@ -3008,23 +3008,25 @@ static ArticleMeta ParseArticle(string filePath)
     var first = nl >= 0 ? text[..nl] : text;
     var rest  = nl >= 0 ? text[(nl + 1)..] : "";
 
-    string title, date, desc, body;
+    string title, date, desc, body, format;
     if (first.TrimStart().StartsWith("<!--", StringComparison.Ordinal))
     {
-        title = ExtractMetaField(first, "title");
-        date  = ExtractMetaField(first, "date");
-        desc  = ExtractMetaField(first, "desc");
-        body  = rest;
+        title  = ExtractMetaField(first, "title");
+        date   = ExtractMetaField(first, "date");
+        desc   = ExtractMetaField(first, "desc");
+        format = ExtractMetaField(first, "format") is { Length: > 0 } f ? f : "html";
+        body   = rest;
     }
     else
     {
-        title = Path.GetFileNameWithoutExtension(filePath);
-        date  = "";
-        desc  = "";
-        body  = text;
+        title  = Path.GetFileNameWithoutExtension(filePath);
+        date   = "";
+        desc   = "";
+        format = "html";
+        body   = text;
     }
     if (title == "") title = Path.GetFileNameWithoutExtension(filePath);
-    return new ArticleMeta(Path.GetFileNameWithoutExtension(filePath), title, date, desc, body);
+    return new ArticleMeta(Path.GetFileNameWithoutExtension(filePath), title, date, desc, body, format);
 }
 
 static string BuildArticleListPage(ArticleMeta[] articles, CharData[] chars)
@@ -3102,13 +3104,16 @@ static string BuildArticlePage(ArticleMeta article, CharData[] chars)
         </style>
         """;
 
+    var bodyHtml = article.Format == "markdown"
+        ? Markdig.Markdown.ToHtml(article.BodyHtml)
+        : article.BodyHtml;
     var dateHtml = article.Date != "" ? $"""<div class="article-header-date">{article.Date}</div>""" : "";
     return Layout(article.Title, "articles", "#4a90d9", chars, $"""
         <div class="article-header">
           <div class="article-header-title">{System.Net.WebUtility.HtmlEncode(article.Title)}</div>
           {dateHtml}
         </div>
-        <div class="article-body">{article.BodyHtml}</div>
+        <div class="article-body">{bodyHtml}</div>
         <div class="article-back"><a href="../articles.html">← 記事一覧に戻る</a></div>
         """, basePath: "../", extraHead: ARTICLE_PAGE_CSS);
 }
@@ -3475,7 +3480,7 @@ static string ExtractPageTitle(string filePath)
 record CharData(string Id, string EnName, string JaName, string Accent, string LightBg, string Desc);
 record PageEntry(string Category, string Path, string TitleEn, string TitleJa, string Desc, string Color);
 record FlagDef(string Key, string Label);
-record ArticleMeta(string Slug, string Title, string Date, string Desc, string BodyHtml);
+record ArticleMeta(string Slug, string Title, string Date, string Desc, string BodyHtml, string Format = "html");
 
 static class CardFlags
 {
