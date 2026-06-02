@@ -648,7 +648,9 @@ static string BuildRunPage(RunHistoryData run, CharData[] chars,
         ? REVIEW_GUIDE
         : $"""
           <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedRunReview}</script>
-          {linkedReview}<!-- REVIEW_END -->
+          <section class="section">
+          {linkedReview}
+          </section><!-- REVIEW_END -->
           """;
 
     var content = $"""
@@ -1723,7 +1725,9 @@ static string BuildEventPage(string eventId, CharData[] chars, bool hasImage = f
         ? REVIEW_GUIDE
         : $"""
         <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
-        {RenderMarkdown(trimmedReview)}<!-- REVIEW_END -->
+        <section class="section">
+        {RenderMarkdown(trimmedReview)}
+        </section><!-- REVIEW_END -->
         """;
 
     var content = $"""
@@ -1991,7 +1995,9 @@ static string BuildEncounterPage(string encId, CharData[] chars, HashSet<string>
         ? REVIEW_GUIDE
         : $"""
         <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
-        {RenderMarkdown(trimmedReview)}<!-- REVIEW_END -->
+        <section class="section">
+        {RenderMarkdown(trimmedReview)}
+        </section><!-- REVIEW_END -->
         """;
 
     var content = $"""
@@ -2079,7 +2085,9 @@ static string BuildRelicPage(string relicId, CharData[] chars, bool hasImage = f
         ? REVIEW_GUIDE
         : $"""
         <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
-        {RenderMarkdown(trimmedReview)}<!-- REVIEW_END -->
+        <section class="section">
+        {RenderMarkdown(trimmedReview)}
+        </section><!-- REVIEW_END -->
         """;
 
     var rarityBadge = rarity != "" ? $"""<span class="badge rarity-{rarity.ToLower()}">{rarity}</span>""" : "";
@@ -2237,7 +2245,9 @@ static string BuildCardPage(string cardId, CharData[] chars, string basePath, bo
         ? REVIEW_GUIDE
         : $"""
         <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
-        {RenderMarkdown(trimmedReview)}<!-- REVIEW_END -->
+        <section class="section">
+        {RenderMarkdown(trimmedReview)}
+        </section><!-- REVIEW_END -->
         """;
 
     var content = $"""
@@ -2461,7 +2471,9 @@ static string BuildMechanicPage(CharGroup group, MechanicDef mec, string[] allCa
         ? REVIEW_GUIDE
         : $"""
         <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
-        {RenderMarkdown(trimmedReview)}<!-- REVIEW_END -->
+        <section class="section">
+        {RenderMarkdown(trimmedReview)}
+        </section><!-- REVIEW_END -->
         """;
 
     var content = $"""
@@ -3323,7 +3335,7 @@ public static void SaveReview(string filePath, string reviewMarkdown)
     if (s < 0 || e <= s) return;
     var scriptBlock = $"""<script type="text/plain" class="review-src" id="REVIEW_SRC">{reviewMarkdown}</script>""";
     var rendered    = RenderMarkdown(reviewMarkdown);
-    var zone        = scriptBlock + "\n" + rendered;
+    var zone        = scriptBlock + "\n<section class=\"section\">\n" + rendered + "\n</section>";
     var newContent  = content[..(s + START.Length)] + zone + content[e..];
     File.WriteAllText(filePath, newContent, System.Text.Encoding.UTF8);
 }
