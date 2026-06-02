@@ -810,7 +810,7 @@ static string BuildChangelogPage(CharData[] chars, string review = "") =>
         </div>
         <section class="section">
           <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">{review}</script>
-          {RenderMarkdown(review)}<!-- REVIEW_END -->
+          {review}<!-- REVIEW_END -->
         </section>
         """);
 
