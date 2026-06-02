@@ -336,21 +336,12 @@ static string GetCardDir(string cardId, CharData[] chars)
 static string BuildAboutPage(CharData[] chars, string review = "", string bioReview = "")
 {
     const string OVERVIEW_DEFAULT = """
-
-        <script type="text/markdown">
         このサイトは **Slay the Spire 2** のカード・レリック・イベント・エンカウンター・メカニクスをまとめた個人用リファレンスです。
 
         ゲームデータをもとに静的 HTML として生成されており、英語・日本語の両名称および効果テキストを掲載しています。
-        </script>
-
         """;
 
-    const string BIO_DEFAULT = """
-
-        <!-- プロフィールテキストをここに入力してください -->
-        <!-- このコメントを削除して任意のHTMLを記述できます  -->
-
-        """;
+    const string BIO_DEFAULT = "";
 
     const string AUTHOR_NAME = "（表示名）";
 
@@ -377,7 +368,8 @@ static string BuildAboutPage(CharData[] chars, string review = "", string bioRev
         </div>
         <section class="section">
           <h2 class="section-title">概要</h2>
-          <!-- REVIEW_START -->{overviewContent}<!-- REVIEW_END -->
+          <script type="text/plain" class="review-src" id="REVIEW_SRC">{overviewContent}</script>
+          {RenderMarkdown(overviewContent)}
         </section>
         <section class="section">
           <h2 class="section-title">収録コンテンツ</h2>
@@ -407,7 +399,10 @@ static string BuildAboutPage(CharData[] chars, string review = "", string bioRev
               <div class="author-name">{AUTHOR_NAME}</div>
               <a href="https://x.com/Plover2064" target="_blank" rel="noopener noreferrer"
                  class="author-handle">@Plover2064</a>
-              <div class="author-bio"><!-- BIO_START -->{bioContent}<!-- BIO_END --></div>
+              <div class="author-bio">
+                <script type="text/plain" class="review-src" id="BIO_SRC">{bioContent}</script>
+                {RenderMarkdownInline(bioContent)}
+              </div>
             </div>
           </div>
         </section>
@@ -637,18 +632,24 @@ static string BuildRunPage(RunHistoryData run, CharData[] chars,
 
     // ── 感想・メモ（REVIEW） ──
     const string REVIEW_GUIDE = """
-        <!-- REVIEW_START -->
+        <script type="text/plain" class="review-src" id="REVIEW_SRC">
         <!--
           【感想・メモ】
-          このコメントブロック全体を削除し、かわりにHTMLを書いてください。
+          このコメントブロック全体を削除し、Markdown で書いてください。
         -->
-        <!-- REVIEW_END -->
+        </script>
         """;
-    var strippedReview = review == "" ? "" : StripAutoLinks(review, "../");
-    var linkedReview = strippedReview == "" ? "" : AutoLinkHtml(strippedReview, autoLinkRegex, autoLinkMap, "../");
+    var trimmedRunReview  = review.Trim();
+    var runReviewIsPlaceholder = trimmedRunReview.StartsWith("<!--") && trimmedRunReview.EndsWith("-->");
+    var runReviewHtml     = (string.IsNullOrWhiteSpace(trimmedRunReview) || runReviewIsPlaceholder) ? "" : RenderMarkdown(trimmedRunReview);
+    var strippedReview = runReviewHtml == "" ? "" : StripAutoLinks(runReviewHtml, "../");
+    var linkedReview   = strippedReview == "" ? "" : AutoLinkHtml(strippedReview, autoLinkRegex, autoLinkMap, "../");
     var reviewZone = linkedReview == ""
         ? REVIEW_GUIDE
-        : $"<!-- REVIEW_START -->{linkedReview}<!-- REVIEW_END -->";
+        : $"""
+          <script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedRunReview}</script>
+          {linkedReview}
+          """;
 
     var content = $"""
         <div class="card-detail-header" style="border-left:5px solid {accent};background:{lightBg}">
@@ -806,7 +807,8 @@ static string BuildChangelogPage(CharData[] chars, string review = "") =>
           <h1 class="hero-title">更新履歴</h1>
         </div>
         <section class="section">
-          <!-- REVIEW_START -->{review}<!-- REVIEW_END -->
+          <script type="text/plain" class="review-src" id="REVIEW_SRC">{review}</script>
+          {RenderMarkdown(review)}
         </section>
         """);
 
@@ -819,7 +821,7 @@ static string BuildIndex(CharData[] chars)
                   <div class="char-name-ja">{ch.JaName}</div>
                 </div>
                 <div class="char-card-body">
-                  <p class="char-desc">{ch.Desc}</p>
+                  <p class="char-desc">{RenderMarkdownInline(ch.Desc)}</p>
                 </div>
                 <div class="char-card-footer">カードを見る &rarr;</div>
               </a>
@@ -846,7 +848,7 @@ static string BuildCharListPage(CharData[] chars)
                   <div class="char-name-ja">{ch.JaName}</div>
                 </div>
                 <div class="char-card-body">
-                  <p class="char-desc">{ch.Desc}</p>
+                  <p class="char-desc">{RenderMarkdownInline(ch.Desc)}</p>
                 </div>
                 <div class="char-card-footer">詳細を見る &rarr;</div>
               </a>
@@ -1700,28 +1702,28 @@ static string BuildEventPage(string eventId, CharData[] chars, bool hasImage = f
         """ : "";
 
     const string REVIEW_GUIDE = """
-
-        <!-- REVIEW_START -->
+        <script type="text/plain" class="review-src" id="REVIEW_SRC">
         <!--
           【評価・メモ】
-          このコメントブロック全体を削除し、かわりにHTMLを書いてください。
-          ビルド（dotnet run --project StS2SiteBuilder）後も上書きされません。
+          このコメントブロック全体を削除し、Markdown で書いてください。
+          ビルド後も上書きされません。
 
-          ▼ テンプレート（コピーして使ってください） ▼
+          ▼ テンプレート ▼
 
-          <section class="section">
-            <h2 class="section-title">評価・メモ</h2>
-            <p>ここに感想や評価を書く。</p>
-          </section>
+          ## 評価・メモ
+
+          ここに感想や評価を書く。
         -->
-        <!-- REVIEW_END -->
+        </script>
         """;
 
-    var reviewZone = review == ""
+    var trimmedReview  = review.Trim();
+    var isPlaceholder  = trimmedReview.StartsWith("<!--") && trimmedReview.EndsWith("-->");
+    var reviewZone = (string.IsNullOrWhiteSpace(trimmedReview) || isPlaceholder)
         ? REVIEW_GUIDE
         : $"""
-
-        <!-- REVIEW_START -->{review}<!-- REVIEW_END -->
+        <script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
+        {RenderMarkdown(trimmedReview)}
         """;
 
     var content = $"""
@@ -1968,28 +1970,28 @@ static string BuildEncounterPage(string encId, CharData[] chars, HashSet<string>
     }
 
     const string REVIEW_GUIDE = """
-
-        <!-- REVIEW_START -->
+        <script type="text/plain" class="review-src" id="REVIEW_SRC">
         <!--
           【評価・メモ】
-          このコメントブロック全体を削除し、かわりにHTMLを書いてください。
-          ビルド（dotnet run --project StS2SiteBuilder）後も上書きされません。
+          このコメントブロック全体を削除し、Markdown で書いてください。
+          ビルド後も上書きされません。
 
-          ▼ テンプレート（コピーして使ってください） ▼
+          ▼ テンプレート ▼
 
-          <section class="section">
-            <h2 class="section-title">評価・メモ</h2>
-            <p>ここに感想や評価を書く。</p>
-          </section>
+          ## 評価・メモ
+
+          ここに感想や評価を書く。
         -->
-        <!-- REVIEW_END -->
+        </script>
         """;
 
-    var reviewZone = review == ""
+    var trimmedReview  = review.Trim();
+    var isPlaceholder  = trimmedReview.StartsWith("<!--") && trimmedReview.EndsWith("-->");
+    var reviewZone = (string.IsNullOrWhiteSpace(trimmedReview) || isPlaceholder)
         ? REVIEW_GUIDE
         : $"""
-
-        <!-- REVIEW_START -->{review}<!-- REVIEW_END -->
+        <script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
+        {RenderMarkdown(trimmedReview)}
         """;
 
     var content = $"""
@@ -2056,28 +2058,28 @@ static string BuildRelicPage(string relicId, CharData[] chars, bool hasImage = f
         """ : "";
 
     const string REVIEW_GUIDE = """
-
-        <!-- REVIEW_START -->
+        <script type="text/plain" class="review-src" id="REVIEW_SRC">
         <!--
           【評価・メモ】
-          このコメントブロック全体を削除し、かわりにHTMLを書いてください。
-          ビルド（dotnet run --project StS2SiteBuilder）後も上書きされません。
+          このコメントブロック全体を削除し、Markdown で書いてください。
+          ビルド後も上書きされません。
 
-          ▼ テンプレート（コピーして使ってください） ▼
+          ▼ テンプレート ▼
 
-          <section class="section">
-            <h2 class="section-title">評価・メモ</h2>
-            <p>ここに感想や評価を書く。</p>
-          </section>
+          ## 評価・メモ
+
+          ここに感想や評価を書く。
         -->
-        <!-- REVIEW_END -->
+        </script>
         """;
 
-    var reviewZone = review == ""
+    var trimmedReview  = review.Trim();
+    var isPlaceholder  = trimmedReview.StartsWith("<!--") && trimmedReview.EndsWith("-->");
+    var reviewZone = (string.IsNullOrWhiteSpace(trimmedReview) || isPlaceholder)
         ? REVIEW_GUIDE
         : $"""
-
-        <!-- REVIEW_START -->{review}<!-- REVIEW_END -->
+        <script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
+        {RenderMarkdown(trimmedReview)}
         """;
 
     var rarityBadge = rarity != "" ? $"""<span class="badge rarity-{rarity.ToLower()}">{rarity}</span>""" : "";
@@ -2210,43 +2212,32 @@ static string BuildCardPage(string cardId, CharData[] chars, string basePath, bo
 
     // マーカー区間：ビルドで上書きされない手書きセクション
     const string REVIEW_GUIDE = """
-
-        <!-- REVIEW_START -->
+        <script type="text/plain" class="review-src" id="REVIEW_SRC">
         <!--
           【評価・メモ】
-          このコメントブロック全体を削除し、かわりにHTMLを書いてください。
-          ビルド（dotnet run --project StS2SiteBuilder）後も上書きされません。
+          このコメントブロック全体を削除し、Markdown で書いてください。
+          ビルド後も上書きされません。
 
-          ▼ テンプレート（コピーして使ってください） ▼
+          ▼ テンプレート ▼
 
-          <section class="section">
-            <h2 class="section-title">評価・メモ</h2>
-            <p>ここに感想や評価を書く。</p>
-          </section>
+          ## 評価・メモ
 
-          ▼ 使えるCSSクラス ▼
+          ここに感想や評価を書く。
 
-          テキスト段落：
-            <p>テキスト</p>
-
-          キー/値テーブル：
-            <table class="stat-table">
-              <tr><td class="stat-key">評価</td><td class="stat-val">A</td></tr>
-              <tr><td class="stat-key">習得時期</td><td class="stat-val">序盤</td></tr>
-            </table>
-
-          タグ・バッジ：
-            <span class="mec-tag">Strength</span>
-            <span class="badge rarity-rare">Rare</span>
+          | 評価 | 習得時期 |
+          |------|---------|
+          | A    | 序盤     |
         -->
-        <!-- REVIEW_END -->
+        </script>
         """;
 
-    var reviewZone = review == ""
+    var trimmedReview  = review.Trim();
+    var isPlaceholder  = trimmedReview.StartsWith("<!--") && trimmedReview.EndsWith("-->");
+    var reviewZone = (string.IsNullOrWhiteSpace(trimmedReview) || isPlaceholder)
         ? REVIEW_GUIDE
         : $"""
-
-        <!-- REVIEW_START -->{review}<!-- REVIEW_END -->
+        <script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
+        {RenderMarkdown(trimmedReview)}
         """;
 
     var content = $"""
@@ -2307,7 +2298,8 @@ static string BuildCharPage(CharData ch, CharData[] chars, (string En, string Ja
           <div class="char-header-body">
             <h1 class="char-title-en" style="color:{ch.Accent}">{ch.EnName}</h1>
             <div class="char-title-ja">{ch.JaName}</div>
-            <p class="char-desc-full"><!-- REVIEW_START -->{ch.Desc}<!-- REVIEW_END --></p>
+            <script type="text/plain" class="review-src" id="REVIEW_SRC">{ch.Desc}</script>
+            <div class="char-desc-full">{RenderMarkdown(ch.Desc)}</div>
           </div>
           <img src="images/characters/{ch.Id}.jpg" class="char-hero-img" alt="{ch.EnName}">
         </div>
@@ -2448,26 +2440,28 @@ static string BuildMechanicPage(CharGroup group, MechanicDef mec, string[] allCa
         : "";
 
     const string REVIEW_GUIDE = """
-
-        <!-- REVIEW_START -->
+        <script type="text/plain" class="review-src" id="REVIEW_SRC">
         <!--
           【評価・メモ】
-          このコメントブロック全体を削除し、かわりにHTMLを書いてください。
+          このコメントブロック全体を削除し、Markdown で書いてください。
+          ビルド後も上書きされません。
 
           ▼ テンプレート ▼
-          <section class="section">
-            <h2 class="section-title">評価・メモ</h2>
-            <p>ここに感想や評価を書く。</p>
-          </section>
+
+          ## 評価・メモ
+
+          ここに感想や評価を書く。
         -->
-        <!-- REVIEW_END -->
+        </script>
         """;
 
-    var reviewZone = review == ""
+    var trimmedReview  = review.Trim();
+    var isPlaceholder  = trimmedReview.StartsWith("<!--") && trimmedReview.EndsWith("-->");
+    var reviewZone = (string.IsNullOrWhiteSpace(trimmedReview) || isPlaceholder)
         ? REVIEW_GUIDE
         : $"""
-
-        <!-- REVIEW_START -->{review}<!-- REVIEW_END -->
+        <script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
+        {RenderMarkdown(trimmedReview)}
         """;
 
     var content = $"""
@@ -3056,7 +3050,7 @@ static string BuildArticleListPage(ArticleMeta[] articles, CharData[] chars)
         : string.Concat(articles.Select(a =>
         {
             var titleEnc = System.Net.WebUtility.HtmlEncode(a.Title);
-            var descHtml = a.Desc != "" ? $"""<div class="article-desc">{System.Net.WebUtility.HtmlEncode(a.Desc)}</div>""" : "";
+            var descHtml = a.Desc != "" ? $"""<div class="article-desc">{RenderMarkdownInline(a.Desc)}</div>""" : "";
             var dateHtml = a.Date != "" ? $"""<span class="article-date">{a.Date}</span>""" : "";
             return $"""
                 <div class="article-card">
@@ -3268,17 +3262,30 @@ static ISRgba32 DecodeBc7(byte[] data, int hdr, int w, int h)
 
 static string ExtractMarker(string filePath, string marker)
 {
-    var start = $"<!-- {marker}_START -->";
-    var end   = $"<!-- {marker}_END -->";
     if (!File.Exists(filePath)) return "";
-    var content = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
-    var s = content.IndexOf(start, StringComparison.Ordinal);
-    var e = content.IndexOf(end,   StringComparison.Ordinal);
-    if (s < 0 || e <= s) return "";
-    return content[(s + start.Length)..e];
+    var content     = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
+    var scriptOpen  = $"""<script type="text/plain" class="review-src" id="{marker}_SRC">""";
+    const string scriptClose = "</script>";
+    var sn = content.IndexOf(scriptOpen, StringComparison.Ordinal);
+    if (sn < 0) return "";
+    var en = content.IndexOf(scriptClose, sn + scriptOpen.Length, StringComparison.Ordinal);
+    return en > sn ? content[(sn + scriptOpen.Length)..en] : "";
 }
 
 static string ExtractReview(string filePath) => ExtractMarker(filePath, "REVIEW");
+
+static string RenderMarkdown(string md)
+    => string.IsNullOrEmpty(md) ? "" : Markdig.Markdown.ToHtml(md);
+
+static string RenderMarkdownInline(string md)
+{
+    if (string.IsNullOrEmpty(md)) return "";
+    var html = Markdig.Markdown.ToHtml(md).Trim();
+    if (html.StartsWith("<p>", StringComparison.OrdinalIgnoreCase) &&
+        html.EndsWith("</p>", StringComparison.OrdinalIgnoreCase))
+        html = html[3..^4].Trim();
+    return html;
+}
 
 static Dictionary<string, string> ParseChangelogDates(string changelogPath)
 {
