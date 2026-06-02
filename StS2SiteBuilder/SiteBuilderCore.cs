@@ -368,8 +368,8 @@ static string BuildAboutPage(CharData[] chars, string review = "", string bioRev
         </div>
         <section class="section">
           <h2 class="section-title">概要</h2>
-          <script type="text/plain" class="review-src" id="REVIEW_SRC">{overviewContent}</script>
-          {RenderMarkdown(overviewContent)}
+          <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">{overviewContent}</script>
+          {RenderMarkdown(overviewContent)}<!-- REVIEW_END -->
         </section>
         <section class="section">
           <h2 class="section-title">収録コンテンツ</h2>
@@ -632,12 +632,12 @@ static string BuildRunPage(RunHistoryData run, CharData[] chars,
 
     // ── 感想・メモ（REVIEW） ──
     const string REVIEW_GUIDE = """
-        <script type="text/plain" class="review-src" id="REVIEW_SRC">
+        <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">
         <!--
           【感想・メモ】
           このコメントブロック全体を削除し、Markdown で書いてください。
         -->
-        </script>
+        </script><!-- REVIEW_END -->
         """;
     var trimmedRunReview  = review.Trim();
     var runReviewIsPlaceholder = trimmedRunReview.StartsWith("<!--") && trimmedRunReview.EndsWith("-->");
@@ -647,8 +647,8 @@ static string BuildRunPage(RunHistoryData run, CharData[] chars,
     var reviewZone = linkedReview == ""
         ? REVIEW_GUIDE
         : $"""
-          <script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedRunReview}</script>
-          {linkedReview}
+          <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedRunReview}</script>
+          {linkedReview}<!-- REVIEW_END -->
           """;
 
     var content = $"""
@@ -807,8 +807,8 @@ static string BuildChangelogPage(CharData[] chars, string review = "") =>
           <h1 class="hero-title">更新履歴</h1>
         </div>
         <section class="section">
-          <script type="text/plain" class="review-src" id="REVIEW_SRC">{review}</script>
-          {RenderMarkdown(review)}
+          <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">{review}</script>
+          {RenderMarkdown(review)}<!-- REVIEW_END -->
         </section>
         """);
 
@@ -1702,7 +1702,7 @@ static string BuildEventPage(string eventId, CharData[] chars, bool hasImage = f
         """ : "";
 
     const string REVIEW_GUIDE = """
-        <script type="text/plain" class="review-src" id="REVIEW_SRC">
+        <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">
         <!--
           【評価・メモ】
           このコメントブロック全体を削除し、Markdown で書いてください。
@@ -1714,7 +1714,7 @@ static string BuildEventPage(string eventId, CharData[] chars, bool hasImage = f
 
           ここに感想や評価を書く。
         -->
-        </script>
+        </script><!-- REVIEW_END -->
         """;
 
     var trimmedReview  = review.Trim();
@@ -1722,8 +1722,8 @@ static string BuildEventPage(string eventId, CharData[] chars, bool hasImage = f
     var reviewZone = (string.IsNullOrWhiteSpace(trimmedReview) || isPlaceholder)
         ? REVIEW_GUIDE
         : $"""
-        <script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
-        {RenderMarkdown(trimmedReview)}
+        <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
+        {RenderMarkdown(trimmedReview)}<!-- REVIEW_END -->
         """;
 
     var content = $"""
@@ -1970,7 +1970,7 @@ static string BuildEncounterPage(string encId, CharData[] chars, HashSet<string>
     }
 
     const string REVIEW_GUIDE = """
-        <script type="text/plain" class="review-src" id="REVIEW_SRC">
+        <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">
         <!--
           【評価・メモ】
           このコメントブロック全体を削除し、Markdown で書いてください。
@@ -1982,7 +1982,7 @@ static string BuildEncounterPage(string encId, CharData[] chars, HashSet<string>
 
           ここに感想や評価を書く。
         -->
-        </script>
+        </script><!-- REVIEW_END -->
         """;
 
     var trimmedReview  = review.Trim();
@@ -1990,8 +1990,8 @@ static string BuildEncounterPage(string encId, CharData[] chars, HashSet<string>
     var reviewZone = (string.IsNullOrWhiteSpace(trimmedReview) || isPlaceholder)
         ? REVIEW_GUIDE
         : $"""
-        <script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
-        {RenderMarkdown(trimmedReview)}
+        <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
+        {RenderMarkdown(trimmedReview)}<!-- REVIEW_END -->
         """;
 
     var content = $"""
@@ -2058,7 +2058,7 @@ static string BuildRelicPage(string relicId, CharData[] chars, bool hasImage = f
         """ : "";
 
     const string REVIEW_GUIDE = """
-        <script type="text/plain" class="review-src" id="REVIEW_SRC">
+        <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">
         <!--
           【評価・メモ】
           このコメントブロック全体を削除し、Markdown で書いてください。
@@ -2070,7 +2070,7 @@ static string BuildRelicPage(string relicId, CharData[] chars, bool hasImage = f
 
           ここに感想や評価を書く。
         -->
-        </script>
+        </script><!-- REVIEW_END -->
         """;
 
     var trimmedReview  = review.Trim();
@@ -2078,8 +2078,8 @@ static string BuildRelicPage(string relicId, CharData[] chars, bool hasImage = f
     var reviewZone = (string.IsNullOrWhiteSpace(trimmedReview) || isPlaceholder)
         ? REVIEW_GUIDE
         : $"""
-        <script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
-        {RenderMarkdown(trimmedReview)}
+        <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
+        {RenderMarkdown(trimmedReview)}<!-- REVIEW_END -->
         """;
 
     var rarityBadge = rarity != "" ? $"""<span class="badge rarity-{rarity.ToLower()}">{rarity}</span>""" : "";
@@ -2212,7 +2212,7 @@ static string BuildCardPage(string cardId, CharData[] chars, string basePath, bo
 
     // マーカー区間：ビルドで上書きされない手書きセクション
     const string REVIEW_GUIDE = """
-        <script type="text/plain" class="review-src" id="REVIEW_SRC">
+        <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">
         <!--
           【評価・メモ】
           このコメントブロック全体を削除し、Markdown で書いてください。
@@ -2228,7 +2228,7 @@ static string BuildCardPage(string cardId, CharData[] chars, string basePath, bo
           |------|---------|
           | A    | 序盤     |
         -->
-        </script>
+        </script><!-- REVIEW_END -->
         """;
 
     var trimmedReview  = review.Trim();
@@ -2236,8 +2236,8 @@ static string BuildCardPage(string cardId, CharData[] chars, string basePath, bo
     var reviewZone = (string.IsNullOrWhiteSpace(trimmedReview) || isPlaceholder)
         ? REVIEW_GUIDE
         : $"""
-        <script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
-        {RenderMarkdown(trimmedReview)}
+        <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
+        {RenderMarkdown(trimmedReview)}<!-- REVIEW_END -->
         """;
 
     var content = $"""
@@ -2298,8 +2298,8 @@ static string BuildCharPage(CharData ch, CharData[] chars, (string En, string Ja
           <div class="char-header-body">
             <h1 class="char-title-en" style="color:{ch.Accent}">{ch.EnName}</h1>
             <div class="char-title-ja">{ch.JaName}</div>
-            <script type="text/plain" class="review-src" id="REVIEW_SRC">{ch.Desc}</script>
-            <div class="char-desc-full">{RenderMarkdown(ch.Desc)}</div>
+            <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">{ch.Desc}</script>
+            <div class="char-desc-full">{RenderMarkdown(ch.Desc)}</div><!-- REVIEW_END -->
           </div>
           <img src="images/characters/{ch.Id}.jpg" class="char-hero-img" alt="{ch.EnName}">
         </div>
@@ -2440,7 +2440,7 @@ static string BuildMechanicPage(CharGroup group, MechanicDef mec, string[] allCa
         : "";
 
     const string REVIEW_GUIDE = """
-        <script type="text/plain" class="review-src" id="REVIEW_SRC">
+        <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">
         <!--
           【評価・メモ】
           このコメントブロック全体を削除し、Markdown で書いてください。
@@ -2452,7 +2452,7 @@ static string BuildMechanicPage(CharGroup group, MechanicDef mec, string[] allCa
 
           ここに感想や評価を書く。
         -->
-        </script>
+        </script><!-- REVIEW_END -->
         """;
 
     var trimmedReview  = review.Trim();
@@ -2460,8 +2460,8 @@ static string BuildMechanicPage(CharGroup group, MechanicDef mec, string[] allCa
     var reviewZone = (string.IsNullOrWhiteSpace(trimmedReview) || isPlaceholder)
         ? REVIEW_GUIDE
         : $"""
-        <script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
-        {RenderMarkdown(trimmedReview)}
+        <!-- REVIEW_START --><script type="text/plain" class="review-src" id="REVIEW_SRC">{trimmedReview}</script>
+        {RenderMarkdown(trimmedReview)}<!-- REVIEW_END -->
         """;
 
     var content = $"""
@@ -3312,7 +3312,7 @@ public static string? ExtractReviewPublic(string filePath)
     return ExtractReview(filePath);
 }
 
-public static void SaveReview(string filePath, string reviewHtml)
+public static void SaveReview(string filePath, string reviewMarkdown)
 {
     const string START = "<!-- REVIEW_START -->";
     const string END   = "<!-- REVIEW_END -->";
@@ -3321,7 +3321,10 @@ public static void SaveReview(string filePath, string reviewHtml)
     var s = content.IndexOf(START, StringComparison.Ordinal);
     var e = content.IndexOf(END,   StringComparison.Ordinal);
     if (s < 0 || e <= s) return;
-    var newContent = content[..(s + START.Length)] + reviewHtml + content[e..];
+    var scriptBlock = $"""<script type="text/plain" class="review-src" id="REVIEW_SRC">{reviewMarkdown}</script>""";
+    var rendered    = RenderMarkdown(reviewMarkdown);
+    var zone        = scriptBlock + "\n" + rendered;
+    var newContent  = content[..(s + START.Length)] + zone + content[e..];
     File.WriteAllText(filePath, newContent, System.Text.Encoding.UTF8);
 }
 
