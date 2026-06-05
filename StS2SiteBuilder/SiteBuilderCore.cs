@@ -4084,10 +4084,11 @@ static string ExtractPageTitle(string filePath)
         {
             var name    = Path.GetFileName(monsterDir);
             var gifPath = Path.Combine(outDir, $"{name}.gif");
+            var pngPath = Path.Combine(outDir, $"{name}.png");
 
             // キャッシュチェック
             var skelImport = Directory.GetFiles(monsterDir, "*.skel.import").FirstOrDefault();
-            if (skelImport is not null && File.Exists(gifPath) &&
+            if (skelImport is not null && File.Exists(gifPath) && File.Exists(pngPath) &&
                 File.GetLastWriteTimeUtc(gifPath) >= File.GetLastWriteTimeUtc(skelImport))
             {
                 result.Add(name);
@@ -4142,6 +4143,8 @@ static string ExtractPageTitle(string filePath)
 
                 gifImage.Metadata.GetGifMetadata().RepeatCount = 0;
                 gifImage.SaveAsGif(gifPath);
+                using var pngFrame = gifImage.Frames.CloneFrame(0);
+                pngFrame.SaveAsPng(pngPath);
 
                 result.Add(name);
                 generated++;
