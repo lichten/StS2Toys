@@ -7,7 +7,7 @@ using SixLabors.ImageSharp.Processing;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
-var toolsRoot       = @"C:\work\develop\StS2Toys\tools\extracted";
+var toolsRoot       = FindToolsRoot();
 var portraitPngRoot = Path.Combine(toolsRoot, "images", "card_portraits_png");
 var jpegOutRoot     = Path.GetFullPath(Path.Combine(toolsRoot, "..", "..", "card-images"));
 var ctexImport      = Path.Combine(toolsRoot, ".godot", "imported");
@@ -120,6 +120,19 @@ Console.WriteLine($"  Done. converted={converted} skipped={skipped}");
 Console.WriteLine("\nAll done.");
 
 // ── helpers ──────────────────────────────────────────────────────────────────
+
+static string FindToolsRoot()
+{
+    var dir = new DirectoryInfo(AppContext.BaseDirectory);
+    while (dir is not null)
+    {
+        var candidate = Path.Combine(dir.FullName, "tools", "extracted");
+        if (Directory.Exists(candidate)) return candidate;
+        dir = dir.Parent;
+    }
+    throw new DirectoryNotFoundException(
+        "tools/extracted が見つかりません。dotnet run --project ctex-to-png をリポジトリルートから実行してください。");
+}
 
 // GST2 header layout:
 //   [0]  "GST2" magic (4 bytes)

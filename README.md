@@ -52,6 +52,22 @@ New-Item -ItemType Directory -Force -Path $out | Out-Null
 > PCK バージョンは `3.4.5.1`（Godot 4.5+ 形式）です。  
 > Steam のゲームアップデート後にアセットが変わった場合は、`tools/extracted/` を削除してから再実行してください。
 
+#### 2-3. カード画像を生成する
+
+`.ctex` 形式で圧縮されたカードアトラス画像を PNG に変換します。
+
+```powershell
+dotnet run --project ctex-to-png
+```
+
+完了すると以下が生成されます：
+
+- `tools/extracted/images/atlases/card_atlas_0.png`（～2）— カードアトラス（アプリの画像表示に必須）
+- `tools/extracted/images/card_portraits_png/{character}/*.png` — 個別カード PNG（数百枚）
+
+> **注意**  
+> このステップを省略すると、アプリ起動後にデッキ概観などでカード画像が表示されません。
+
 ### 3. ビルド・実行
 
 tools のセットアップが完了したら、ソリューション全体をビルドします。
