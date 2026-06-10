@@ -34,10 +34,9 @@ partial class MainForm
         _openDistButton = new Button();
         _changeDistButton = new Button();
         _tabHistory = new TabPage();
-        _historyList = new ListView();
+        _historyPanel = new Panel();
         _historyToolbar = new FlowLayoutPanel();
         _refreshHistoryButton = new Button();
-        _generateRunButton = new Button();
         _tabArticles = new TabPage();
         _articleSplit = new SplitContainer();
         _articleList = new ListBox();
@@ -348,7 +347,7 @@ partial class MainForm
         // 
         // _tabHistory
         // 
-        _tabHistory.Controls.Add(_historyList);
+        _tabHistory.Controls.Add(_historyPanel);
         _tabHistory.Controls.Add(_historyToolbar);
         _tabHistory.Dock = DockStyle.Fill;
         _tabHistory.Location = new Point(4, 34);
@@ -356,24 +355,17 @@ partial class MainForm
         _tabHistory.Size = new Size(192, 62);
         _tabHistory.TabIndex = 2;
         _tabHistory.Text = "ラン履歴";
-        // 
-        // _historyList
-        // 
-        _historyList.Dock = DockStyle.Fill;
-        _historyList.FullRowSelect = true;
-        _historyList.GridLines = true;
-        _historyList.Location = new Point(0, 52);
-        _historyList.MultiSelect = false;
-        _historyList.Name = "_historyList";
-        _historyList.Size = new Size(192, 10);
-        _historyList.TabIndex = 1;
-        _historyList.UseCompatibleStateImageBehavior = false;
-        _historyList.View = View.Details;
-        // 
+        //
+        // _historyPanel
+        //
+        _historyPanel.AutoScroll = true;
+        _historyPanel.Dock = DockStyle.Fill;
+        _historyPanel.Name = "_historyPanel";
+        _historyPanel.TabIndex = 1;
+        //
         // _historyToolbar
-        // 
+        //
         _historyToolbar.Controls.Add(_refreshHistoryButton);
-        _historyToolbar.Controls.Add(_generateRunButton);
         _historyToolbar.Dock = DockStyle.Top;
         _historyToolbar.Location = new Point(0, 0);
         _historyToolbar.Name = "_historyToolbar";
@@ -391,18 +383,7 @@ partial class MainForm
         _refreshHistoryButton.Size = new Size(82, 43);
         _refreshHistoryButton.TabIndex = 0;
         _refreshHistoryButton.Text = "更新";
-        // 
-        // _generateRunButton
-        // 
-        _generateRunButton.AutoSize = true;
-        _generateRunButton.Enabled = false;
-        _generateRunButton.Location = new Point(11, 52);
-        _generateRunButton.Name = "_generateRunButton";
-        _generateRunButton.Padding = new Padding(12, 4, 12, 4);
-        _generateRunButton.Size = new Size(142, 43);
-        _generateRunButton.TabIndex = 1;
-        _generateRunButton.Text = "HTMLを生成";
-        // 
+        //
         // _tabArticles
         // 
         _tabArticles.Controls.Add(_articleSplit);
@@ -753,8 +734,7 @@ partial class MainForm
     private TabPage              _tabHistory;
     private FlowLayoutPanel      _historyToolbar;
     private Button               _refreshHistoryButton;
-    private Button               _generateRunButton;
-    private ListView             _historyList;
+    private Panel                _historyPanel;
     private TabPage              _tabArticles;
     private SplitContainer       _articleSplit;
     private FlowLayoutPanel      _articleToolbar;

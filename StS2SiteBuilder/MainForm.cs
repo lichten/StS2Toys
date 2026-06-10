@@ -28,10 +28,8 @@ public partial class MainForm : Form
         _revertReviewButton.Click += (_, _) => RevertReview();
         _changelogAddButton.Click += ChangelogAddButton_Click;
 
-        _tabHistory.Enter += (_, _) => RefreshHistoryList();
+        _tabHistory.Enter           += (_, _) => RefreshHistoryList();
         _refreshHistoryButton.Click += (_, _) => RefreshHistoryList();
-        _generateRunButton.Click    += GenerateRunButton_Click;
-        _historyList.SelectedIndexChanged += HistoryList_SelectedIndexChanged;
 
         _tabArticles.Enter += (_, _) => RefreshArticleList();
         _newArticleButton.Click    += NewArticle_Click;
@@ -474,7 +472,7 @@ public partial class MainForm : Form
     {
         try
         {
-            _historyList.Items.Clear();
+            _historyPanel.Controls.Clear();
             var dir = RunHistoryService.GetHistoryDir();
             if (!Directory.Exists(dir))
             {
@@ -483,22 +481,45 @@ public partial class MainForm : Form
             }
             var distDir   = SiteBuilderCore.GetDistDir();
             var summaries = RunHistoryService.LoadSummaries(dir);
+            const int rowH = 40;
+            const int btnW = 130;
+            var panelW = Math.Max(_historyPanel.ClientSize.Width, 400);
+            var y = 0;
             foreach (var s in summaries)
             {
+                var existing   = Path.Combine(distDir, "run", $"{s.StartTime}.html");
+                var published  = File.Exists(existing);
                 var date       = DateTimeOffset.FromUnixTimeSeconds(s.StartTime).LocalDateTime.ToString("yyyy-MM-dd HH:mm");
                 var charJa     = _baseChars.FirstOrDefault(c => c.Id == s.CharacterId)?.JaName ?? s.CharacterId;
                 var resultText = s.Win ? "勝利" : s.WasAbandoned ? "離脱" : "敗北";
                 var time       = $"{s.RunTime / 60}:{s.RunTime % 60:D2}";
-                var item       = new ListViewItem(date);
-                item.SubItems.Add(charJa);
-                item.SubItems.Add(resultText);
-                item.SubItems.Add($"A{s.Ascension}");
-                item.SubItems.Add(time);
-                item.Tag = s;
-                var existing = Path.Combine(distDir, "run", $"{s.StartTime}.html");
-                item.ForeColor = File.Exists(existing) ? Color.Black : Color.Gray;
-                _historyList.Items.Add(item);
+                var row = new Panel
+                {
+                    Location = new Point(0, y),
+                    Size     = new Size(panelW, rowH),
+                };
+                var lbl = new Label
+                {
+                    Text      = $"{date}  {charJa}  {resultText}  A{s.Ascension}  {time}",
+                    Location  = new Point(4, 0),
+                    Size      = new Size(panelW - btnW - 8, rowH),
+                    TextAlign = ContentAlignment.MiddleLeft,
+                    ForeColor = published ? Color.Black : Color.Gray,
+                };
+                var btn = new Button
+                {
+                    Text     = published ? "HTMLを再生成" : "HTMLを生成",
+                    Location = new Point(panelW - btnW, 4),
+                    Size     = new Size(btnW - 4, rowH - 8),
+                    Tag      = s,
+                };
+                btn.Click += GenerateRunButton_Click;
+                row.Controls.Add(lbl);
+                row.Controls.Add(btn);
+                _historyPanel.Controls.Add(row);
+                y += rowH;
             }
+            _historyPanel.AutoScrollMinSize = new Size(0, y);
             _statusLabel.Text = $"ラン履歴: {summaries.Count} 件";
         }
         catch (Exception ex)
@@ -507,33 +528,22 @@ public partial class MainForm : Form
         }
     }
 
-    private void HistoryList_SelectedIndexChanged(object? sender, EventArgs e)
-    {
-        if (_historyList.SelectedItems.Count == 0) return;
-        var summary  = (RunSummary)_historyList.SelectedItems[0].Tag!;
-        var distDir  = SiteBuilderCore.GetDistDir();
-        var existing = Path.Combine(distDir, "run", $"{summary.StartTime}.html");
-        _generateRunButton.Enabled = true;
-        _generateRunButton.Text    = File.Exists(existing) ? "HTMLを再生成" : "HTMLを生成";
-    }
-
     private async void GenerateRunButton_Click(object? sender, EventArgs e)
     {
-        if (_historyList.SelectedItems.Count == 0) return;
-        var summary = (RunSummary)_historyList.SelectedItems[0].Tag!;
-        _generateRunButton.Enabled = false;
+        if (sender is not Button btn) return;
+        var summary = (RunSummary)btn.Tag!;
+        btn.Enabled = false;
         _statusLabel.Text = "HTML生成中...";
         try
         {
-            var run     = await Task.Run(() => RunHistoryService.Load(summary.FilePath));
-            var distDir = SiteBuilderCore.GetDistDir();
+            var run      = await Task.Run(() => RunHistoryService.Load(summary.FilePath));
+            var distDir  = SiteBuilderCore.GetDistDir();
             var htmlPath = await Task.Run(() => SiteBuilderCore.WriteRunPage(run, _baseChars, distDir));
             _statusLabel.Text = "生成完了";
-            _generateRunButton.Text = "HTMLを再生成";
-            _generateRunButton.Enabled = true;
-            // update color in list
-            if (_historyList.SelectedItems.Count > 0)
-                _historyList.SelectedItems[0].ForeColor = Color.Black;
+            btn.Text    = "HTMLを再生成";
+            btn.Enabled = true;
+            if (btn.Parent?.Controls.OfType<Label>().FirstOrDefault() is Label lbl)
+                lbl.ForeColor = Color.Black;
             _tabControl.SelectedTab = _tabPreview;
             if (_webView2.CoreWebView2 != null)
                 _webView2.CoreWebView2.Navigate(new Uri(htmlPath).AbsoluteUri);
@@ -541,7 +551,7 @@ public partial class MainForm : Form
         catch (Exception ex)
         {
             _statusLabel.Text = $"エラー: {ex.Message}";
-            _generateRunButton.Enabled = true;
+            btn.Enabled = true;
         }
     }
 }
