@@ -3748,21 +3748,12 @@ static HashSet<string> CopyCardImages(string toolsRoot, string dstDir, string[] 
         var rawId   = RawId(cardId).ToLowerInvariant();
         var charDir = GetCardDir(cardId, chars);
 
-        string? srcPng = null;
-        if (charDir != "shared")
-        {
-            var p = Path.Combine(portBaseDir, charDir, rawId + ".png");
-            if (File.Exists(p)) srcPng = p;
-        }
-        if (srcPng is null)
-        {
-            foreach (var sub in fallbackDirs)
-            {
-                var p = Path.Combine(portBaseDir, sub, rawId + ".png");
-                if (File.Exists(p)) { srcPng = p; break; }
-            }
-        }
-        // fallback: packed/card_portraits/ から ctex 変換
+        // ソースは StS2Shared の CardImageService に一元化した対応データから解決
+        // （サブディレクトリ・type 付きファイル名を含む）。
+        string? srcPng = CardImageService.GetSourcePath(portBaseDir, cardId);
+        if (srcPng is not null && !File.Exists(srcPng)) srcPng = null;
+
+        // fallback: packed/card_portraits/ から ctex 変換（マッピングに無いカード向け）
         if (srcPng is null)
         {
             var packedBase = Path.Combine(toolsRoot, "images", "packed", "card_portraits");

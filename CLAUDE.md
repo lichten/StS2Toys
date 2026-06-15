@@ -53,6 +53,8 @@ $pck = "C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\SlayTheSp
 - `card_types.json`, `card_costs.json`, `card_rarities.json`, `card_characters.json` — ゲーム DLL から抽出
 - `card_star_costs.json` — スターコストを持つカードの ID リスト（`get_CanonicalStarCost > 0` または `get_HasStarCostX` が true のもの）
 - `card_stats.json` — カードのキャノニカル変数（ダメージ・ブロック値など）
+- `card_images.json` — カード ID → 画像のソース相対パス（`card_portraits_png/` 基準、例 `silent/abrasive.png`）。
+  extractor が実ファイルをスキャンして生成。`Services/CardImageService.cs` で参照し、SiteBuilder/Toys 双方の画像解決を一元化
 
 **ローカライゼーション JSON（`tools/extracted/` から埋め込み）**
 - `localization/{eng,jpn}/{cards,relics,enchantments,encounters,acts}.json`

@@ -1556,6 +1556,58 @@ Console.WriteLine(kwOutPath);
     Console.WriteLine(Path.Combine(outDir2, "event_acts.json"));
 }
 
+// card_images.json 出力（カード ID → card_portraits_png 内のソース相対パス）
+// 実ファイルをスキャンして対応付ける。探索順は Toys 実装に合わせ、まず全 dir+ルートで
+// {rawId}.png、見つからなければ {rawId}_{type}.png を探す。
+{
+    var outDir3 = Path.GetDirectoryName(outPath)!;
+    var repoRoot3 = Path.GetFullPath(Path.Combine(outDir3, "..", "..", ".."));
+    var portraitsDir = Path.Combine(repoRoot3, "tools", "extracted", "images", "card_portraits_png");
+
+    var jsonOpts3 = new System.Text.Json.JsonSerializerOptions
+    {
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
+    string J(string s) => System.Text.Json.JsonSerializer.Serialize(s, jsonOpts3);
+
+    if (!Directory.Exists(portraitsDir))
+    {
+        Console.Error.WriteLine($"WARNING: {portraitsDir} not found; skipping card_images.json.");
+    }
+    else
+    {
+        // 探索対象: 各サブディレクトリ + ルート直下（ルートは subdir 名 "" で表す）
+        var searchDirs = Directory.GetDirectories(portraitsDir)
+            .Select(d => (name: Path.GetFileName(d)!, full: d))
+            .Append(("", portraitsDir))
+            .ToList();
+
+        string? Find(string fileName)
+        {
+            foreach (var (name, full) in searchDirs)
+                if (File.Exists(Path.Combine(full, fileName)))
+                    return name.Length == 0 ? fileName : name + "/" + fileName;
+            return null;
+        }
+
+        var imgEntries = new SortedDictionary<string, string>(StringComparer.Ordinal);
+        foreach (var (cardId, type) in results)
+        {
+            var raw = (cardId.Contains('.') ? cardId[(cardId.IndexOf('.') + 1)..] : cardId).ToLowerInvariant();
+            var rel = Find(raw + ".png");
+            if (rel is null && !string.IsNullOrEmpty(type))
+                rel = Find(raw + "_" + type.ToLowerInvariant() + ".png");
+            if (rel is not null)
+                imgEntries[cardId] = rel;
+        }
+        var imgLines = imgEntries.Select(kv => $"  {J(kv.Key)}: {J(kv.Value)}");
+        File.WriteAllText(Path.Combine(outDir3, "card_images.json"),
+            "{\n" + string.Join(",\n", imgLines) + "\n}\n");
+        Console.Error.WriteLine($"Extracted {imgEntries.Count} card image paths.");
+        Console.WriteLine(Path.Combine(outDir3, "card_images.json"));
+    }
+}
+
 // ancient_options.json 出力
 // Ancient イベントクラスのオプションプールを IL から抽出する
 {

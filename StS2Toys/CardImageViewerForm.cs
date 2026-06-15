@@ -44,32 +44,11 @@ public partial class CardImageViewerForm : Form
 
     internal static string? FindCardImage(string cardId, string? typeHint = null)
     {
+        // サブディレクトリ/type 付きファイル名の対応は StS2Shared の CardImageService に一元化。
         var dir = GetPortraitsDir();
         if (dir is null) return null;
-
-        var raw = cardId.Contains('.') ? cardId[(cardId.LastIndexOf('.') + 1)..] : cardId;
-        var baseName = raw.ToLowerInvariant();
-
-        var found = SearchPortraitsDir(dir, baseName + ".png");
-        if (found is not null) return found;
-
-        // タイプ別ファイル名のフォールバック（例: mad_science_skill.png）
-        var type = (typeHint ?? CardDatabaseService.GetCardType(cardId)).ToLowerInvariant();
-        if (!string.IsNullOrEmpty(type))
-            found = SearchPortraitsDir(dir, baseName + "_" + type + ".png");
-
-        return found;
-    }
-
-    static string? SearchPortraitsDir(string dir, string filename)
-    {
-        foreach (var subdir in Directory.GetDirectories(dir))
-        {
-            var path = Path.Combine(subdir, filename);
-            if (File.Exists(path)) return path;
-        }
-        var rootPath = Path.Combine(dir, filename);
-        return File.Exists(rootPath) ? rootPath : null;
+        var path = CardImageService.GetSourcePath(dir, cardId);
+        return path is not null && File.Exists(path) ? path : null;
     }
 
     static string? GetPortraitsDir()
