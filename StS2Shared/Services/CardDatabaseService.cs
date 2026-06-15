@@ -12,7 +12,8 @@ public static class CardDatabaseService
     static readonly Dictionary<string, string> _types = LoadTypes();
     static readonly Dictionary<string, string> _rarities = LoadStringDict("card_rarities.json");
     static readonly Dictionary<string, string> _characters = LoadStringDict("card_characters.json");
-    static readonly Dictionary<string, int> _costs = LoadCosts();
+    static readonly Dictionary<string, int> _costs = LoadIntDict("card_costs.json");
+    static readonly Dictionary<string, int> _upgradedCosts = LoadIntDict("card_upgraded_costs.json");
 
     static Dictionary<string, Entry> Load()
     {
@@ -50,10 +51,10 @@ public static class CardDatabaseService
         return result;
     }
 
-    static Dictionary<string, int> LoadCosts()
+    static Dictionary<string, int> LoadIntDict(string fileName)
     {
         var asm = Assembly.GetExecutingAssembly();
-        var name = ResourceResolver.ResolveVersioned(asm, "card_costs.json");
+        var name = ResourceResolver.ResolveVersioned(asm, fileName);
         if (name is null) return new Dictionary<string, int>();
 
         using var stream = asm.GetManifestResourceStream(name)!;
@@ -85,6 +86,24 @@ public static class CardDatabaseService
     public static string GetCardCost(string id)
     {
         if (!_costs.TryGetValue(id, out var cost)) return "";
+        return FormatCost(id, cost);
+    }
+
+    /// <summary>
+    /// アップグレードでコストが変わるカードのアップグレード後コスト値。変わらない場合は null。
+    /// </summary>
+    public static int? GetUpgradedCostValue(string id) =>
+        _upgradedCosts.TryGetValue(id, out var c) ? c : null;
+
+    /// <summary>
+    /// アップグレード後コストの整形文字列（<see cref="GetCardCost"/> と同じ形式）。
+    /// コストが変わらないカードは ""。
+    /// </summary>
+    public static string GetUpgradedCost(string id) =>
+        _upgradedCosts.TryGetValue(id, out var c) ? FormatCost(id, c) : "";
+
+    static string FormatCost(string id, int cost)
+    {
         if (cost != -1) return cost.ToString();
         var type = GetCardType(id);
         return type is "Attack" or "Skill" or "Power" ? "X" : "-";

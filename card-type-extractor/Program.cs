@@ -721,6 +721,7 @@ foreach (var typeHandle in mr.TypeDefinitions)
 // およびフィールド代入 (ldarg.0, ldc.i4 N, stfld F) を取得
 var results       = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 var costs         = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+var upgradedCosts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 var rarities      = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 var cardStats     = new Dictionary<string, Dictionary<string, int>>(StringComparer.OrdinalIgnoreCase);
 var starCostCards = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -1059,6 +1060,19 @@ foreach (var typeHandle in mr.TypeDefinitions)
                     upgVar = null;
                     pendingAmount = null;
                 }
+                else if ((name == "UpgradeBy" || name == "UpgradeTo") &&
+                         upgVar == "EnergyCost" && pendingAmount.HasValue)
+                {
+                    // コスト（EnergyCost）のアップグレード変動。base は .ctor 由来（X コスト=-1 は除外）。
+                    if (costs.TryGetValue(cardId, out var baseCost) && baseCost >= 0)
+                    {
+                        var upg = name == "UpgradeBy" ? baseCost + pendingAmount.Value : pendingAmount.Value;
+                        if (upg >= 0 && upg != baseCost)
+                            upgradedCosts[cardId] = upg;
+                    }
+                    upgVar = null;
+                    pendingAmount = null;
+                }
                 else
                 {
                     pendingAmount = null;
@@ -1302,6 +1316,14 @@ var costLines = costs.OrderBy(kv => kv.Key)
     .Select(kv => $"  \"{kv.Key}\": {kv.Value}");
 File.WriteAllText(costsOutPath, "{\n" + string.Join(",\n", costLines) + "\n}\n");
 Console.WriteLine(costsOutPath);
+
+// card_upgraded_costs.json 出力（アップグレードでコストが変わるカードのみ）
+var upgCostsOutPath = Path.Combine(Path.GetDirectoryName(outPath)!, "card_upgraded_costs.json");
+Console.Error.WriteLine($"Extracted {upgradedCosts.Count} upgraded card cost mappings.");
+var upgCostLines = upgradedCosts.OrderBy(kv => kv.Key)
+    .Select(kv => $"  \"{kv.Key}\": {kv.Value}");
+File.WriteAllText(upgCostsOutPath, "{\n" + string.Join(",\n", upgCostLines) + "\n}\n");
+Console.WriteLine(upgCostsOutPath);
 
 // card_rarities.json 出力
 var raritiesOutPath = Path.Combine(Path.GetDirectoryName(outPath)!, "card_rarities.json");
