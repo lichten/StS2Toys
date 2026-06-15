@@ -12,8 +12,7 @@ public static class EventActService
     static IReadOnlyList<ActGroup> Load()
     {
         var asm = Assembly.GetExecutingAssembly();
-        var name = asm.GetManifestResourceNames()
-            .FirstOrDefault(n => n.EndsWith("event_acts.json", StringComparison.OrdinalIgnoreCase));
+        var name = ResourceResolver.ResolveVersioned(asm, "event_acts.json");
         if (name is null) return [];
 
         using var stream = asm.GetManifestResourceStream(name)!;

@@ -113,6 +113,80 @@ if (args.Length > 0 && args[0] == "--list-var-ctors")
     return;
 }
 
+// --- 調査: 型フルネームに部分文字列を含む型を一覧（名前空間・クラス特定用）---
+if (args.Length > 0 && args[0] == "--list-types")
+{
+    var sub = args.Length > 1 ? args[1] : "";
+    foreach (var th in mr.TypeDefinitions)
+    {
+        var td = mr.GetTypeDefinition(th);
+        var ns = mr.GetString(td.Namespace);
+        var nm = mr.GetString(td.Name);
+        var full = string.IsNullOrEmpty(ns) ? nm : ns + "." + nm;
+        if (full.Contains(sub, StringComparison.OrdinalIgnoreCase))
+            Console.WriteLine(full);
+    }
+    return;
+}
+
+// --- 調査: 指定型のメソッド・フィールド・各メソッドが参照する型名を表示 ---
+if (args.Length > 0 && args[0] == "--dump-type")
+{
+    var target = args.Length > 1 ? args[1] : "";
+    foreach (var th in mr.TypeDefinitions)
+    {
+        var td = mr.GetTypeDefinition(th);
+        var ns = mr.GetString(td.Namespace);
+        var nm = mr.GetString(td.Name);
+        var full = string.IsNullOrEmpty(ns) ? nm : ns + "." + nm;
+        if (!full.Equals(target, StringComparison.OrdinalIgnoreCase) &&
+            !nm.Equals(target, StringComparison.OrdinalIgnoreCase)) continue;
+
+        Console.WriteLine($"TYPE {full}");
+        foreach (var fh in td.GetFields())
+        {
+            var fd = mr.GetFieldDefinition(fh);
+            Console.WriteLine($"  FIELD {mr.GetString(fd.Name)}");
+        }
+        foreach (var mh in td.GetMethods())
+        {
+            var md = mr.GetMethodDefinition(mh);
+            var mn = mr.GetString(md.Name);
+            var refs = new List<string>();
+            if (md.RelativeVirtualAddress != 0)
+            {
+                var body = peReader.GetMethodBody(md.RelativeVirtualAddress);
+                var il = body?.GetILBytes();
+                if (il != null)
+                {
+                    var seenStr = new List<string>();
+                    for (int i = 0; i + 4 < il.Length; i++)
+                    {
+                        byte op = il[i];
+                        if (op is 0x28 or 0x6F) // call / callvirt
+                        {
+                            int tok = il[i+1]|(il[i+2]<<8)|(il[i+3]<<16)|(il[i+4]<<24);
+                            var tn = ResolveMethodSpecFirstArg(mr, tok);
+                            if (!string.IsNullOrEmpty(tn)) refs.Add(tn);
+                            i += 4;
+                        }
+                        else if (op == 0x72) // ldstr
+                        {
+                            int tok = il[i+1]|(il[i+2]<<8)|(il[i+3]<<16)|(il[i+4]<<24);
+                            try { seenStr.Add(mr.GetUserString(MetadataTokens.UserStringHandle(tok & 0xFFFFFF))); } catch { }
+                            i += 4;
+                        }
+                    }
+                    if (seenStr.Count > 0) refs.Add("STR:[" + string.Join("|", seenStr.Take(12)) + "]");
+                }
+            }
+            var refStr = refs.Count > 0 ? "  => " + string.Join(", ", refs.Distinct().Take(30)) : "";
+            Console.WriteLine($"  METHOD {mn}{refStr}");
+        }
+    }
+    return;
+}
+
 // --- 調査: UserString トークンを読み取る ---
 if (args.Length > 0 && args[0] == "--read-string")
 {
@@ -1327,6 +1401,161 @@ Console.WriteLine(kwOutPath);
     }
 }
 
+// monster_names.json / encounter_monsters.json / event_acts.json 出力
+// monster_names: アニメーション dir × ローカライズ名（loc に無い表示名は既存ファイルを引き継ぐ）
+// encounter_monsters / event_acts: DLL のモデルクラス（Encounters / Acts）から IL 抽出
+{
+    var outDir2  = Path.GetDirectoryName(outPath)!;
+    var repoRoot2 = Path.GetFullPath(Path.Combine(outDir2, "..", "..", ".."));
+    var locDir2  = Path.Combine(repoRoot2, "tools", "extracted", "localization");
+
+    var jsonOpts2 = new System.Text.Json.JsonSerializerOptions
+    {
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
+    string J(string s) => System.Text.Json.JsonSerializer.Serialize(s, jsonOpts2);
+
+    var excludedEvents = new HashSet<string>(StringComparer.Ordinal)
+        { "DEPRECATED_EVENT", "ERROR", "MOCK_EVENT_MODEL", "PROCEED" };
+
+    // ---- 有効なモンスターモデル ID 集合（DLL）----
+    // monster_names と encounter_monsters は同じ「モデル snake 小文字」を ID 空間として共有する。
+    // SiteBuilder は ID をそのまま images/monsters/{id}.png|gif とページ monsters/{id}.html に使うため、
+    // 画像フォルダが存在する ID は画像表示、無い ID は名前のみ（グレースフル）になる。
+    const string monNs = "MegaCrit.Sts2.Core.Models.Monsters";
+    var monsterIdToKey = new SortedDictionary<string, string>(StringComparer.Ordinal); // id(lower) → SNAKE
+    foreach (var th in mr.TypeDefinitions)
+    {
+        var td = mr.GetTypeDefinition(th);
+        if (mr.GetString(td.Namespace) != monNs) continue;       // .Monsters のみ（.Mocks 等は除外）
+        var cls = mr.GetString(td.Name);
+        if (cls.StartsWith('<') || cls.Contains("Mock") || cls.Contains("Deprecated")) continue;
+        var snake = CamelToUpperSnake(cls);
+        monsterIdToKey[snake.ToLowerInvariant()] = snake;
+    }
+
+    // ---- monster_names.json（モデル粒度。名前は localization {SNAKE}.name）----
+    var engMon = LoadLocBySuffix(Path.Combine(locDir2, "eng", "monsters.json"), ".name");
+    var jpnMon = LoadLocBySuffix(Path.Combine(locDir2, "jpn", "monsters.json"), ".name");
+
+    // 既存 monster_names.json を表示名フォールバックとして読む（loc に無い手書き名を保持）
+    var monFallback = new Dictionary<string, (string En, string Ja)>(StringComparer.OrdinalIgnoreCase);
+    foreach (var cand in new[] { Path.Combine(outDir2, "monster_names.json"),
+                                 Path.Combine(repoRoot2, "StS2Shared", "Resources", "monster_names.json") })
+    {
+        if (!File.Exists(cand)) continue;
+        using var d = System.Text.Json.JsonDocument.Parse(File.ReadAllText(cand));
+        foreach (var el in d.RootElement.EnumerateArray())
+        {
+            var dn = el.GetProperty("dirName").GetString();
+            if (string.IsNullOrEmpty(dn)) continue;
+            var en = el.TryGetProperty("en", out var ev) ? ev.GetString() ?? "" : "";
+            var ja = el.TryGetProperty("ja", out var jv) ? jv.GetString() ?? "" : "";
+            monFallback[dn] = (en, ja);
+        }
+        break;
+    }
+
+    var monLines = new List<string>();
+    foreach (var (id, key) in monsterIdToKey)
+    {
+        string en, ja;
+        if (engMon.TryGetValue(key, out var le) && le.Length > 0)
+        {
+            en = le;
+            ja = jpnMon.TryGetValue(key, out var lj) && lj.Length > 0 ? lj : le;
+        }
+        else if (monFallback.TryGetValue(id, out var fb) && fb.En.Length > 0)
+        {
+            en = fb.En;
+            ja = fb.Ja.Length > 0 ? fb.Ja : fb.En;
+        }
+        else
+        {
+            en = SnakeToTitle(key);
+            ja = en;
+        }
+        monLines.Add($"  {{ \"dirName\": {J(id)}, \"en\": {J(en)}, \"ja\": {J(ja)} }}");
+    }
+    File.WriteAllText(Path.Combine(outDir2, "monster_names.json"),
+        "[\n" + string.Join(",\n", monLines) + "\n]\n");
+    Console.Error.WriteLine($"Extracted {monLines.Count} monster names (model granularity).");
+    Console.WriteLine(Path.Combine(outDir2, "monster_names.json"));
+
+    // ---- encounter_monsters.json（encounter → モンスターモデル ID）----
+    const string encNs = "MegaCrit.Sts2.Core.Models.Encounters";
+    var encMap = new SortedDictionary<string, List<string>>(StringComparer.Ordinal);
+    foreach (var th in mr.TypeDefinitions)
+    {
+        var td = mr.GetTypeDefinition(th);
+        if (mr.GetString(td.Namespace) != encNs) continue;
+        var cls = mr.GetString(td.Name);
+        if (cls.StartsWith('<') || cls.Contains("Deprecated") || cls.Contains("Mock")) continue;
+
+        var refs = CollectGenericArgRefs(mr, peReader, td, n => n == "get_AllPossibleMonsters");
+        if (refs.Count == 0)
+            refs = CollectGenericArgRefs(mr, peReader, td, n => n == "GenerateMonsters");
+        // 有効なモンスターモデル ID のみ（基底型 MonsterModel 等のノイズを除外）
+        var monIds = refs.Select(r => CamelToUpperSnake(r).ToLowerInvariant())
+            .Where(id => monsterIdToKey.ContainsKey(id))
+            .Distinct().OrderBy(x => x, StringComparer.Ordinal).ToList();
+        if (monIds.Count > 0)
+            encMap[CamelToUpperSnake(cls)] = monIds;
+    }
+    var encLines = encMap.Select(kv => $"  {J(kv.Key)}: [{string.Join(", ", kv.Value.Select(J))}]");
+    File.WriteAllText(Path.Combine(outDir2, "encounter_monsters.json"),
+        "{\n" + string.Join(",\n", encLines) + "\n}\n");
+    Console.Error.WriteLine($"Extracted {encMap.Count} encounter→monster mappings.");
+    Console.WriteLine(Path.Combine(outDir2, "encounter_monsters.json"));
+
+    // ---- event_acts.json ----
+    const string actNs = "MegaCrit.Sts2.Core.Models.Acts";
+    var actEvents = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+    foreach (var th in mr.TypeDefinitions)
+    {
+        var td = mr.GetTypeDefinition(th);
+        if (mr.GetString(td.Namespace) != actNs) continue;
+        var cls = mr.GetString(td.Name);
+        if (cls.StartsWith('<') || cls.Contains("Deprecated")) continue;
+        var refs = CollectGenericArgRefs(mr, peReader, td, n => n == "get_AllEvents");
+        actEvents[CamelToUpperSnake(cls)] = refs.Select(CamelToUpperSnake)
+            .Where(e => !excludedEvents.Contains(e))
+            .Distinct().OrderBy(x => x, StringComparer.Ordinal).ToList();
+    }
+
+    var engActTitle = LoadLocBySuffix(Path.Combine(locDir2, "eng", "acts.json"), ".title");
+    var jpnActTitle = LoadLocBySuffix(Path.Combine(locDir2, "jpn", "acts.json"), ".title");
+
+    // ALL_ACTS = どの Act の get_AllEvents にも属さないイベント（全幕共通）
+    var allEventIds = LoadLocBySuffix(Path.Combine(locDir2, "eng", "events.json"), ".title").Keys
+        .Where(id => !excludedEvents.Contains(id));
+    var claimed = actEvents.Values.SelectMany(x => x).ToHashSet(StringComparer.Ordinal);
+    var globalEvents = allEventIds.Where(e => !claimed.Contains(e))
+        .Distinct().OrderBy(x => x, StringComparer.Ordinal).ToList();
+
+    // Act の表示名の接頭辞・順序は編集上の定義（ローカライズには素のタイトルのみ）。
+    var actMeta = new (string Id, string PrefixEn, string PrefixJp)[]
+    {
+        ("OVERGROWTH", "Act 1: ", "第一幕："),
+        ("UNDERDOCKS", "Act 1: ", "第一幕："),
+        ("HIVE",       "Act 2: ", "第二幕："),
+        ("GLORY",      "Act 3: ", "第三幕："),
+    };
+    var actEntries = new List<string>();
+    foreach (var (id, pe, pj) in actMeta)
+    {
+        if (!actEvents.TryGetValue(id, out var evs)) continue;
+        var en = pe + (engActTitle.TryGetValue(id, out var te) ? te : SnakeToTitle(id));
+        var ja = pj + (jpnActTitle.TryGetValue(id, out var tj) ? tj : SnakeToTitle(id));
+        actEntries.Add($"  {{ \"id\": {J(id)}, \"nameJp\": {J(ja)}, \"nameEn\": {J(en)}, \"events\": [{string.Join(", ", evs.Select(J))}] }}");
+    }
+    actEntries.Add($"  {{ \"id\": \"ALL_ACTS\", \"nameJp\": \"全幕共通\", \"nameEn\": \"All Acts\", \"events\": [{string.Join(", ", globalEvents.Select(J))}] }}");
+    File.WriteAllText(Path.Combine(outDir2, "event_acts.json"),
+        "[\n" + string.Join(",\n", actEntries) + "\n]\n");
+    Console.Error.WriteLine($"Extracted {actEvents.Count} acts (+ALL_ACTS, {globalEvents.Count} global events).");
+    Console.WriteLine(Path.Combine(outDir2, "event_acts.json"));
+}
+
 // ancient_options.json 出力
 // Ancient イベントクラスのオプションプールを IL から抽出する
 {
@@ -1485,6 +1714,56 @@ static string CamelToUpperSnake(string name)
     // BeaconOfHope → BEACON_OF_HOPE
     var result = Regex.Replace(name, @"(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])", "_");
     return result.ToUpperInvariant();
+}
+
+// UPPER_SNAKE → Title Case（例 KAISER_CRAB → Kaiser Crab）。loc に名前が無い場合のフォールバック。
+static string SnakeToTitle(string snake) =>
+    string.Join(' ', snake.Split('_')
+        .Select(w => w.Length == 0 ? w : char.ToUpper(w[0]) + w[1..].ToLowerInvariant()));
+
+// ローカライズ JSON の "{PREFIX}{suffix}" キー（PREFIX に追加のドット無し）を PREFIX→値 辞書にする。
+static Dictionary<string, string> LoadLocBySuffix(string path, string suffix)
+{
+    var map = new Dictionary<string, string>(StringComparer.Ordinal);
+    if (!File.Exists(path)) return map;
+    using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(path));
+    foreach (var p in doc.RootElement.EnumerateObject())
+    {
+        if (!p.Name.EndsWith(suffix, StringComparison.Ordinal)) continue;
+        var prefix = p.Name[..^suffix.Length];
+        if (prefix.Contains('.')) continue;
+        map[prefix] = p.Value.GetString() ?? "";
+    }
+    return map;
+}
+
+// 指定型の、名前が match するメソッドの IL を走査し、call/callvirt の MethodSpec 第一型引数から
+// 参照型名（例: ジェネリック Add&lt;Axebot&gt;() の "Axebot"）を収集する。
+// encounter→monster / act→event 抽出に使用（ancient_options 抽出と同じ手法）。
+static List<string> CollectGenericArgRefs(MetadataReader mr, PEReader peReader, TypeDefinition td, Func<string, bool> match)
+{
+    var refs = new List<string>();
+    foreach (var mh in td.GetMethods())
+    {
+        var md = mr.GetMethodDefinition(mh);
+        if (!match(mr.GetString(md.Name))) continue;
+        if (md.RelativeVirtualAddress == 0) continue;
+        var il = peReader.GetMethodBody(md.RelativeVirtualAddress)?.GetILBytes();
+        if (il == null) continue;
+        for (int i = 0; i + 4 < il.Length; i++)
+        {
+            byte op = il[i];
+            if (op is 0x28 or 0x6F) // call / callvirt
+            {
+                int tok = il[i + 1] | (il[i + 2] << 8) | (il[i + 3] << 16) | (il[i + 4] << 24);
+                var tn = ResolveMethodSpecFirstArg(mr, tok);
+                if (!string.IsNullOrEmpty(tn) && tn.Length > 2 && !tn.Contains('<'))
+                    refs.Add(tn);
+                i += 4;
+            }
+        }
+    }
+    return refs;
 }
 
 static (int? val, int size) ReadLdcI4(byte[] il, int i)

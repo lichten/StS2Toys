@@ -13,11 +13,12 @@ public static class MonsterDatabaseService
     static IReadOnlyDictionary<string, MonsterDef> LoadMonsters()
     {
         var asm  = Assembly.GetExecutingAssembly();
-        var name = asm.GetManifestResourceNames().First(n => n.EndsWith("monster_names.json"));
+        var result = new Dictionary<string, MonsterDef>(StringComparer.OrdinalIgnoreCase);
+        var name = ResourceResolver.ResolveVersioned(asm, "monster_names.json");
+        if (name is null) return result;
         using var stream = asm.GetManifestResourceStream(name)!;
         var arr = JsonDocument.Parse(stream).RootElement;
 
-        var result = new Dictionary<string, MonsterDef>(StringComparer.OrdinalIgnoreCase);
         foreach (var el in arr.EnumerateArray())
         {
             var dir = el.GetProperty("dirName").GetString()!;
@@ -31,11 +32,12 @@ public static class MonsterDatabaseService
     static IReadOnlyDictionary<string, string[]> LoadEncounterMap()
     {
         var asm  = Assembly.GetExecutingAssembly();
-        var name = asm.GetManifestResourceNames().First(n => n.EndsWith("encounter_monsters.json"));
+        var result = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+        var name = ResourceResolver.ResolveVersioned(asm, "encounter_monsters.json");
+        if (name is null) return result;
         using var stream = asm.GetManifestResourceStream(name)!;
         var doc = JsonDocument.Parse(stream);
 
-        var result = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
         foreach (var prop in doc.RootElement.EnumerateObject())
         {
             var dirs = prop.Value.EnumerateArray().Select(e => e.GetString()!).ToArray();

@@ -106,8 +106,12 @@ $pck = "C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\SlayTheSp
 - キャッシュ済みの GIF はスキップされる（`.skel.import` より新しければ再生成不要）。
 - PNG スナップショット（256×256）は以前と同様に同ディレクトリに残る。
 
-エンカウンター→モンスターの対応は `StS2Shared/Resources/encounter_monsters.json` で管理。
-モンスターの EN/JA 名は `StS2Shared/Resources/monster_names.json` で管理。
+エンカウンター→モンスターの対応 `encounter_monsters.json`、モンスターの EN/JA 名 `monster_names.json`、
+Act→イベントの対応 `event_acts.json` は、card-type-extractor が DLL のモデルクラス
+（`Models.Encounters` / `Models.Monsters` / `Models.Acts`）とローカライズから
+バージョンフォルダ（`Resources/{version}/`）へ生成する（`ResourceResolver` で最新を解決）。
+モンスターは**モデル粒度**の ID 空間（例 `bowlbug_rock`）で、`monster_names` と `encounter_monsters` で共通。
+画像/ページは ID をそのまま使うため、Spine フォルダがある ID のみ画像表示される。
 Spine レンダリングには `SpineLoader.cs` / `SpineRenderer.cs`（StS2SiteBuilder 内）と
 `SpineRuntime` プロジェクト（spine-csharp の pure C# ランタイム）を使用する。
 
