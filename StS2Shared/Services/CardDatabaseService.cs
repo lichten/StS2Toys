@@ -577,6 +577,55 @@ public static class CardDatabaseService
     public static IReadOnlyDictionary<string, int>? GetCardStats(string id) =>
         _stats.TryGetValue(ToRawId(id), out var v) ? v : null;
 
+    // ---- 関連カード (card_related.json: DLL の get_ExtraHoverTips 由来、カードのみ) ----
+
+    static readonly IReadOnlyDictionary<string, string[]> _relatedCards = LoadRelatedCards();
+    static readonly IReadOnlyDictionary<string, IReadOnlyList<string>> _createdByCards = BuildCreatedBy();
+
+    static IReadOnlyDictionary<string, string[]> LoadRelatedCards()
+    {
+        var asm = Assembly.GetExecutingAssembly();
+        var result = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+        var name = ResourceResolver.ResolveVersioned(asm, "card_related.json");
+        if (name is null) return result;
+
+        using var stream = asm.GetManifestResourceStream(name)!;
+        var doc = JsonDocument.Parse(stream);
+        foreach (var prop in doc.RootElement.EnumerateObject())
+            result[prop.Name] = prop.Value.EnumerateArray()
+                .Select(e => e.GetString() ?? "").Where(s => s.Length > 0).ToArray();
+        return result;
+    }
+
+    static IReadOnlyDictionary<string, IReadOnlyList<string>> BuildCreatedBy()
+    {
+        var map = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (src, targets) in _relatedCards)
+            foreach (var t in targets)
+            {
+                if (!map.TryGetValue(t, out var lst)) map[t] = lst = new List<string>();
+                lst.Add(src);
+            }
+        foreach (var lst in map.Values) lst.Sort(StringComparer.OrdinalIgnoreCase);
+        return map.ToDictionary(kv => kv.Key, kv => (IReadOnlyList<string>)kv.Value,
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    static string NormalizeCardId(string id) => id.Contains('.') ? id : "CARD." + id;
+
+    /// <summary>
+    /// カードがホバー時に関連表示するカード（DLL の <c>get_ExtraHoverTips</c>、カードのみ）。例: Accuracy → [CARD.SHIV]。
+    /// </summary>
+    public static IReadOnlyList<string> GetRelatedCards(string id) =>
+        _relatedCards.TryGetValue(NormalizeCardId(id), out var r) ? r : Array.Empty<string>();
+
+    /// <summary>
+    /// 指定カードを関連表示している（＝そのカードを生成/参照する）カード一覧。<see cref="GetRelatedCards"/> の逆引き。
+    /// 例: Shiv ← [CARD.ACCURACY, CARD.BLADE_DANCE, ...]。
+    /// </summary>
+    public static IReadOnlyList<string> GetCreatedByCards(string id) =>
+        _createdByCards.TryGetValue(NormalizeCardId(id), out var r) ? r : Array.Empty<string>();
+
     public static IEnumerable<string> GetAllCardIds() => _types.Keys;
 
     public static IEnumerable<string> GetAllRelicIds()

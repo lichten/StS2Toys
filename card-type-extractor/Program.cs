@@ -1442,6 +1442,35 @@ Console.WriteLine(kwOutPath);
     }
 }
 
+// card_related.json 出力（カードのホバーツールチップに出る関連カード = get_ExtraHoverTips）
+// 値はカードクラスのみにフィルタ（power/orb/DynamicVar ノイズを除外）。CREATED BY は参照側で逆引き。
+{
+    var outDir = Path.GetDirectoryName(outPath)!;
+    const string cardsNs = "MegaCrit.Sts2.Core.Models.Cards";
+    var cardRelated = new SortedDictionary<string, List<string>>(StringComparer.Ordinal);
+    foreach (var th in mr.TypeDefinitions)
+    {
+        var td = mr.GetTypeDefinition(th);
+        if (mr.GetString(td.Namespace) != cardsNs) continue;
+        var cls = mr.GetString(td.Name);
+        if (cls.StartsWith('<') || !cardClasses.Contains(cls)) continue;
+        var srcId = "CARD." + CamelToUpperSnake(cls);
+        var refs = CollectGenericArgRefs(mr, peReader, td, n => n == "get_ExtraHoverTips")
+            .Where(r => cardClasses.Contains(r))
+            .Select(r => "CARD." + CamelToUpperSnake(r))
+            .Where(id => id != srcId)
+            .Distinct().OrderBy(x => x, StringComparer.Ordinal).ToList();
+        if (refs.Count > 0)
+            cardRelated[srcId] = refs;
+    }
+    var relLines = cardRelated.Select(kv =>
+        $"  \"{kv.Key}\": [{string.Join(", ", kv.Value.Select(v => $"\"{v}\""))}]");
+    var relOutPath = Path.Combine(outDir, "card_related.json");
+    File.WriteAllText(relOutPath, "{\n" + string.Join(",\n", relLines) + "\n}\n");
+    Console.Error.WriteLine($"Extracted {cardRelated.Count} card related-card mappings.");
+    Console.WriteLine(relOutPath);
+}
+
 // monster_names.json / encounter_monsters.json / event_acts.json 出力
 // monster_names: アニメーション dir × ローカライズ名（loc に無い表示名は既存ファイルを引き継ぐ）
 // encounter_monsters / event_acts: DLL のモデルクラス（Encounters / Acts）から IL 抽出
