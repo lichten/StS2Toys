@@ -1363,6 +1363,35 @@ var kwEntries = cardKeywords.OrderBy(kv => kv.Key).Select(kv =>
 File.WriteAllText(kwOutPath, "{\n" + string.Join(",\n", kwEntries) + "\n}\n");
 Console.WriteLine(kwOutPath);
 
+// 生ローカライズ JSON をバージョンフォルダへ取り込む（版の固定）。
+// tools/extracted は git 未追跡でゲーム更新時に内容が変わるため、各バージョンの版を
+// Resources/{version}/localization/{eng,jpn}/ にコピーして保持する。
+// StS2Shared 側は ResourceResolver で最新版を解決する。
+{
+    var outDir = Path.GetDirectoryName(outPath)!;
+    var repoRoot = Path.GetFullPath(Path.Combine(outDir, "..", "..", ".."));
+    var locDir = Path.Combine(repoRoot, "tools", "extracted", "localization");
+    string[] locFiles =
+    {
+        "relics", "card_keywords", "afflictions", "enchantments",
+        "encounters", "acts", "events", "ancients"
+    };
+    foreach (var lang in new[] { "eng", "jpn" })
+    {
+        var destDir = Path.Combine(outDir, "localization", lang);
+        Directory.CreateDirectory(destDir);
+        foreach (var f in locFiles)
+        {
+            var src = Path.Combine(locDir, lang, $"{f}.json");
+            if (File.Exists(src))
+                File.Copy(src, Path.Combine(destDir, $"{f}.json"), overwrite: true);
+            else
+                Console.Error.WriteLine($"WARNING: {src} not found; skipping.");
+        }
+    }
+    Console.Error.WriteLine($"Copied raw localization into {Path.Combine(outDir, "localization")}.");
+}
+
 // card_database.json 出力 (カード・レリックの EN/JP 表示名)
 // 名前は DLL ではなくローカライズの {ID}.title に存在するため、
 // tools/extracted/localization/{eng,jpn}/{cards,relics}.json から生成する。

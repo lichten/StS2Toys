@@ -12,22 +12,10 @@
     <EmbeddedResource Include="Resources\*.json" />
     <EmbeddedResource Include="Resources\v*\*.json" />
     <!-- カード説明文・名称はバージョン管理の card_descriptions.json / card_database.json に移行済み（cards.json 埋め込みは廃止） -->
-    <EmbeddedResource Include="..\tools\extracted\localization\eng\relics.json" LogicalName="StS2Shared.localization.eng.relics.json" />
-    <EmbeddedResource Include="..\tools\extracted\localization\jpn\relics.json" LogicalName="StS2Shared.localization.jpn.relics.json" />
-    <EmbeddedResource Include="..\tools\extracted\localization\eng\card_keywords.json" LogicalName="StS2Shared.localization.eng.card_keywords.json" />
-    <EmbeddedResource Include="..\tools\extracted\localization\jpn\card_keywords.json" LogicalName="StS2Shared.localization.jpn.card_keywords.json" />
-    <EmbeddedResource Include="..\tools\extracted\localization\eng\afflictions.json"   LogicalName="StS2Shared.localization.eng.afflictions.json" />
-    <EmbeddedResource Include="..\tools\extracted\localization\jpn\afflictions.json"   LogicalName="StS2Shared.localization.jpn.afflictions.json" />
-    <EmbeddedResource Include="..\tools\extracted\localization\eng\enchantments.json" LogicalName="StS2Shared.localization.eng.enchantments.json" />
-    <EmbeddedResource Include="..\tools\extracted\localization\jpn\enchantments.json" LogicalName="StS2Shared.localization.jpn.enchantments.json" />
-    <EmbeddedResource Include="..\tools\extracted\localization\eng\encounters.json" LogicalName="StS2Shared.localization.eng.encounters.json" />
-    <EmbeddedResource Include="..\tools\extracted\localization\jpn\encounters.json" LogicalName="StS2Shared.localization.jpn.encounters.json" />
-    <EmbeddedResource Include="..\tools\extracted\localization\eng\acts.json" LogicalName="StS2Shared.localization.eng.acts.json" />
-    <EmbeddedResource Include="..\tools\extracted\localization\jpn\acts.json" LogicalName="StS2Shared.localization.jpn.acts.json" />
-    <EmbeddedResource Include="..\tools\extracted\localization\eng\events.json" LogicalName="StS2Shared.localization.eng.events.json" />
-    <EmbeddedResource Include="..\tools\extracted\localization\jpn\events.json" LogicalName="StS2Shared.localization.jpn.events.json" />
-    <EmbeddedResource Include="..\tools\extracted\localization\eng\ancients.json" LogicalName="StS2Shared.localization.eng.ancients.json" />
-    <EmbeddedResource Include="..\tools\extracted\localization\jpn\ancients.json" LogicalName="StS2Shared.localization.jpn.ancients.json" />
+    <!-- 生ローカライズ JSON（relics/card_keywords/afflictions/enchantments/encounters/acts/events/ancients）は
+         card-type-extractor が Resources\{version}\localization\{eng,jpn}\ へコピーし、ResourceResolver で最新版を解決する。
+         （自動生成マニフェスト名 …localization.{lang}.{file}.json が各サービスの suffix 一致を満たす） -->
+    <EmbeddedResource Include="Resources\v*\localization\**\*.json" />
   </ItemGroup>
 
 </Project>

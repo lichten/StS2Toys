@@ -501,9 +501,7 @@ public static class CardDatabaseService
     static IReadOnlyDictionary<string, string> LoadLocJson(string suffix)
     {
         var asm = Assembly.GetExecutingAssembly();
-        var name = asm.GetManifestResourceNames()
-            .FirstOrDefault(n => n.EndsWith($"localization.{suffix}.json",
-                                 StringComparison.OrdinalIgnoreCase));
+        var name = ResourceResolver.ResolveVersioned(asm, $"localization.{suffix}.json");
         if (name is null) return new Dictionary<string, string>();
 
         using var stream = asm.GetManifestResourceStream(name)!;

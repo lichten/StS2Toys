@@ -59,8 +59,12 @@ $pck = "C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\SlayTheSp
   extractor が実ファイルをスキャンして生成。`Services/CardImageService.cs` で参照し、SiteBuilder/Toys 双方の画像解決を一元化
 - `card_related.json` — カードがホバー表示する関連カード（DLL の `get_ExtraHoverTips`、カードのみにフィルタ）。例: `CARD.ACCURACY` → `[CARD.SHIV]`。`GetRelatedCards` / `GetCreatedByCards`（逆引き）で参照
 
-**ローカライゼーション JSON（`tools/extracted/` から埋め込み）**
-- `localization/{eng,jpn}/{relics,enchantments,encounters,acts}.json`（`cards.json` はバージョン管理の `card_descriptions.json` / `card_database.json` に移行済み）
+**ローカライゼーション JSON（バージョン管理 = `Resources/{version}/localization/{eng,jpn}/`）**
+- `relics` / `card_keywords` / `afflictions` / `enchantments` / `encounters` / `acts` / `events` / `ancients` の各 `.json`。
+  `tools/extracted` はゲーム更新時に内容が変わるため、card-type-extractor が抽出時に各バージョンフォルダへ**生のままコピー**して版を固定する。
+  読み込みは各サービス（`KeywordDatabaseService` / `EncounterDatabaseService` / `AncientDatabaseService` / `CardDatabaseService`）が
+  `ResourceResolver.ResolveVersioned(asm, "localization.{lang}.{file}.json")` で最新版を解決する。
+  （`cards.json` はバージョン管理の `card_descriptions.json` / `card_database.json` に移行済み）
 
 **主要サービス**
 
