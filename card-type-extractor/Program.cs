@@ -1707,6 +1707,53 @@ Console.WriteLine(kwOutPath);
     }
 }
 
+// relic_images.json 出力（レリック ID → relics 内のソース相対パス）
+// 実ファイル（.png.import）をスキャンして対応付ける。beta/ サブフォルダも対象。
+// キーは接頭辞なし大文字 ID（relic_rarities.json と同形）。値は .png 相対パス。
+{
+    var outDir4 = Path.GetDirectoryName(outPath)!;
+    var repoRoot4 = Path.GetFullPath(Path.Combine(outDir4, "..", "..", ".."));
+    var relicsDir = Path.Combine(repoRoot4, "tools", "extracted", "images", "relics");
+
+    var jsonOpts4 = new System.Text.Json.JsonSerializerOptions
+    { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+    string J4(string s) => System.Text.Json.JsonSerializer.Serialize(s, jsonOpts4);
+
+    if (!Directory.Exists(relicsDir))
+    {
+        Console.Error.WriteLine($"WARNING: {relicsDir} not found; skipping relic_images.json.");
+    }
+    else
+    {
+        // 探索対象: 各サブディレクトリ（beta 等）+ ルート直下（ルートは subdir 名 "" で表す）
+        var searchDirs = Directory.GetDirectories(relicsDir)
+            .Select(d => (name: Path.GetFileName(d)!, full: d))
+            .Append(("", relicsDir))
+            .ToList();
+
+        string? Find(string raw)
+        {
+            foreach (var (name, full) in searchDirs)
+                if (File.Exists(Path.Combine(full, raw + ".png.import")))
+                    return name.Length == 0 ? raw + ".png" : name + "/" + raw + ".png";
+            return null;
+        }
+
+        var relImg = new SortedDictionary<string, string>(StringComparer.Ordinal);
+        foreach (var cls in relicClasses)
+        {
+            var id = CamelToUpperSnake(cls);
+            var rel = Find(id.ToLowerInvariant());
+            if (rel is not null) relImg[id] = rel;
+        }
+        var relImgLines = relImg.Select(kv => $"  {J4(kv.Key)}: {J4(kv.Value)}");
+        File.WriteAllText(Path.Combine(outDir4, "relic_images.json"),
+            "{\n" + string.Join(",\n", relImgLines) + "\n}\n");
+        Console.Error.WriteLine($"Extracted {relImg.Count} relic image paths.");
+        Console.WriteLine(Path.Combine(outDir4, "relic_images.json"));
+    }
+}
+
 // ancient_options.json 出力
 // Ancient イベントクラスのオプションプールを IL から抽出する
 {

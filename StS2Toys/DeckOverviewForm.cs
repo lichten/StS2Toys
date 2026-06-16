@@ -531,7 +531,9 @@ public partial class DeckOverviewForm : Form
 
         const int ImgPad = 2;
         int imgSize = rect.Height - ImgPad * 2;
-        var img = RelicImageService.GetRelicBitmap(relic.Id);
+        // StS2Shared.Services にも同名の RelicImageService（パスマップ）があるため、
+        // atlas 描画用の Toys 実装を完全修飾で指定する。
+        var img = StS2Toys.Services.RelicImageService.GetRelicBitmap(relic.Id);
         if (img is not null)
         {
             var oldInterp = g.InterpolationMode;
