@@ -57,6 +57,9 @@ $pck = "C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\SlayTheSp
 - `card_stats.json` — カードのキャノニカル変数（ダメージ・ブロック値など）
 - `card_images.json` — カード ID → 画像のソース相対パス（`card_portraits_png/` 基準、例 `silent/abrasive.png`）。
   extractor が実ファイルをスキャンして生成。`Services/CardImageService.cs` で参照し、SiteBuilder/Toys 双方の画像解決を一元化
+- `relic_images.json` — レリック ID（接頭辞なし大文字、例 `AKABEKO`）→ 画像のソース相対パス（`relics_png/` 基準、例 `akabeko.png`・`beta/belt_buckle.png`）。
+  extractor が `tools/extracted/images/relics/` の `.png.import` をスキャンして生成（`beta/` 含む）。`Services/RelicImageService.cs` で参照。
+  PNG 実体は `dotnet run --project ctex-to-png -- relics` で `.ctex` を変換し `tools/extracted/images/relics_png/` に生成する
 - `card_related.json` — カードがホバー表示する関連カード（DLL の `get_ExtraHoverTips`、カードのみにフィルタ）。例: `CARD.ACCURACY` → `[CARD.SHIV]`。`GetRelatedCards` / `GetCreatedByCards`（逆引き）で参照
 
 **ローカライゼーション JSON（バージョン管理 = `Resources/{version}/localization/{eng,jpn}/`）**

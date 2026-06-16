@@ -38,6 +38,39 @@ if (args.Length == 1 && args[0] == "characters")
     return;
 }
 
+// Relic mode: convert relic .ctex → PNG into images/relics_png/ per relic_images.json
+// Usage: dotnet run --project ctex-to-png -- relics
+if (args.Length == 1 && args[0] == "relics")
+{
+    var repoRoot  = Path.GetFullPath(Path.Combine(toolsRoot, "..", ".."));
+    var jsonPath  = LatestVersioned(Path.Combine(repoRoot, "StS2Shared", "Resources"), "relic_images.json");
+    if (jsonPath is null) { Console.WriteLine("relic_images.json が見つかりません。"); return; }
+
+    var relicsSrc = Path.Combine(toolsRoot, "images", "relics");
+    var outRoot   = Path.Combine(toolsRoot, "images", "relics_png");
+    Directory.CreateDirectory(outRoot);
+
+    using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(jsonPath));
+    int relConverted = 0, relSkipped = 0, relMissing = 0;
+    foreach (var prop in doc.RootElement.EnumerateObject())
+    {
+        var rel        = prop.Value.GetString()!;                 // "akabeko.png" / "beta/belt_buckle.png"
+        var relOs      = rel.Replace('/', Path.DirectorySeparatorChar);
+        var importPath = Path.Combine(relicsSrc, relOs + ".import");
+        var ctexRel    = ParseImportCtexPath(importPath);
+        if (ctexRel is null) { relMissing++; continue; }
+        var ctexFull   = Path.Combine(toolsRoot, ctexRel.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+        if (!File.Exists(ctexFull)) { relMissing++; continue; }
+        var outPath    = Path.Combine(outRoot, relOs);
+        Directory.CreateDirectory(Path.GetDirectoryName(outPath)!);
+        if (File.Exists(outPath)) { relSkipped++; continue; }
+        try { ConvertCtex(ctexFull, outPath, verbose: false); relConverted++; }
+        catch (Exception ex) { Console.WriteLine($"  fail {rel}: {ex.Message}"); relMissing++; }
+    }
+    Console.WriteLine($"relics_png: converted={relConverted} skipped={relSkipped} missing={relMissing}");
+    return;
+}
+
 // Card JPEG mode: convert specified card IDs to web-sized JPEG for git tracking
 // Usage: dotnet run --project ctex-to-png -- <id1> <id2> ...
 // Example: dotnet run --project ctex-to-png -- bash defend_ironclad
@@ -219,9 +252,26 @@ static Image<Rgba32> DecodeBc(byte[] data, int headerSize, int width, int height
 
 static string? ParseImportCtexPath(string importPath)
 {
+    if (!File.Exists(importPath)) return null;
     var content = File.ReadAllText(importPath);
-    var m = Regex.Match(content, @"^path=""res://(.+\.ctex)""", RegexOptions.Multiline);
+    // 単一フォーマット (path=) と複数フォーマット (path.bptc= 等) の両方に対応。
+    var m = Regex.Match(content, @"^path(?:\.\w+)?=""res://(.+?\.ctex)""", RegexOptions.Multiline);
     return m.Success ? m.Groups[1].Value : null;
+}
+
+// Resources/v*/{fileName} のうち最大バージョンの実ファイルパスを返す（無ければ null）。
+// バージョン token 内の整数列を 0 埋め連結して文字列比較で数値順にする
+// （StS2Shared/Services/ResourceResolver.cs の VersionKey と同方針）。
+static string? LatestVersioned(string resourcesDir, string fileName)
+{
+    if (!Directory.Exists(resourcesDir)) return null;
+    return Directory.GetDirectories(resourcesDir, "v*")
+        .Select(d => Path.Combine(d, fileName))
+        .Where(File.Exists)
+        .OrderByDescending(p => string.Join('.',
+            Regex.Matches(Path.GetFileName(Path.GetDirectoryName(p)!), @"\d+")
+                 .Select(x => x.Value.PadLeft(8, '0'))), StringComparer.Ordinal)
+        .FirstOrDefault();
 }
 
 static void ConvertToJpeg(string srcPath, string outPath)

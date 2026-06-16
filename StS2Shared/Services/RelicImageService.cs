@@ -4,17 +4,19 @@ using System.Text.Json;
 namespace StS2Shared.Services;
 
 /// <summary>
-/// レリック ID → レリック画像のソース相対パス（<c>relics/</c> 基準、例 "akabeko.png"・"beta/belt_buckle.png"）。
+/// レリック ID → レリック画像のソース相対パス（<c>relics_png/</c> 基準、例 "akabeko.png"・"beta/belt_buckle.png"）。
 /// card-type-extractor が実ファイル（<c>.png.import</c>）をスキャンして生成した relic_images.json
-/// （バージョンフォルダ）を参照する。「どのサブディレクトリにどのファイル名で存在するか」の対応を
-/// ここに一元化する。<see cref="CardImageService"/> のレリック版。
+/// （バージョンフォルダ）を参照する。PNG 実体は <c>ctex-to-png -- relics</c> が
+/// <c>tools/extracted/images/relics_png/</c> に変換生成する。
+/// 「どのサブディレクトリにどのファイル名で存在するか」の対応をここに一元化する。
+/// <see cref="CardImageService"/> のレリック版。
 ///
 /// 注: <c>StS2Toys.Services.RelicImageService</c>（atlas 描画）とは別物（名前空間が異なる）。
 /// </summary>
 public static class RelicImageService
 {
     /// <summary>画像ソースのベースディレクトリ名（<c>tools/extracted/images/</c> 配下）。</summary>
-    public const string RelicsDirName = "relics";
+    public const string RelicsDirName = "relics_png";
 
     static readonly IReadOnlyDictionary<string, string> _paths = Load();
 
