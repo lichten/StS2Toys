@@ -188,6 +188,8 @@ PageEntry[] pages =
         $"全{allEventIds.Length}件のイベントをテキスト・選択肢付きで一覧表示。", "#1a6678"),
     new PageEntry("エンカウンター", "encounters.html", "Encounter List", "エンカウンター一覧",
         $"全{allEncounterIds.Length}件のエンカウンターをタイプ別に一覧表示。", "#8b2222"),
+    new PageEntry("タイムライン", "timeline.html", "Encounter Timeline", "エンカウンタータイムライン",
+        "アクトごとの戦闘エンカウンターを階層別（Weak/Normal/Elite/Boss）とボス出現順で一覧表示。", "#8b2222"),
     new PageEntry("Ancient", "ancients.html", "Ancient List", "Ancient 一覧",
         $"全{allAncientIds.Length}人の Ancient の会話・選択肢・報酬候補を一覧表示。", "#6b46c1"),
     new PageEntry("モンスター", "monsters.html", "Monster List", "モンスター一覧",
@@ -259,6 +261,7 @@ File.WriteAllText(Path.Combine(distDir, "cards.html"),  BuildCardListPage(allCar
 File.WriteAllText(Path.Combine(distDir, "relics.html"), BuildRelicListPage(allRelicIds, chars), System.Text.Encoding.UTF8);
 File.WriteAllText(Path.Combine(distDir, "events.html"),     BuildEventListPage(allEventIds, chars, eventsWithImg), System.Text.Encoding.UTF8);
 File.WriteAllText(Path.Combine(distDir, "encounters.html"), BuildEncounterListPage(allEncounterIds, chars),        System.Text.Encoding.UTF8);
+File.WriteAllText(Path.Combine(distDir, "timeline.html"),   BuildTimelinePage(chars, monstersWithImg),             System.Text.Encoding.UTF8);
 File.WriteAllText(Path.Combine(distDir, "ancients.html"),   BuildAncientListPage(allAncientIds, chars, ancientsWithImg), System.Text.Encoding.UTF8);
 File.WriteAllText(Path.Combine(distDir, "monsters.html"),   BuildMonsterListPage(chars, monstersWithImg), System.Text.Encoding.UTF8);
 foreach (var ch in chars)
@@ -1654,9 +1657,12 @@ static string BuildRelicListPage(string[] allRelicIds, CharData[] chars)
 
 static string BuildEventListPage(string[] allEventIds, CharData[] chars, HashSet<string> eventsWithImg)
 {
-    var actByEvent = EventActService.Groups
-        .SelectMany(g => g.Events.Select(eid => (eid, g.Id)))
-        .ToDictionary(x => x.eid, x => x.Id, StringComparer.OrdinalIgnoreCase);
+    // 同一イベントが複数アクトに属しうる（例: SUNKEN_STATUE は OVERGROWTH と UNDERDOCKS）ため
+    // ToDictionary だと重複キーで落ちる。最初に出現したアクトを採用する。
+    var actByEvent = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    foreach (var g in EventActService.Groups)
+        foreach (var eid in g.Events)
+            actByEvent.TryAdd(eid, g.Id);
     var hasUnclassified = allEventIds.Any(id => !actByEvent.ContainsKey(id));
 
     var rows = string.Concat(allEventIds.Select(id =>
@@ -2248,6 +2254,99 @@ static string GetAncientItemName(string itemId)
     if (itemId.StartsWith("CARD.", StringComparison.OrdinalIgnoreCase))
         return CardDatabaseService.GetName(itemId);
     return CardDatabaseService.GetRelicTitle(itemId);
+}
+
+// spiracle.gg/monsters の Timeline タブ相当。アクト→戦闘エンカウンターを階層別＋ボス出現順で表示。
+// データは EncounterActService（encounter_acts.json）。各エンカウンターは encounters/{id}.html と
+// 登場モンスター（monsters/{dir}.html）へリンクする。
+static string BuildTimelinePage(CharData[] chars, HashSet<string> monstersWithImg)
+{
+    const string basePath = "";
+
+    string EncCard(string id)
+    {
+        var nameEn = EncounterDatabaseService.GetEncounterName(id);
+        var nameJa = EncounterDatabaseService.GetEncounterName(id, japanese: true);
+        var jaSpan = nameJa != nameEn ? $"""<span class="tl-enc-ja">{nameJa}</span>""" : "";
+        var dirs   = MonsterDatabaseService.GetEncounterMonsterDirs(id);
+        var thumbs = dirs == null ? "" : string.Concat(dirs.Select(dir =>
+        {
+            var m   = MonsterDatabaseService.GetOrCreate(dir);
+            var img = monstersWithImg.Contains(dir)
+                ? $"""<img src="{basePath}images/monsters/{dir}.png" alt="{m.EnLabel}" title="{m.JaLabel}" class="tl-mon-thumb">"""
+                : $"""<span class="tl-mon-thumb tl-mon-missing" title="{m.JaLabel}">?</span>""";
+            return $"""<a href="{basePath}monsters/{dir}.html" class="tl-mon">{img}</a>""";
+        }));
+        return $"""
+            <div class="tl-enc">
+              <a href="{basePath}encounters/{id}.html" class="tl-enc-name">{nameEn}</a>{jaSpan}
+              <div class="tl-mons">{thumbs}</div>
+            </div>
+            """;
+    }
+
+    string Tier(string label, string cls, IReadOnlyList<string> ids, bool ordered = false)
+    {
+        if (ids.Count == 0) return "";
+        var cards = string.Concat(ids.Select((id, i) =>
+            ordered ? $"""<div class="tl-enc-wrap"><span class="tl-order">{i + 1}</span>{EncCard(id)}</div>"""
+                    : EncCard(id)));
+        return $"""
+            <div class="tl-tier">
+              <div class="tl-tier-label tl-{cls}">{label} <span class="tl-tier-n">{ids.Count}</span></div>
+              <div class="tl-enc-grid">{cards}</div>
+            </div>
+            """;
+    }
+
+    var sections = string.Concat(EncounterActService.Groups.Select(act =>
+    {
+        var boss   = act.BossOrder.Count > 0 ? act.BossOrder : act.Boss;
+        var jaHead = act.NameJp != act.NameEn ? $"""<span class="tl-act-ja">{act.NameJp}</span>""" : "";
+        return $"""
+            <section class="section tl-act">
+              <h2 class="tl-act-title">{act.NameEn}{jaHead}</h2>
+              {Tier("Weak", "weak", act.Weak)}
+              {Tier("Normal", "normal", act.Normal)}
+              {Tier("Elite", "elite", act.Elite)}
+              {Tier("Boss", "boss", boss, ordered: true)}
+            </section>
+            """;
+    }));
+
+    const string TL_CSS = """
+        <style>
+        .tl-act { margin-bottom: 28px; }
+        .tl-act-title { font-size: 19px; margin: 0 0 14px; padding-bottom: 8px; border-bottom: 2px solid #8b2222; color: #2c3e50; }
+        .tl-act-ja { font-size: 13px; color: #999; font-weight: 400; margin-left: 10px; }
+        .tl-tier { margin: 0 0 14px; }
+        .tl-tier-label { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #fff; padding: 2px 10px; border-radius: 12px; margin-bottom: 8px; }
+        .tl-tier-n { opacity: 0.85; font-weight: 600; }
+        .tl-boss   { background: #b03030; }
+        .tl-elite  { background: #6c3483; }
+        .tl-normal { background: #1a5799; }
+        .tl-weak   { background: #666; }
+        .tl-enc-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+        .tl-enc-wrap { position: relative; }
+        .tl-order { position: absolute; top: -6px; left: -6px; z-index: 2; width: 18px; height: 18px; line-height: 18px; text-align: center; font-size: 11px; font-weight: 700; color: #fff; background: #b03030; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+        .tl-enc { background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 8px 12px; min-width: 150px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .tl-enc-name { font-weight: 600; color: #1a5799; text-decoration: none; }
+        .tl-enc-name:hover { text-decoration: underline; }
+        .tl-enc-ja { display: block; font-size: 11px; color: #999; }
+        .tl-mons { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; }
+        .tl-mon { display: inline-block; line-height: 0; }
+        .tl-mon-thumb { width: 34px; height: 34px; object-fit: contain; background: #f5f5f5; border-radius: 4px; }
+        .tl-mon-missing { display: inline-flex; align-items: center; justify-content: center; color: #ccc; font-size: 14px; }
+        </style>
+        """;
+
+    return Layout("エンカウンタータイムライン", "timeline", "#8b2222", chars, $"""
+        <div class="page-hero">
+          <h1 class="hero-title">エンカウンタータイムライン</h1>
+          <p class="hero-sub">アクトごとの戦闘エンカウンタープール（階層別・ボス出現順）</p>
+        </div>
+        {sections}
+        """, extraHead: TL_CSS);
 }
 
 static string BuildEncounterListPage(string[] allEncounterIds, CharData[] chars)
@@ -3470,6 +3569,9 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
     var encountersActive = activeId == "encounters";
     var encountersStyle  = encountersActive ? " style=\"border-left-color:#8b2222\"" : "";
     var encountersClass  = encountersActive ? " active" : "";
+    var timelineActive   = activeId == "timeline";
+    var timelineStyle    = timelineActive   ? " style=\"border-left-color:#8b2222\"" : "";
+    var timelineClass    = timelineActive   ? " active" : "";
     var ancientsActive   = activeId == "ancients";
     var ancientsStyle    = ancientsActive   ? " style=\"border-left-color:#6b46c1\"" : "";
     var ancientsClass    = ancientsActive   ? " active" : "";
@@ -3544,6 +3646,9 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
                 </a>
                 <a href="{basePath}encounters.html" class="nav-link{encountersClass}"{encountersStyle}>
                   <span class="nav-icon">&#9876;</span>エンカウンター一覧
+                </a>
+                <a href="{basePath}timeline.html" class="nav-link{timelineClass}"{timelineStyle}>
+                  <span class="nav-icon">&#9201;</span>タイムライン
                 </a>
                 <a href="{basePath}ancients.html" class="nav-link{ancientsClass}"{ancientsStyle}>
                   <span class="nav-icon">&#10022;</span>Ancient 一覧

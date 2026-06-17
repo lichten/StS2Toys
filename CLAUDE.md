@@ -138,9 +138,16 @@ $pck = "C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\SlayTheSp
 - PNG スナップショット（256×256）は以前と同様に同ディレクトリに残る。
 
 エンカウンター→モンスターの対応 `encounter_monsters.json`、モンスターの EN/JA 名 `monster_names.json`、
-Act→イベントの対応 `event_acts.json` は、card-type-extractor が DLL のモデルクラス
+Act→イベントの対応 `event_acts.json`、Act→エンカウンターの対応 `encounter_acts.json` は、
+card-type-extractor が DLL のモデルクラス
 （`Models.Encounters` / `Models.Monsters` / `Models.Acts`）とローカライズから
 バージョンフォルダ（`Resources/{version}/`）へ生成する（`ResourceResolver` で最新を解決）。
+`encounter_acts.json` は各 Act クラスの `GenerateAllEncounters()`（ジェネリック `Add<EncounterType>()`）から
+アクト別の戦闘エンカウンターを収集し、ID サフィックスで階層分け（`weak`/`normal`/`elite`/`boss`）、
+ボス出現順（`get_BossDiscoveryOrder`）を `bossOrder` として持つ。`event_acts.json` と同形式の配列。
+`Services/EncounterActService.cs`（`EventActService` のエンカウンター版）で読み、
+SiteBuilder の `timeline.html`（spiracle.gg/monsters の Timeline タブ相当）が
+アクト×階層でエンカウンター・登場モンスターを一覧表示する（`BuildTimelinePage`）。
 モンスターは**モデル粒度**の ID 空間（例 `bowlbug_rock`）で、`monster_names` と `encounter_monsters` で共通。
 画像/ページは ID をそのまま使うため、Spine フォルダがある ID のみ画像表示される。
 Spine レンダリングには `SpineLoader.cs` / `SpineRenderer.cs`（StS2SiteBuilder 内）と

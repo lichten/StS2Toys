@@ -1690,6 +1690,57 @@ Console.WriteLine(kwOutPath);
     Console.Error.WriteLine($"Extracted {actEvents.Count} acts (+ALL_ACTS, {globalEvents.Count} global events).");
     Console.WriteLine(Path.Combine(outDir2, "event_acts.json"));
 
+    // ---- encounter_acts.json ----（event_acts.json と同形式。アクト→戦闘エンカウンターを階層別＋ボス順で）
+    // 各 Act クラスの GenerateAllEncounters() オーバーライドが Add<EncounterType>() で
+    // 自分専用のエンカウンターを登録する（event_acts の get_AllEvents と同パターン）。
+    // 階層は ID サフィックスで判定。ボス順は get_BossDiscoveryOrder（IL 順 = 出現順）。
+    static string TierOf(string id) =>
+        id.EndsWith("_WEAK")  ? "weak"  : id.EndsWith("_NORMAL") ? "normal" :
+        id.EndsWith("_ELITE") ? "elite" : id.EndsWith("_BOSS")   ? "boss"   : "special";
+
+    var actEncs = new Dictionary<string, (List<string> weak, List<string> normal,
+        List<string> elite, List<string> boss, List<string> order)>(StringComparer.Ordinal);
+    foreach (var th in mr.TypeDefinitions)
+    {
+        var td = mr.GetTypeDefinition(th);
+        if (mr.GetString(td.Namespace) != actNs) continue;
+        var cls = mr.GetString(td.Name);
+        if (cls.StartsWith('<') || cls.Contains("Deprecated")) continue;
+
+        var all = CollectGenericArgRefs(mr, peReader, td, n => n == "GenerateAllEncounters")
+            .Select(CamelToUpperSnake).Distinct().ToList();
+        var bossOrder = CollectGenericArgRefs(mr, peReader, td, n => n == "get_BossDiscoveryOrder")
+            .Select(CamelToUpperSnake).Distinct().ToList();   // IL 順保持（並べ替えない）
+
+        var g = (weak: new List<string>(), normal: new List<string>(),
+                 elite: new List<string>(), boss: new List<string>(), order: bossOrder);
+        foreach (var id in all.OrderBy(x => x, StringComparer.Ordinal))
+            switch (TierOf(id))
+            {
+                case "weak":   g.weak.Add(id);   break;
+                case "normal": g.normal.Add(id); break;
+                case "elite":  g.elite.Add(id);  break;
+                case "boss":   g.boss.Add(id);   break;
+            }
+        actEncs[CamelToUpperSnake(cls)] = g;
+    }
+
+    var encActEntries = new List<string>();
+    foreach (var (id, pe, pj) in actMeta)   // 既存 actMeta（順序・接頭辞）を共有
+    {
+        if (!actEncs.TryGetValue(id, out var g)) continue;
+        var en = pe + (engActTitle.TryGetValue(id, out var te) ? te : SnakeToTitle(id));
+        var ja = pj + (jpnActTitle.TryGetValue(id, out var tj) ? tj : SnakeToTitle(id));
+        string Arr(List<string> xs) => "[" + string.Join(", ", xs.Select(J)) + "]";
+        encActEntries.Add($"  {{ \"id\": {J(id)}, \"nameJp\": {J(ja)}, \"nameEn\": {J(en)}, " +
+            $"\"weak\": {Arr(g.weak)}, \"normal\": {Arr(g.normal)}, \"elite\": {Arr(g.elite)}, " +
+            $"\"boss\": {Arr(g.boss)}, \"bossOrder\": {Arr(g.order)} }}");
+    }
+    File.WriteAllText(Path.Combine(outDir2, "encounter_acts.json"),
+        "[\n" + string.Join(",\n", encActEntries) + "\n]\n");
+    Console.Error.WriteLine($"Extracted {actEncs.Count} acts' encounter pools.");
+    Console.WriteLine(Path.Combine(outDir2, "encounter_acts.json"));
+
     // ---- event_images.json（イベント ID → events 内の主画像相対パス）----
     // ルート直下の {id}.png.import のみを主画像として採用（サブフォルダ/_foreground 等の副次素材は除外）。
     var eventsDir = Path.Combine(repoRoot2, "tools", "extracted", "images", "events");
