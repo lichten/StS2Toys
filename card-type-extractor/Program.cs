@@ -1272,7 +1272,7 @@ var relicRaritiesOutPath = Path.Combine(Path.GetDirectoryName(outPath)!, "relic_
 Console.Error.WriteLine($"Extracted {relicRarities.Count} relic rarity mappings.");
 var relicRarityLines = relicRarities.OrderBy(kv => kv.Key)
     .Select(kv => $"  \"{kv.Key}\": \"{kv.Value}\"");
-File.WriteAllText(relicRaritiesOutPath, "{\n" + string.Join(",\n", relicRarityLines) + "\n}\n");
+WriteJson(relicRaritiesOutPath, "{\n" + string.Join(",\n", relicRarityLines) + "\n}\n");
 Console.WriteLine(relicRaritiesOutPath);
 
 // relic_stats.json 出力 → StS2Shared/Resources/
@@ -1284,7 +1284,7 @@ var relicStatsEntries = relicStats.OrderBy(kv => kv.Key).Select(kv =>
         .Select(f => $"    \"{f.Key}\": {f.Value}");
     return $"  \"{kv.Key}\": {{\n{string.Join(",\n", fieldPairs)}\n  }}";
 });
-File.WriteAllText(relicStatsOutPath, "{\n" + string.Join(",\n", relicStatsEntries) + "\n}\n");
+WriteJson(relicStatsOutPath, "{\n" + string.Join(",\n", relicStatsEntries) + "\n}\n");
 Console.WriteLine(relicStatsOutPath);
 
 // card_characters.json 出力
@@ -1292,14 +1292,14 @@ var charsOutPath = Path.Combine(Path.GetDirectoryName(outPath)!, "card_character
 Console.Error.WriteLine($"Extracted {cardCharacters.Count} card character mappings.");
 var charLines = cardCharacters.OrderBy(kv => kv.Key)
     .Select(kv => $"  \"{kv.Key}\": \"{kv.Value}\"");
-File.WriteAllText(charsOutPath, "{\n" + string.Join(",\n", charLines) + "\n}\n");
+WriteJson(charsOutPath, "{\n" + string.Join(",\n", charLines) + "\n}\n");
 Console.WriteLine(charsOutPath);
 
 // card_types.json 出力
 Console.Error.WriteLine($"Extracted {results.Count} card type mappings.");
 var jsonLines = results.OrderBy(kv => kv.Key)
     .Select(kv => $"  \"{kv.Key}\": \"{kv.Value}\"");
-File.WriteAllText(outPath, "{\n" + string.Join(",\n", jsonLines) + "\n}\n");
+WriteJson(outPath, "{\n" + string.Join(",\n", jsonLines) + "\n}\n");
 Console.WriteLine(outPath);
 
 // card_costs.json 出力
@@ -1307,7 +1307,7 @@ var costsOutPath = Path.Combine(Path.GetDirectoryName(outPath)!, "card_costs.jso
 Console.Error.WriteLine($"Extracted {costs.Count} card cost mappings.");
 var costLines = costs.OrderBy(kv => kv.Key)
     .Select(kv => $"  \"{kv.Key}\": {kv.Value}");
-File.WriteAllText(costsOutPath, "{\n" + string.Join(",\n", costLines) + "\n}\n");
+WriteJson(costsOutPath, "{\n" + string.Join(",\n", costLines) + "\n}\n");
 Console.WriteLine(costsOutPath);
 
 // card_upgraded_costs.json 出力（アップグレードでコストが変わるカードのみ）
@@ -1315,7 +1315,7 @@ var upgCostsOutPath = Path.Combine(Path.GetDirectoryName(outPath)!, "card_upgrad
 Console.Error.WriteLine($"Extracted {upgradedCosts.Count} upgraded card cost mappings.");
 var upgCostLines = upgradedCosts.OrderBy(kv => kv.Key)
     .Select(kv => $"  \"{kv.Key}\": {kv.Value}");
-File.WriteAllText(upgCostsOutPath, "{\n" + string.Join(",\n", upgCostLines) + "\n}\n");
+WriteJson(upgCostsOutPath, "{\n" + string.Join(",\n", upgCostLines) + "\n}\n");
 Console.WriteLine(upgCostsOutPath);
 
 // card_rarities.json 出力
@@ -1323,7 +1323,7 @@ var raritiesOutPath = Path.Combine(Path.GetDirectoryName(outPath)!, "card_rariti
 Console.Error.WriteLine($"Extracted {rarities.Count} card rarity mappings.");
 var rarityLines = rarities.OrderBy(kv => kv.Key)
     .Select(kv => $"  \"{kv.Key}\": \"{kv.Value}\"");
-File.WriteAllText(raritiesOutPath, "{\n" + string.Join(",\n", rarityLines) + "\n}\n");
+WriteJson(raritiesOutPath, "{\n" + string.Join(",\n", rarityLines) + "\n}\n");
 Console.WriteLine(raritiesOutPath);
 
 // card_stats.json 出力
@@ -1335,14 +1335,14 @@ var statsEntries = cardStats.OrderBy(kv => kv.Key).Select(kv =>
         .Select(f => $"    \"{f.Key}\": {f.Value}");
     return $"  \"{kv.Key}\": {{\n{string.Join(",\n", fieldPairs)}\n  }}";
 });
-File.WriteAllText(statsOutPath, "{\n" + string.Join(",\n", statsEntries) + "\n}\n");
+WriteJson(statsOutPath, "{\n" + string.Join(",\n", statsEntries) + "\n}\n");
 Console.WriteLine(statsOutPath);
 
 // card_star_costs.json 出力 (Starをコストとして消費するカードの ID リスト)
 var starCostsOutPath = Path.Combine(Path.GetDirectoryName(outPath)!, "card_star_costs.json");
 Console.Error.WriteLine($"Extracted {starCostCards.Count} star-cost card mappings.");
 var starCostLines = starCostCards.OrderBy(id => id).Select(id => $"  \"{id}\"");
-File.WriteAllText(starCostsOutPath, "[\n" + string.Join(",\n", starCostLines) + "\n]\n");
+WriteJson(starCostsOutPath, "[\n" + string.Join(",\n", starCostLines) + "\n]\n");
 Console.WriteLine(starCostsOutPath);
 
 // card_keywords.json 出力 (カードID → キーワード名リスト)
@@ -1353,7 +1353,7 @@ var kwEntries = cardKeywords.OrderBy(kv => kv.Key).Select(kv =>
     var kwList = string.Join(", ", kv.Value.Select(k => $"\"{k}\""));
     return $"  \"{kv.Key}\": [{kwList}]";
 });
-File.WriteAllText(kwOutPath, "{\n" + string.Join(",\n", kwEntries) + "\n}\n");
+WriteJson(kwOutPath, "{\n" + string.Join(",\n", kwEntries) + "\n}\n");
 Console.WriteLine(kwOutPath);
 
 // 生ローカライズ JSON をバージョンフォルダへ取り込む（版の固定）。
@@ -1438,7 +1438,7 @@ Console.WriteLine(kwOutPath);
         var dbOutPath = Path.Combine(outDir, "card_database.json");
         var dbLines = entries.OrderBy(e => e.Id, StringComparer.Ordinal).Select(e =>
             $"  {J(e.Id)}: {{ \"en\": {J(e.En)}, \"ja\": {J(e.Ja)} }}");
-        File.WriteAllText(dbOutPath, "{\n" + string.Join(",\n", dbLines) + "\n}\n");
+        WriteJson(dbOutPath, "{\n" + string.Join(",\n", dbLines) + "\n}\n");
         Console.Error.WriteLine($"Extracted {entries.Count} card/relic name mappings.");
         Console.WriteLine(dbOutPath);
     }
@@ -1458,7 +1458,7 @@ Console.WriteLine(kwOutPath);
             return $"  {J($"CARD.{kv.Key}")}: {{ \"en\": {J(kv.Value)}, \"ja\": {J(ja)} }}";
         });
         var descOutPath = Path.Combine(outDir, "card_descriptions.json");
-        File.WriteAllText(descOutPath, "{\n" + string.Join(",\n", descLines) + "\n}\n");
+        WriteJson(descOutPath, "{\n" + string.Join(",\n", descLines) + "\n}\n");
         Console.Error.WriteLine($"Extracted {engCardDesc.Count} card descriptions.");
         Console.WriteLine(descOutPath);
     }
@@ -1483,7 +1483,7 @@ Console.WriteLine(kwOutPath);
                 $"\"enUpgraded\": {J(Res(rawEn, st, false, true))}, \"jaUpgraded\": {J(Res(rawJa, st, true, true))} }}");
         }
         var cardResOut = Path.Combine(outDir, "card_descriptions_resolved.json");
-        File.WriteAllText(cardResOut, "{\n" + string.Join(",\n", cardLines) + "\n}\n");
+        WriteJson(cardResOut, "{\n" + string.Join(",\n", cardLines) + "\n}\n");
         Console.Error.WriteLine($"Resolved {cardLines.Count} card descriptions.");
         Console.WriteLine(cardResOut);
 
@@ -1501,7 +1501,7 @@ Console.WriteLine(kwOutPath);
                 $"  {J(id)}: {{ \"en\": {J(Res(rawEn, st, false, false))}, \"ja\": {J(Res(rawJa, st, true, false))} }}");
         }
         var relicResOut = Path.Combine(outDir, "relic_descriptions_resolved.json");
-        File.WriteAllText(relicResOut, "{\n" + string.Join(",\n", relicLines) + "\n}\n");
+        WriteJson(relicResOut, "{\n" + string.Join(",\n", relicLines) + "\n}\n");
         Console.Error.WriteLine($"Resolved {relicLines.Count} relic descriptions.");
         Console.WriteLine(relicResOut);
     }
@@ -1531,7 +1531,7 @@ Console.WriteLine(kwOutPath);
     var relLines = cardRelated.Select(kv =>
         $"  \"{kv.Key}\": [{string.Join(", ", kv.Value.Select(v => $"\"{v}\""))}]");
     var relOutPath = Path.Combine(outDir, "card_related.json");
-    File.WriteAllText(relOutPath, "{\n" + string.Join(",\n", relLines) + "\n}\n");
+    WriteJson(relOutPath, "{\n" + string.Join(",\n", relLines) + "\n}\n");
     Console.Error.WriteLine($"Extracted {cardRelated.Count} card related-card mappings.");
     Console.WriteLine(relOutPath);
 }
@@ -1612,7 +1612,7 @@ Console.WriteLine(kwOutPath);
         }
         monLines.Add($"  {{ \"dirName\": {J(id)}, \"en\": {J(en)}, \"ja\": {J(ja)} }}");
     }
-    File.WriteAllText(Path.Combine(outDir2, "monster_names.json"),
+    WriteJson(Path.Combine(outDir2, "monster_names.json"),
         "[\n" + string.Join(",\n", monLines) + "\n]\n");
     Console.Error.WriteLine($"Extracted {monLines.Count} monster names (model granularity).");
     Console.WriteLine(Path.Combine(outDir2, "monster_names.json"));
@@ -1638,7 +1638,7 @@ Console.WriteLine(kwOutPath);
             encMap[CamelToUpperSnake(cls)] = monIds;
     }
     var encLines = encMap.Select(kv => $"  {J(kv.Key)}: [{string.Join(", ", kv.Value.Select(J))}]");
-    File.WriteAllText(Path.Combine(outDir2, "encounter_monsters.json"),
+    WriteJson(Path.Combine(outDir2, "encounter_monsters.json"),
         "{\n" + string.Join(",\n", encLines) + "\n}\n");
     Console.Error.WriteLine($"Extracted {encMap.Count} encounter→monster mappings.");
     Console.WriteLine(Path.Combine(outDir2, "encounter_monsters.json"));
@@ -1685,7 +1685,7 @@ Console.WriteLine(kwOutPath);
         actEntries.Add($"  {{ \"id\": {J(id)}, \"nameJp\": {J(ja)}, \"nameEn\": {J(en)}, \"events\": [{string.Join(", ", evs.Select(J))}] }}");
     }
     actEntries.Add($"  {{ \"id\": \"ALL_ACTS\", \"nameJp\": \"全幕共通\", \"nameEn\": \"All Acts\", \"events\": [{string.Join(", ", globalEvents.Select(J))}] }}");
-    File.WriteAllText(Path.Combine(outDir2, "event_acts.json"),
+    WriteJson(Path.Combine(outDir2, "event_acts.json"),
         "[\n" + string.Join(",\n", actEntries) + "\n]\n");
     Console.Error.WriteLine($"Extracted {actEvents.Count} acts (+ALL_ACTS, {globalEvents.Count} global events).");
     Console.WriteLine(Path.Combine(outDir2, "event_acts.json"));
@@ -1736,7 +1736,7 @@ Console.WriteLine(kwOutPath);
             $"\"weak\": {Arr(g.weak)}, \"normal\": {Arr(g.normal)}, \"elite\": {Arr(g.elite)}, " +
             $"\"boss\": {Arr(g.boss)}, \"bossOrder\": {Arr(g.order)} }}");
     }
-    File.WriteAllText(Path.Combine(outDir2, "encounter_acts.json"),
+    WriteJson(Path.Combine(outDir2, "encounter_acts.json"),
         "[\n" + string.Join(",\n", encActEntries) + "\n]\n");
     Console.Error.WriteLine($"Extracted {actEncs.Count} acts' encounter pools.");
     Console.WriteLine(Path.Combine(outDir2, "encounter_acts.json"));
@@ -1751,7 +1751,7 @@ Console.WriteLine(kwOutPath);
         if (File.Exists(Path.Combine(eventsDir, raw + ".png.import")))
             evImg[id] = raw + ".png";
     }
-    File.WriteAllText(Path.Combine(outDir2, "event_images.json"),
+    WriteJson(Path.Combine(outDir2, "event_images.json"),
         "{\n" + string.Join(",\n", evImg.Select(kv => $"  {J(kv.Key)}: {J(kv.Value)}")) + "\n}\n");
     Console.Error.WriteLine($"Extracted {evImg.Count} event image paths.");
     Console.WriteLine(Path.Combine(outDir2, "event_images.json"));
@@ -1802,7 +1802,7 @@ Console.WriteLine(kwOutPath);
                 imgEntries[cardId] = rel;
         }
         var imgLines = imgEntries.Select(kv => $"  {J(kv.Key)}: {J(kv.Value)}");
-        File.WriteAllText(Path.Combine(outDir3, "card_images.json"),
+        WriteJson(Path.Combine(outDir3, "card_images.json"),
             "{\n" + string.Join(",\n", imgLines) + "\n}\n");
         Console.Error.WriteLine($"Extracted {imgEntries.Count} card image paths.");
         Console.WriteLine(Path.Combine(outDir3, "card_images.json"));
@@ -1849,7 +1849,7 @@ Console.WriteLine(kwOutPath);
             if (rel is not null) relImg[id] = rel;
         }
         var relImgLines = relImg.Select(kv => $"  {J4(kv.Key)}: {J4(kv.Value)}");
-        File.WriteAllText(Path.Combine(outDir4, "relic_images.json"),
+        WriteJson(Path.Combine(outDir4, "relic_images.json"),
             "{\n" + string.Join(",\n", relImgLines) + "\n}\n");
         Console.Error.WriteLine($"Extracted {relImg.Count} relic image paths.");
         Console.WriteLine(Path.Combine(outDir4, "relic_images.json"));
@@ -2061,7 +2061,7 @@ Console.WriteLine(kwOutPath);
     // (5) 出力: potion_rarities / potion_stats / potion_characters
     var pRarLines = potionRarities.OrderBy(kv => kv.Key, StringComparer.Ordinal)
         .Select(kv => $"  {JP(kv.Key)}: {JP(kv.Value)}");
-    File.WriteAllText(Path.Combine(outDirP, "potion_rarities.json"),
+    WriteJson(Path.Combine(outDirP, "potion_rarities.json"),
         "{\n" + string.Join(",\n", pRarLines) + "\n}\n");
     Console.WriteLine(Path.Combine(outDirP, "potion_rarities.json"));
 
@@ -2071,13 +2071,13 @@ Console.WriteLine(kwOutPath);
             .Select(f => $"    {JP(f.Key)}: {f.Value}");
         return $"  {JP(kv.Key)}: {{\n{string.Join(",\n", fields)}\n  }}";
     });
-    File.WriteAllText(Path.Combine(outDirP, "potion_stats.json"),
+    WriteJson(Path.Combine(outDirP, "potion_stats.json"),
         "{\n" + string.Join(",\n", pStatLines) + "\n}\n");
     Console.WriteLine(Path.Combine(outDirP, "potion_stats.json"));
 
     var pCharLines = potionCharacters.OrderBy(kv => kv.Key, StringComparer.Ordinal)
         .Select(kv => $"  {JP(kv.Key)}: {JP(kv.Value)}");
-    File.WriteAllText(Path.Combine(outDirP, "potion_characters.json"),
+    WriteJson(Path.Combine(outDirP, "potion_characters.json"),
         "{\n" + string.Join(",\n", pCharLines) + "\n}\n");
     Console.WriteLine(Path.Combine(outDirP, "potion_characters.json"));
 
@@ -2094,7 +2094,7 @@ Console.WriteLine(kwOutPath);
                 pImg[id] = file;
         }
         var pImgLines = pImg.Select(kv => $"  {JP(kv.Key)}: {JP(kv.Value)}");
-        File.WriteAllText(Path.Combine(outDirP, "potion_images.json"),
+        WriteJson(Path.Combine(outDirP, "potion_images.json"),
             "{\n" + string.Join(",\n", pImgLines) + "\n}\n");
         Console.Error.WriteLine($"Extracted {pImg.Count} potion image paths.");
         Console.WriteLine(Path.Combine(outDirP, "potion_images.json"));
@@ -2115,7 +2115,7 @@ Console.WriteLine(kwOutPath);
             var ja = jpnTitle.TryGetValue(kv.Key, out var j) && j.Length > 0 ? j : kv.Value;
             return $"  {JP($"POTION.{kv.Key}")}: {{ \"en\": {JP(kv.Value)}, \"ja\": {JP(ja)} }}";
         });
-        File.WriteAllText(Path.Combine(outDirP, "potion_database.json"),
+        WriteJson(Path.Combine(outDirP, "potion_database.json"),
             "{\n" + string.Join(",\n", dbLines) + "\n}\n");
         Console.Error.WriteLine($"Extracted {engTitle.Count} potion name mappings.");
         Console.WriteLine(Path.Combine(outDirP, "potion_database.json"));
@@ -2130,7 +2130,7 @@ Console.WriteLine(kwOutPath);
             var ja = jpnDesc.TryGetValue(kv.Key, out var j) && j.Length > 0 ? j : kv.Value;
             return $"  {JP($"POTION.{kv.Key}")}: {{ \"en\": {JP(kv.Value)}, \"ja\": {JP(ja)} }}";
         });
-        File.WriteAllText(Path.Combine(outDirP, "potion_descriptions.json"),
+        WriteJson(Path.Combine(outDirP, "potion_descriptions.json"),
             "{\n" + string.Join(",\n", rawLines) + "\n}\n");
         Console.WriteLine(Path.Combine(outDirP, "potion_descriptions.json"));
 
@@ -2145,7 +2145,7 @@ Console.WriteLine(kwOutPath);
             var st = potionStats.TryGetValue(kv.Key, out var sd) ? sd : null;
             return $"  {JP($"POTION.{kv.Key}")}: {{ \"en\": {JP(Res(rawEn, st, false))}, \"ja\": {JP(Res(rawJa, st, true))} }}";
         });
-        File.WriteAllText(Path.Combine(outDirP, "potion_descriptions_resolved.json"),
+        WriteJson(Path.Combine(outDirP, "potion_descriptions_resolved.json"),
             "{\n" + string.Join(",\n", resLines) + "\n}\n");
         Console.Error.WriteLine($"Resolved {engDesc.Count} potion descriptions.");
         Console.WriteLine(Path.Combine(outDirP, "potion_descriptions_resolved.json"));
@@ -2252,7 +2252,7 @@ Console.WriteLine(kwOutPath);
         });
         return $"  \"{kv.Key}\": {{\n{string.Join(",\n", methodEntries)}\n  }}";
     });
-    File.WriteAllText(optionsOutPath, "{\n" + string.Join(",\n", ancientEntries) + "\n}\n");
+    WriteJson(optionsOutPath, "{\n" + string.Join(",\n", ancientEntries) + "\n}\n");
     Console.Error.WriteLine($"Extracted Ancient options for {ancientOptions.Count} Ancients.");
     Console.WriteLine(optionsOutPath);
 
@@ -2280,7 +2280,7 @@ Console.WriteLine(kwOutPath);
     var ancientActEntries = ancientAct.OrderBy(kv => kv.Key, StringComparer.Ordinal)
         .Select(kv => $"  \"{kv.Key}\": {{ \"act\": {kv.Value} }}");
     var ancientActsOutPath = Path.Combine(Path.GetDirectoryName(outPath)!, "ancient_acts.json");
-    File.WriteAllText(ancientActsOutPath, "{\n" + string.Join(",\n", ancientActEntries) + "\n}\n");
+    WriteJson(ancientActsOutPath, "{\n" + string.Join(",\n", ancientActEntries) + "\n}\n");
     Console.Error.WriteLine($"Extracted Ancient act placement for {ancientAct.Count} Ancients.");
     Console.WriteLine(ancientActsOutPath);
 
@@ -2303,7 +2303,7 @@ Console.WriteLine(kwOutPath);
         }
     }
     var ancImgOutPath = Path.Combine(Path.GetDirectoryName(outPath)!, "ancient_images.json");
-    File.WriteAllText(ancImgOutPath,
+    WriteJson(ancImgOutPath,
         "{\n" + string.Join(",\n", ancImg.Select(kv => $"  \"{kv.Key}\": \"{kv.Value}\"")) + "\n}\n");
     Console.Error.WriteLine($"Extracted {ancImg.Count} ancient image paths.");
     Console.WriteLine(ancImgOutPath);
@@ -2396,7 +2396,7 @@ Console.WriteLine(kwOutPath);
             $"\"energyOutlineColor\": \"{energy}\", \"targetingLineColor\": \"{targeting}\" }}");
     }
     var colorsOutPath = Path.Combine(outDirC, "character_colors.json");
-    File.WriteAllText(colorsOutPath, "{\n" + string.Join(",\n", colorEntries) + "\n}\n");
+    WriteJson(colorsOutPath, "{\n" + string.Join(",\n", colorEntries) + "\n}\n");
     Console.Error.WriteLine($"Extracted character colors for {colorEntries.Count} characters.");
     Console.WriteLine(colorsOutPath);
 }
@@ -2561,7 +2561,7 @@ Console.WriteLine(kwOutPath);
     sb.AppendLine("}");
 
     var merchantOutPath = Path.Combine(outDirM, "merchant_prices.json");
-    File.WriteAllText(merchantOutPath, sb.ToString());
+    WriteJson(merchantOutPath, sb.ToString());
     Console.Error.WriteLine($"Merchant prices: card={RarityMap(cardPrices)} colorless×{F(colorlessMarkup)} " +
         $"sale÷{cardSaleDiv} | potion={RarityMap(potionPrices)} | relic={{{relicBaseJson}}} | " +
         $"removal base={(baseCostInts.Count >= 3 ? baseCostInts[1] : 0)}(+{(priceIncInts.Count >= 3 ? priceIncInts[1] : 0)}/use)");
@@ -2622,6 +2622,11 @@ static string CamelToUpperSnake(string name)
     var result = Regex.Replace(name, @"(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])", "_");
     return result.ToUpperInvariant();
 }
+
+// JSON 出力は .gitattributes (*.json eol=crlf) に合わせ CRLF で書き出す。
+// 既存の '\n' 直書き出力を一括 CRLF 化し、extractor 実行後の EOL 差分(M 表示)再発を防ぐ。
+static void WriteJson(string path, string content) =>
+    File.WriteAllText(path, content.Replace("\r\n", "\n").Replace("\n", "\r\n"));
 
 // UPPER_SNAKE → Title Case（例 KAISER_CRAB → Kaiser Crab）。loc に名前が無い場合のフォールバック。
 static string SnakeToTitle(string snake) =>
