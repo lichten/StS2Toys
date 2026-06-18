@@ -67,6 +67,9 @@ $pck = "C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\SlayTheSp
 - `event_images.json` — イベント ID（接頭辞なし大文字、例 `ABYSSAL_BATHS`）→ 画像のソース相対パス（`events_png/` 基準、例 `abyssal_baths.png`）。
   extractor が `tools/extracted/images/events/` ルートの `.png.import`（主画像のみ）をスキャンして生成。`Services/EventImageService.cs` で参照。
   PNG 実体は `dotnet run --project ctex-to-png -- events` で `.ctex` を変換し `tools/extracted/images/events_png/` に生成する
+- `ancient_images.json` — Ancient ID（接頭辞なし大文字、例 `OROBAS`）→ 画像のソース相対パス（`ancients_png/` 基準、`_placeholder` 付き、例 `orobas_placeholder.png`）。
+  extractor が `tools/extracted/images/ancients/` の `*_placeholder.png.import` をスキャンして生成（汎用フォールバックの `under_construction` は除外、画像未提供の `NEOW`/`TEZCATARA` は未収録）。`Services/AncientImageService.cs` で参照。
+  PNG 実体は `dotnet run --project ctex-to-png -- ancients` で `.ctex` を変換し `tools/extracted/images/ancients_png/` に生成する
 - `card_related.json` — カードがホバー表示する関連カード（DLL の `get_ExtraHoverTips`、カードのみにフィルタ）。例: `CARD.ACCURACY` → `[CARD.SHIV]`。`GetRelatedCards` / `GetCreatedByCards`（逆引き）で参照
 
 **ポーション系 JSON（card-type-extractor 生成、`Resources/{version}/`）**

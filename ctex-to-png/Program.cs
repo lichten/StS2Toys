@@ -104,6 +104,39 @@ if (args.Length == 1 && args[0] == "events")
     return;
 }
 
+// Ancient mode: convert ancient .ctex → PNG into images/ancients_png/ per ancient_images.json
+// Usage: dotnet run --project ctex-to-png -- ancients
+if (args.Length == 1 && args[0] == "ancients")
+{
+    var repoRoot  = Path.GetFullPath(Path.Combine(toolsRoot, "..", ".."));
+    var jsonPath  = LatestVersioned(Path.Combine(repoRoot, "StS2Shared", "Resources"), "ancient_images.json");
+    if (jsonPath is null) { Console.WriteLine("ancient_images.json が見つかりません。"); return; }
+
+    var ancientsSrc = Path.Combine(toolsRoot, "images", "ancients");
+    var outRoot     = Path.Combine(toolsRoot, "images", "ancients_png");
+    Directory.CreateDirectory(outRoot);
+
+    using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(jsonPath));
+    int ancConverted = 0, ancSkipped = 0, ancMissing = 0;
+    foreach (var prop in doc.RootElement.EnumerateObject())
+    {
+        var rel        = prop.Value.GetString()!;                 // "orobas_placeholder.png"
+        var relOs      = rel.Replace('/', Path.DirectorySeparatorChar);
+        var importPath = Path.Combine(ancientsSrc, relOs + ".import");
+        var ctexRel    = ParseImportCtexPath(importPath);
+        if (ctexRel is null) { ancMissing++; continue; }
+        var ctexFull   = Path.Combine(toolsRoot, ctexRel.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+        if (!File.Exists(ctexFull)) { ancMissing++; continue; }
+        var outPath    = Path.Combine(outRoot, relOs);
+        Directory.CreateDirectory(Path.GetDirectoryName(outPath)!);
+        if (File.Exists(outPath)) { ancSkipped++; continue; }
+        try { ConvertCtex(ctexFull, outPath, verbose: false); ancConverted++; }
+        catch (Exception ex) { Console.WriteLine($"  fail {rel}: {ex.Message}"); ancMissing++; }
+    }
+    Console.WriteLine($"ancients_png: converted={ancConverted} skipped={ancSkipped} missing={ancMissing}");
+    return;
+}
+
 // Potion mode: convert potion .ctex → PNG into images/potions_png/ per potion_images.json
 // Usage: dotnet run --project ctex-to-png -- potions
 if (args.Length == 1 && args[0] == "potions")

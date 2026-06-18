@@ -2283,6 +2283,30 @@ Console.WriteLine(kwOutPath);
     File.WriteAllText(ancientActsOutPath, "{\n" + string.Join(",\n", ancientActEntries) + "\n}\n");
     Console.Error.WriteLine($"Extracted Ancient act placement for {ancientAct.Count} Ancients.");
     Console.WriteLine(ancientActsOutPath);
+
+    // ---- ancient_images.json（Ancient ID → ancients 内の主画像相対パス）----（event_images と同形）
+    // Ancient 画像は現状プレースホルダのみ（{id}_placeholder.png.import）。
+    // 汎用フォールバックの under_construction は Ancient ID ではないため除外。
+    // 値はソース相対ファイル名（_placeholder 付き、例 "orobas_placeholder.png"）。
+    var ancRepoRoot = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(outPath)!, "..", "..", ".."));
+    var ancientsDir = Path.Combine(ancRepoRoot, "tools", "extracted", "images", "ancients");
+    var ancImg = new SortedDictionary<string, string>(StringComparer.Ordinal);
+    if (Directory.Exists(ancientsDir))
+    {
+        const string suffix = "_placeholder.png.import";
+        foreach (var path in Directory.GetFiles(ancientsDir, "*" + suffix))
+        {
+            var file = Path.GetFileName(path);
+            var stem = file[..^suffix.Length];                 // "orobas" / "the_architect"
+            if (stem.Equals("under_construction", StringComparison.OrdinalIgnoreCase)) continue;
+            ancImg[stem.ToUpperInvariant()] = stem + "_placeholder.png";
+        }
+    }
+    var ancImgOutPath = Path.Combine(Path.GetDirectoryName(outPath)!, "ancient_images.json");
+    File.WriteAllText(ancImgOutPath,
+        "{\n" + string.Join(",\n", ancImg.Select(kv => $"  \"{kv.Key}\": \"{kv.Value}\"")) + "\n}\n");
+    Console.Error.WriteLine($"Extracted {ancImg.Count} ancient image paths.");
+    Console.WriteLine(ancImgOutPath);
 }
 
 // ---- character_colors.json ----（キャラクターの識別色＋UIパレットを DLL から抽出）
