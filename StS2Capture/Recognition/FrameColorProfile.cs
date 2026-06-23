@@ -47,6 +47,17 @@ public sealed class FrameColorProfile
             (r - g) >= 55 && (r - g) <= 105 && (r - b) >= 60);
 
     /// <summary>
+    /// Silent の実機計測に合わせたカード外枠プロファイル。外枠はくすんだ緑（≈ RGB(68,116,33)）。
+    /// 明るい黄緑の絵（G が高い）・レアリティのシアン枠（G≈B）・青/紫/グレーを除外し、外枠の
+    /// 細リングだけを拾う（提供スクショで3枚とも低 fill で検出を確認）。
+    /// </summary>
+    public static FrameColorProfile SilentGreen { get; } = new(
+        "Silent(緑・実測)",
+        static (r, g, b) =>
+            (g - r) >= 30 && (g - b) >= 50 && g >= 80 && g <= 140 &&
+            r >= 30 && r <= 95 && b >= 12 && b <= 55);
+
+    /// <summary>
     /// 色相非依存の彩度リング。彩度 S が高く・明度 V が中程度以上のピクセルを枠候補にする。
     /// 未実測キャラ／セーブ未検出時のベストエフォート。枠は細い均一色リング（低 fill）で
     /// 形状フィルタを通り、塗り潰しの絵（高 fill）や暗い背景（低 S/V）は除外される前提。
@@ -71,6 +82,7 @@ public sealed class FrameColorProfile
     {
         ["DEFECT"] = DefectBlue,
         ["IRONCLAD"] = IroncladRed,
+        ["SILENT"] = SilentGreen,
     };
 
     /// <summary>実測プロファイルを持つキャラ ID の一覧（UI の手動上書き候補に使う）。</summary>
