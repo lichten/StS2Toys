@@ -12,6 +12,7 @@ public sealed class MainForm : Form
     readonly CaptureLoop _loop;
     readonly OcrCardRecognizer _ocr;
     readonly TemplateCardRecognizer _template;
+    readonly ShopItemRecognizer _shop = new();
 
     readonly Label _status = new();
     readonly RadioButton _rbOcr = new() { Text = "OCR", AutoSize = true };
@@ -20,6 +21,7 @@ public sealed class MainForm : Form
     readonly RadioButton _rbGdi = new() { Text = "GDI", AutoSize = true };
     readonly Button _btnCapture = new() { Text = "手動キャプチャ", AutoSize = true };
     readonly Button _btnSave = new() { Text = "キャプチャ保存", AutoSize = true };
+    readonly Button _btnShop = new() { Text = "ショップ検出", AutoSize = true };
     readonly CheckBox _cbAuto = new() { Text = "自動監視", AutoSize = true };
     readonly CheckBox _cbSaveCrops = new() { Text = "切出し/マスク保存", AutoSize = true };
     readonly ComboBox _cbCharacter = new()
@@ -85,6 +87,7 @@ public sealed class MainForm : Form
         top.Controls.Add(_cbAuto);
         top.Controls.Add(_btnCapture);
         top.Controls.Add(_btnSave);
+        top.Controls.Add(_btnShop);
         top.Controls.Add(_cbSaveCrops);
         top.Controls.Add(new Label { Text = "  枠キャラ:", AutoSize = true, Margin = new Padding(8, 6, 2, 0) });
         _cbCharacter.Items.Add("自動（セーブ）");
@@ -200,6 +203,7 @@ public sealed class MainForm : Form
 
         _btnCapture.Click += (_, _) => Task.Run(_loop.CaptureOnce);
         _btnSave.Click += (_, _) => SaveCapture();
+        _btnShop.Click += (_, _) => RunShopDetection();
         _cbSaveCrops.CheckedChanged += (_, _) =>
         {
             if (_cbSaveCrops.Checked)
@@ -322,6 +326,93 @@ public sealed class MainForm : Form
         }
         catch (Exception ex) { _status.Text = $"キャプチャ保存エラー：{ex.Message}"; }
         finally { bmp.Dispose(); }
+    }
+
+    void RunShopDetection()
+    {
+        _shop.SaveCropsDir = _cbSaveCrops.Checked
+            ? Path.Combine(Path.GetTempPath(), "sts2_shop_crops") : null;
+        Task.Run(() =>
+        {
+            var game = GameWindowLocator.Find();
+            var bmp = _loop.CaptureRawFrame();
+            if (bmp is null)
+            {
+                SafeStatus("ショップ検出：キャプチャ失敗（ゲーム未検出/取得不可）");
+                return;
+            }
+            var client = game is null
+                ? new Rectangle(0, 0, bmp.Width, bmp.Height)
+                : WindowClientArea.Resolve(game.Value.Handle, bmp.Width, bmp.Height);
+            ShopItemRecognizer.Result res;
+            try { res = _shop.Detect(bmp, client); }
+            catch (Exception ex) { bmp.Dispose(); SafeStatus($"ショップ検出エラー：{ex.Message}"); return; }
+
+            var preview = BuildShopPreview(bmp, client, res);
+            bmp.Dispose();
+            if (IsDisposed) { preview.Dispose(); return; }
+            try { BeginInvoke(() => ApplyShopResult(res, preview, client)); }
+            catch { preview.Dispose(); }
+        });
+    }
+
+    void SafeStatus(string text)
+    {
+        if (IsDisposed) return;
+        try { BeginInvoke(() => _status.Text = text); } catch { /* 破棄中 */ }
+    }
+
+    Bitmap BuildShopPreview(Bitmap frame, Rectangle client, ShopItemRecognizer.Result res)
+    {
+        const int maxW = 480;
+        double scale = frame.Width <= maxW ? 1.0 : (double)maxW / frame.Width;
+        int w = (int)Math.Round(frame.Width * scale);
+        int h = Math.Max(1, (int)Math.Round(frame.Height * scale));
+        var preview = new Bitmap(w, h);
+        using var g = Graphics.FromImage(preview);
+        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+        g.DrawImage(frame, 0, 0, w, h);
+        Rectangle S(Rectangle b) => new(
+            (int)(b.Left * scale), (int)(b.Top * scale),
+            Math.Max(1, (int)(b.Width * scale)), Math.Max(1, (int)(b.Height * scale)));
+        using (var yellow = new Pen(Color.Gold, 1f)) g.DrawRectangle(yellow, S(client));
+        foreach (var it in res.Items)
+            using (var pen = new Pen(it.Accepted ? Color.Lime : Color.Red, 2f))
+                g.DrawRectangle(pen, S(it.Region));
+        return preview;
+    }
+
+    void ApplyShopResult(ShopItemRecognizer.Result res, Bitmap preview, Rectangle client)
+    {
+        var old = _capturePreview.Image;
+        _capturePreview.Image = preview;
+        old?.Dispose();
+        _lastSignature = ""; // 次のライブ更新でリスト再描画させる
+
+        _ocrList.BeginUpdate();
+        _ocrList.Items.Clear();
+        foreach (var it in res.Items)
+        {
+            var label = it.Candidates.Count == 0
+                ? "(no match)"
+                : string.Join(" / ", it.Candidates.Select(c => $"{c.Name} [{c.Id}]"));
+            var dist = it.Candidates.Count == 0
+                ? "-"
+                : string.Join(" / ", it.Candidates.Select(c => c.Distance.ToString("F2")));
+            var lvi = new ListViewItem(label);
+            lvi.SubItems.Add(it.Kind == ShopItemRecognizer.Kind.Relic ? "R" : "P");
+            lvi.SubItems.Add(it.Accepted ? (it.Candidates.Count > 1 ? $"OK×{it.Candidates.Count}" : "OK") : "-");
+            lvi.SubItems.Add(dist);
+            if (it.Accepted)
+                lvi.BackColor = it.Kind == ShopItemRecognizer.Kind.Relic
+                    ? Color.FromArgb(220, 245, 220) : Color.FromArgb(255, 235, 200);
+            _ocrList.Items.Add(lvi);
+        }
+        _ocrList.EndUpdate();
+
+        int acc = res.Items.Count(i => i.Accepted);
+        _status.Text = $"ショップ検出：{(res.IsShop ? "ショップ" : "非ショップ")}" +
+            $"（一致 {acc}/{res.Items.Count}・client {client.Width}x{client.Height}）";
     }
 
     void UpdateThumbnail()

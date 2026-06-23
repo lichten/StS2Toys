@@ -1,5 +1,3 @@
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
 using StS2Shared.Services;
 
 namespace StS2Capture.Recognition;
@@ -12,9 +10,6 @@ public sealed class TemplateCardRecognizer : ICardRecognizer
 {
     public string Name => "Template";
 
-    // HSV ヒストグラムの bin 数（H×S×V = 108）。
-    const int HB = 12, SB = 3, VB = 3, BINS = HB * SB * VB;
-    const int SampleN = 40; // ヒストグラム計算時のリサイズ解像度
     // portrait の下端トリム（在ゲーム絵窓の種別装飾を除外するため対応させる。ArtRegionOf と同値）。
     const double PortraitBottomTrim = 0.15;
 
@@ -72,11 +67,11 @@ public sealed class TemplateCardRecognizer : ICardRecognizer
     /// <summary>絵窓のヒストグラムを DB 全件と照合し、最近傍を返す（しきい値・マージンで採否）。</summary>
     Match? Identify(Bitmap frame, Rectangle art, Dictionary<string, float[]> db)
     {
-        var q = Histogram(frame, art);
+        var q = HsvHistogram.Compute(frame, art);
         string? bestId = null; double best = double.MaxValue, second = double.MaxValue;
         foreach (var (id, h) in db)
         {
-            double d = ChiSquare(q, h);
+            double d = HsvHistogram.ChiSquare(q, h);
             if (d < best) { second = best; best = d; bestId = id; }
             else if (d < second) second = d;
         }
@@ -102,79 +97,11 @@ public sealed class TemplateCardRecognizer : ICardRecognizer
                 using var bmp = new Bitmap(path);
                 // 在ゲーム絵窓は下 15%（種別装飾）を除外するので、portrait も上 85% に揃える。
                 int ph = Math.Max(1, (int)(bmp.Height * (1.0 - PortraitBottomTrim)));
-                _db[id] = Histogram(bmp, new Rectangle(0, 0, bmp.Width, ph));
+                _db[id] = HsvHistogram.Compute(bmp, new Rectangle(0, 0, bmp.Width, ph));
             }
             catch { /* 壊れた画像はスキップ */ }
         }
         return _db;
-    }
-
-    /// <summary>領域を 40×40 にリサイズして正規化 HSV ヒストグラム（108bin）を作る。</summary>
-    static float[] Histogram(Bitmap src, Rectangle region)
-    {
-        using var small = new Bitmap(SampleN, SampleN, PixelFormat.Format32bppArgb);
-        using (var g = Graphics.FromImage(small))
-        {
-            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
-            g.DrawImage(src, new Rectangle(0, 0, SampleN, SampleN), region, GraphicsUnit.Pixel);
-        }
-
-        var hist = new float[BINS];
-        var data = small.LockBits(new Rectangle(0, 0, SampleN, SampleN),
-            ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-        try
-        {
-            int stride = data.Stride;
-            var row = new byte[stride];
-            for (int y = 0; y < SampleN; y++)
-            {
-                Marshal.Copy(data.Scan0 + y * stride, row, 0, stride);
-                for (int x = 0; x < SampleN; x++)
-                {
-                    int p = x * 4;
-                    ToHsv(row[p + 2], row[p + 1], row[p], out double h, out double s, out double v);
-                    int hi = Math.Min(HB - 1, (int)(h * HB));
-                    int si = Math.Min(SB - 1, (int)(s * SB));
-                    int vi = Math.Min(VB - 1, (int)(v * VB));
-                    hist[(hi * SB + si) * VB + vi] += 1f;
-                }
-            }
-        }
-        finally { small.UnlockBits(data); }
-
-        float tot = SampleN * SampleN;
-        for (int i = 0; i < BINS; i++) hist[i] /= tot;
-        return hist;
-    }
-
-    /// <summary>RGB(0-255) → HSV(0..1)。.NET の HSL とは別なので手計算する。</summary>
-    static void ToHsv(byte r, byte g, byte b, out double h, out double s, out double v)
-    {
-        double rf = r / 255.0, gf = g / 255.0, bf = b / 255.0;
-        double max = Math.Max(rf, Math.Max(gf, bf)), min = Math.Min(rf, Math.Min(gf, bf));
-        double delta = max - min;
-        v = max;
-        s = max <= 0 ? 0 : delta / max;
-        if (delta <= 0) { h = 0; return; }
-        double hue;
-        if (max == rf) hue = (gf - bf) / delta % 6;
-        else if (max == gf) hue = (bf - rf) / delta + 2;
-        else hue = (rf - gf) / delta + 4;
-        hue /= 6;
-        if (hue < 0) hue += 1;
-        h = hue;
-    }
-
-    static double ChiSquare(float[] u, float[] v)
-    {
-        double s = 0;
-        for (int i = 0; i < u.Length; i++)
-        {
-            double d = u[i] - v[i], den = u[i] + v[i];
-            if (den > 0) s += d * d / den;
-        }
-        return s;
     }
 
     /// <summary>tools/extracted/images/card_portraits_png を上位ディレクトリに遡って探す。</summary>
