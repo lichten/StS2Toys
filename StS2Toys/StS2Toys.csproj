@@ -2,7 +2,10 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <!-- ライブキャプチャ機能で WinRT（WGC/OCR）を使う StS2Capture.Core を参照するため
+         SDK バージョン付き TFM に引上げ。 -->
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.18362.0</SupportedOSPlatformVersion>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -14,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\StS2Shared\StS2Shared.csproj" />
+    <ProjectReference Include="..\StS2Capture.Core\StS2Capture.Core.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <!-- Windows.Media.Ocr / Windows.Graphics.Capture（WinRT 投影）を使うため
-         単なる net10.0-windows ではなく SDK バージョン付き TFM にする。 -->
+    <!-- Windows.Media.Ocr / Windows.Graphics.Capture（WinRT 投影）を使うため SDK バージョン付き TFM。
+         StS2Capture(exe) と StS2Toys の双方から参照する共有ライブラリ。 -->
     <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <SupportedOSPlatformVersion>10.0.18362.0</SupportedOSPlatformVersion>
     <Nullable>enable</Nullable>
+    <!-- System.Drawing（Bitmap/Rectangle/Color 等）を暗黙 using で使うため WinForms を参照。 -->
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\StS2Shared\StS2Shared.csproj" />
-    <ProjectReference Include="..\StS2Capture.Core\StS2Capture.Core.csproj" />
   </ItemGroup>
 
 </Project>
