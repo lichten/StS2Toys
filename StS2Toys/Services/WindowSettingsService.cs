@@ -18,7 +18,8 @@ record AppSettings(
     SubWindowSettings? RegentOverview = null,
     SubWindowSettings? CombinedOverview = null,
     SubWindowSettings? DisappearanceOverview = null,
-    string? Language = null);
+    string? Language = null,
+    SubWindowSettings? LiveCapture = null);
 
 static class WindowSettingsService
 {

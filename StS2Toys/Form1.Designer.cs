@@ -39,6 +39,7 @@ namespace StS2Toys
             lblGroupOverview = new Label();
             btnCardDetail = new Button();
             btnImageViewer = new Button();
+            btnLiveCapture = new Button();
             splitContainer = new SplitContainer();
             listViewDeck = new ListView();
             colCardName = new ColumnHeader();
@@ -208,6 +209,7 @@ namespace StS2Toys
             panelSideButtons.Controls.Add(lblGroupOverview);
             panelSideButtons.Controls.Add(btnCardDetail);
             panelSideButtons.Controls.Add(btnImageViewer);
+            panelSideButtons.Controls.Add(btnLiveCapture);
             panelSideButtons.Dock = DockStyle.Fill;
             panelSideButtons.Location = new Point(0, 0);
             panelSideButtons.Name = "panelSideButtons";
@@ -361,6 +363,16 @@ namespace StS2Toys
             btnImageViewer.TabIndex = 0;
             btnImageViewer.Text = "○ 画像ビューア";
             btnImageViewer.Click += BtnImageViewer_Click;
+            //
+            // btnLiveCapture
+            //
+            btnLiveCapture.Dock = DockStyle.Top;
+            btnLiveCapture.Location = new Point(0, 0);
+            btnLiveCapture.Name = "btnLiveCapture";
+            btnLiveCapture.Size = new Size(150, 30);
+            btnLiveCapture.TabIndex = 0;
+            btnLiveCapture.Text = "○ ライブキャプチャ";
+            btnLiveCapture.Click += BtnLiveCapture_Click;
             // 
             // splitContainer
             // 
@@ -513,6 +525,7 @@ namespace StS2Toys
         private SplitContainer splitContainerOuter;
         private Panel panelSideButtons;
         private Button btnImageViewer;
+        private Button btnLiveCapture;
         private Button btnCardDetail;
         private Button btnCombinedOverview;
         private Button btnHpHistory;

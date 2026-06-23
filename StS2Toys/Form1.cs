@@ -20,6 +20,8 @@ namespace StS2Toys
         private DeckOverviewForm? _disappearanceOverview;
         private EncounterOverviewForm? _encounterOverview;
         private HpHistoryForm? _hpHistory;
+        private LiveCaptureForm? _liveCapture;
+        private SubWindowSettings? _liveCaptureSettings;
         private SubWindowSettings? _imageViewerSettings;
         private SubWindowSettings? _cardDetailSettings;
         private SubWindowSettings? _combinedOverviewSettings;
@@ -101,6 +103,7 @@ namespace StS2Toys
             _defectOverviewSettings   = app.DefectOverview;
             _regentOverviewSettings       = app.RegentOverview;
             _disappearanceOverviewSettings = app.DisappearanceOverview;
+            _liveCaptureSettings = app.LiveCapture;
 
             if (app.SidePanelWidth is int w)
                 splitContainerOuter.SplitterDistance = w;
@@ -142,11 +145,13 @@ namespace StS2Toys
                 _encounterOverviewSettings = WindowToSub(_encounterOverview);
             if (_hpHistory is { IsDisposed: false })
                 _hpHistorySettings = WindowToSub(_hpHistory);
+            if (_liveCapture is { IsDisposed: false })
+                _liveCaptureSettings = WindowToSub(_liveCapture);
 
             var state = WindowState == FormWindowState.Minimized ? FormWindowState.Normal : WindowState;
             var bounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
             var main = new WindowSettings(bounds.X, bounds.Y, bounds.Width, bounds.Height, state.ToString());
-            WindowSettingsService.Save(new AppSettings(main, _imageViewerSettings, _cardDetailSettings, _hpHistorySettings, _encounterOverviewSettings, splitContainerOuter.SplitterDistance, _necroOverviewSettings, _ironcladOverviewSettings, _silentOverviewSettings, _defectOverviewSettings, _regentOverviewSettings, _combinedOverviewSettings, _disappearanceOverviewSettings, AppLanguage.IsJapanese ? "ja" : "en"));
+            WindowSettingsService.Save(new AppSettings(main, _imageViewerSettings, _cardDetailSettings, _hpHistorySettings, _encounterOverviewSettings, splitContainerOuter.SplitterDistance, _necroOverviewSettings, _ironcladOverviewSettings, _silentOverviewSettings, _defectOverviewSettings, _regentOverviewSettings, _combinedOverviewSettings, _disappearanceOverviewSettings, AppLanguage.IsJapanese ? "ja" : "en", _liveCaptureSettings));
         }
 
         static SubWindowSettings WindowToSub(Form form) =>
@@ -163,6 +168,7 @@ namespace StS2Toys
             if (_defectOverviewSettings?.Visible == true)     BtnDefectOverview_Click(null, EventArgs.Empty);
             if (_regentOverviewSettings?.Visible == true)        BtnRegentOverview_Click(null, EventArgs.Empty);
             if (_disappearanceOverviewSettings?.Visible == true) BtnDisappearanceOverview_Click(null, EventArgs.Empty);
+            if (_liveCaptureSettings?.Visible == true)           BtnLiveCapture_Click(null, EventArgs.Empty);
         }
 
         static SubWindowSettings BoundsToSub(Rectangle r) => new(r.X, r.Y, r.Width, r.Height);
@@ -909,6 +915,36 @@ namespace StS2Toys
         {
             btnImageViewer.Text = visible ? "● 画像ビューア" : "○ 画像ビューア";
             btnImageViewer.ForeColor = visible ? Color.DarkBlue : SystemColors.ControlText;
+        }
+
+        void BtnLiveCapture_Click(object? sender, EventArgs e)
+        {
+            if (_liveCapture is null || _liveCapture.IsDisposed || !_liveCapture.Visible)
+            {
+                if (_liveCapture is null || _liveCapture.IsDisposed)
+                {
+                    _liveCapture = new LiveCaptureForm();
+                    ApplySubWindowSettings(_liveCapture, _liveCaptureSettings, new Point(Right + 4, Top));
+                    _liveCapture.FormClosed += (_, _) =>
+                    {
+                        _liveCaptureSettings = BoundsToSub(_liveCapture.Bounds);
+                        UpdateLiveCaptureButton(false);
+                    };
+                }
+                _liveCapture.Show(this);
+                UpdateLiveCaptureButton(true);
+            }
+            else
+            {
+                _liveCapture.Hide();
+                UpdateLiveCaptureButton(false);
+            }
+        }
+
+        void UpdateLiveCaptureButton(bool visible)
+        {
+            btnLiveCapture.Text = visible ? "● ライブキャプチャ" : "○ ライブキャプチャ";
+            btnLiveCapture.ForeColor = visible ? Color.DarkBlue : SystemColors.ControlText;
         }
 
         void BtnCardDetail_Click(object? sender, EventArgs e)
