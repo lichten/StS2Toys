@@ -102,7 +102,9 @@ public sealed class ShopItemRecognizer
     }
 
     static string NameOf(Kind kind, string id) =>
-        kind == Kind.Relic ? CardDatabaseService.GetRelicTitle(id, japanese: true) : id;
+        kind == Kind.Relic
+            ? CardDatabaseService.GetRelicTitle(id, japanese: true)
+            : CardDatabaseService.GetPotionTitle(id, japanese: true);
 
     /// <summary>
     /// best が <see cref="MaxDistance"/> 以内なら、best と best からタイ窓（<see cref="MinMargin"/>）以内の

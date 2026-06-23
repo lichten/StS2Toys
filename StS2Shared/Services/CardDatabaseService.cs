@@ -9,17 +9,21 @@ public static class CardDatabaseService
     record Entry(string En, string Ja);
 
     static readonly Dictionary<string, Entry> _db = Load();
+    static readonly Dictionary<string, Entry> _potionDb = LoadEntries("potion_database.json");
     static readonly Dictionary<string, string> _types = LoadTypes();
     static readonly Dictionary<string, string> _rarities = LoadStringDict("card_rarities.json");
     static readonly Dictionary<string, string> _characters = LoadStringDict("card_characters.json");
     static readonly Dictionary<string, int> _costs = LoadIntDict("card_costs.json");
     static readonly Dictionary<string, int> _upgradedCosts = LoadIntDict("card_upgraded_costs.json");
 
-    static Dictionary<string, Entry> Load()
+    static Dictionary<string, Entry> Load() => LoadEntries("card_database.json");
+
+    /// <summary>{ID}→{en,ja} 形式の DB（card_database.json / potion_database.json）を読む。</summary>
+    static Dictionary<string, Entry> LoadEntries(string suffix)
     {
         var asm = Assembly.GetExecutingAssembly();
         var result = new Dictionary<string, Entry>(StringComparer.OrdinalIgnoreCase);
-        var name = ResourceResolver.ResolveVersioned(asm, "card_database.json");
+        var name = ResourceResolver.ResolveVersioned(asm, suffix);
         if (name is null) return result;
 
         using var stream = asm.GetManifestResourceStream(name)!;
@@ -130,6 +134,18 @@ public static class CardDatabaseService
         if (loc.TryGetValue(key, out var title) && !string.IsNullOrWhiteSpace(title))
             return title;
         return ToTitleCase(id.Replace('_', ' '));
+    }
+
+    /// <summary>
+    /// ポーション ID の表示名（potion_database.json 由来の EN/JP）。接頭辞 "POTION." は付いていても無くても可。
+    /// 見つからない場合はタイトルケースにフォールバック。
+    /// </summary>
+    public static string GetPotionTitle(string id, bool japanese = false)
+    {
+        var raw = id.Contains('.') ? id[(id.IndexOf('.') + 1)..] : id;
+        if (_potionDb.TryGetValue(id, out var e) || _potionDb.TryGetValue("POTION." + raw, out e))
+            return japanese ? e.Ja : e.En;
+        return ToTitleCase(raw.Replace('_', ' '));
     }
 
     static string ToTitleCase(string s) =>

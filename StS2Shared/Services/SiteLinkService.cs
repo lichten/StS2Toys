@@ -51,7 +51,8 @@ public static class SiteLinkService
             case "relic": en = CardDatabaseService.GetRelicTitle(id, false); jp = CardDatabaseService.GetRelicTitle(id, true); break;
             case "event": en = CardDatabaseService.GetEventTitle(id, false); jp = CardDatabaseService.GetEventTitle(id, true); break;
             case "encounter": en = EncounterDatabaseService.GetEncounterName(id, false); jp = EncounterDatabaseService.GetEncounterName(id, true); break;
-            default: en = idRaw; jp = idRaw; break; // potion/monster は名称サービス未整備のため ID フォールバック
+            case "potion": en = CardDatabaseService.GetPotionTitle(id, false); jp = CardDatabaseService.GetPotionTitle(id, true); break;
+            default: en = idRaw; jp = idRaw; break; // monster は名称サービス未整備のため ID フォールバック
         }
 
         string cardClass = "";
