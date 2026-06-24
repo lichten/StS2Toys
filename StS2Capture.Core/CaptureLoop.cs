@@ -19,7 +19,8 @@ public sealed class CaptureLoop : IDisposable
         IReadOnlyList<Rectangle> CardBoxes,
         IReadOnlyList<Rectangle> TitleBands,
         Bitmap? Preview,
-        ShopItemRecognizer.Result? Shop = null);
+        ShopItemRecognizer.Result? Shop = null,
+        ScreenRecognizer.ScreenType Screen = ScreenRecognizer.ScreenType.Unknown);
 
     /// <summary>ライブ表示用の縮小プレビューの最大幅（px）。</summary>
     public int PreviewMaxWidth { get; set; } = 480;
@@ -41,6 +42,13 @@ public sealed class CaptureLoop : IDisposable
     /// </summary>
     public ShopItemRecognizer? ShopRecognizer { get; set; }
 
+    /// <summary>
+    /// 非 null の間、固定矩形レイアウト方式（カードを選択／ショップ）で1パス認識する。
+    /// 設定時は <see cref="ShopRecognizer"/> と従来の枠色認識器（<see cref="ICardRecognizer"/>）には
+    /// 依存せず、これ単体でカード・レリック・ポーションを検出して <see cref="Result"/> を埋める。
+    /// </summary>
+    public ScreenRecognizer? ScreenRecognizer { get; set; }
+
     IFrameSource _frameSource;
     ICardRecognizer _recognizer;
 
@@ -58,6 +66,21 @@ public sealed class CaptureLoop : IDisposable
     {
         _frameSource = frameSource;
         _recognizer = recognizer;
+    }
+
+    /// <summary>
+    /// 枠色認識器を持たないループ。<see cref="ScreenRecognizer"/> 方式（固定矩形）専用に使う。
+    /// 内部の <see cref="ICardRecognizer"/> はダミーで、ScreenRecognizer 未設定時は何も検出しない。
+    /// </summary>
+    public CaptureLoop(IFrameSource frameSource) : this(frameSource, NullRecognizer.Instance) { }
+
+    /// <summary>ScreenRecognizer 方式で使う何もしない認識器（ctor の穴埋め）。</summary>
+    sealed class NullRecognizer : ICardRecognizer
+    {
+        public static readonly NullRecognizer Instance = new();
+        public string Name => "None";
+        public FrameColorProfile FrameProfile { get; set; } = FrameColorProfile.SaturatedRing;
+        public RecognitionResult Recognize(Bitmap frame) => RecognitionResult.Empty;
     }
 
     public string FrameSourceName { get { lock (_swap) return _frameSource.Name; } }
@@ -204,8 +227,17 @@ public sealed class CaptureLoop : IDisposable
                 return;
             }
 
-            // 現在キャラを解決し、対応する枠色プロファイルを認識器（=矩形検出器）へ設定する。
+            // 現在キャラを解決（枠色プロファイル選択／固定矩形方式の候補絞り込みに使う）。
             var charId = ResolveCharacterId();
+
+            // 固定矩形レイアウト方式が設定されていれば、それで1パス認識して終える（カード／ショップ統合）。
+            var screenReco = ScreenRecognizer;
+            if (screenReco is not null)
+            {
+                RunScreen(screenReco, game.Value.Handle, frame, source, charId);
+                return;
+            }
+
             var profile = FrameColorProfile.ForCharacter(charId);
             recognizer.FrameProfile = profile;
 
@@ -251,6 +283,30 @@ public sealed class CaptureLoop : IDisposable
                 Array.Empty<Rectangle>(), Array.Empty<Rectangle>(), null));
         }
         finally { frame?.Dispose(); }
+    }
+
+    /// <summary>固定矩形レイアウト方式で1フレームを認識し、結果を <see cref="Updated"/> で通知する。</summary>
+    void RunScreen(ScreenRecognizer screenReco, IntPtr hwnd, Bitmap frame, IFrameSource source, string? charId)
+    {
+        var client = WindowClientArea.Resolve(hwnd, frame.Width, frame.Height);
+        var screen = screenReco.Recognize(frame, client, charId);
+
+        var ctx = $"[キャラ:{charId ?? "自動?"}]";
+        int accessories = screen.Shop is { } s ? s.Items.Count(i => i.Accepted) : 0;
+        string status = screen.Type switch
+        {
+            ScreenRecognizer.ScreenType.Shop =>
+                $"ショップ画面：カード {screen.Cards.Count}・レリック/ポーション {accessories} 件（{source.Name}）{ctx}",
+            ScreenRecognizer.ScreenType.CardSelect =>
+                $"カードを選択画面：{screen.Cards.Count} 枚検出（{source.Name}）{ctx}",
+            _ => $"対象画面なし（{source.Name}）{ctx}",
+        };
+
+        var preview = MakePreview(frame, PreviewMaxWidth, screen.CardBoxes, Array.Empty<Rectangle>(), screen.Shop);
+
+        Updated?.Invoke(new Result(status, screen.Type == ScreenRecognizer.ScreenType.CardSelect,
+            screen.Cards, Array.Empty<OcrTextSpan>(),
+            screen.CardBoxes, Array.Empty<Rectangle>(), preview, screen.Shop, screen.Type));
     }
 
     public void Dispose()

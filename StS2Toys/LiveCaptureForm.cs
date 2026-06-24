@@ -16,13 +16,10 @@ namespace StS2Toys;
 public sealed class LiveCaptureForm : Form
 {
     readonly CaptureLoop _loop;
-    readonly OcrCardRecognizer _ocr;
-    readonly TemplateCardRecognizer _template;
     readonly ShopItemRecognizer _shop = new();
+    readonly ScreenRecognizer _screen;
 
     readonly Label _status = new();
-    readonly RadioButton _rbOcr = new() { Text = "OCR", AutoSize = true };
-    readonly RadioButton _rbTemplate = new() { Text = "Template", AutoSize = true };
     readonly RadioButton _rbWgc = new() { Text = "WGC", AutoSize = true };
     readonly RadioButton _rbGdi = new() { Text = "GDI", AutoSize = true };
     readonly Button _btnCapture = new() { Text = "手動キャプチャ", AutoSize = true };
@@ -71,20 +68,19 @@ public sealed class LiveCaptureForm : Form
         Height = 580;
         StartPosition = FormStartPosition.Manual;
 
-        _ocr = new OcrCardRecognizer(CardNameIndex.Build());
-        _template = new TemplateCardRecognizer();
+        // 固定矩形レイアウト方式：画面（カードを選択／ショップ）ごとに固定座標を probe して
+        // カード・レリック・ポーションを1パスで検出する（枠色は候補プールの絞り込みにのみ使用）。
+        _screen = new ScreenRecognizer(_shop);
 
-        // 既定：WGC（GPU 描画対応・主）＋ Template（OCR 言語パック非依存で堅い）。
-        _loop = new CaptureLoop(new WgcFrameSource(), _template);
-        // カード検出と同じサイクルでショップ検出も行う（更新経路を1本化し自動監視と競合させない）。
-        _loop.ShopRecognizer = _shop;
+        // 既定：WGC（GPU 描画対応・主）。検出は ScreenRecognizer に一本化。
+        _loop = new CaptureLoop(new WgcFrameSource());
+        _loop.ScreenRecognizer = _screen;
         _loop.Updated += OnLoopUpdated;
 
         BuildLayout();
         WireEvents();
 
         _rbWgc.Checked = true;
-        _rbTemplate.Checked = true;
 
         _saveTimer.Tick += (_, _) => RefreshSaveState();
         _saveTimer.Start();
@@ -103,10 +99,8 @@ public sealed class LiveCaptureForm : Form
             Padding = new Padding(8, 8, 8, 4),
             WrapContents = true,
         };
-        // 認識（Template/OCR）と取得（WGC/GDI）はそれぞれ別の親コンテナに入れて
-        // 独立した相互排他グループにする（同一親だと 4 つで 1 グループ化してしまう）。
-        top.Controls.Add(RadioGroup("認識:", _rbTemplate, _rbOcr));
-        top.Controls.Add(RadioGroup("  取得:", _rbWgc, _rbGdi));
+        // 取得（WGC/GDI）の相互排他ラジオ群。
+        top.Controls.Add(RadioGroup("取得:", _rbWgc, _rbGdi));
         top.Controls.Add(_cbAuto);
         top.Controls.Add(_btnCapture);
         top.Controls.Add(_btnLinks);
@@ -152,7 +146,7 @@ public sealed class LiveCaptureForm : Form
         _left.Dock = DockStyle.Fill;
         _left.Orientation = Orientation.Horizontal;
         _left.Panel1.Controls.Add(_list);
-        _left.Panel2.Controls.Add(WithHeader("検出テキスト／ショップ候補", _ocrList));
+        _left.Panel2.Controls.Add(WithHeader("ショップ候補（レリック／ポーション）", _ocrList));
 
         // 右：キャプチャプレビュー（上）＋ portrait サムネ（下）
         _right.Dock = DockStyle.Fill;
@@ -265,9 +259,6 @@ public sealed class LiveCaptureForm : Form
 
     void WireEvents()
     {
-        _rbOcr.CheckedChanged += (_, _) => { if (_rbOcr.Checked) _loop.SetRecognizer(_ocr); };
-        _rbTemplate.CheckedChanged += (_, _) => { if (_rbTemplate.Checked) _loop.SetRecognizer(_template); };
-
         _rbWgc.CheckedChanged += (_, _) => { if (_rbWgc.Checked) _loop.SetFrameSource(new WgcFrameSource()); };
         _rbGdi.CheckedChanged += (_, _) => { if (_rbGdi.Checked) _loop.SetFrameSource(new GdiFrameSource()); };
 
@@ -410,8 +401,7 @@ public sealed class LiveCaptureForm : Form
         {
             game is null ? "ゲーム未検出" : $"ゲーム検出: {game.Value.Title}",
         };
-        if (!_ocr.IsAvailable) parts.Add("（注意: OCR 言語パック未導入）");
-        if (!_template.IsAvailable) parts.Add("（注意: portraits ディレクトリ未検出）");
+        if (!_screen.IsAvailable) parts.Add("（注意: portraits ディレクトリ未検出）");
         _status.Text = string.Join("  ", parts);
     }
 
