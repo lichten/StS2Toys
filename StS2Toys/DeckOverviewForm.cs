@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Drawing.Imaging;
 using StS2Toys.Services;
 using StS2Shared.Services;
@@ -12,6 +13,8 @@ record HitEntry(Rectangle Rect, string Id, bool IsRelic, string EnchantmentId = 
 public partial class DeckOverviewForm : Form
 {
     const int CardW = 120, CardH = 91, RelicH = 56, Gap = 4, PadX = 8, PadY = 8, HeaderH = 28, SectionGap = 8;
+    // レリックは名前を出さず PNG アイコンのみのため、正方形タイルで密に並べる。
+    const int RelicTile = 56;
 
     private IReadOnlyList<DeckCard>? _cards;
     private IReadOnlyList<RelicEntry>? _relics;
@@ -22,6 +25,8 @@ public partial class DeckOverviewForm : Form
     private int? _deckTotalOverride;
     private readonly Dictionary<string, Bitmap?> _imageCache = new();
     readonly ToolTip _hoverTip = new() { InitialDelay = 400, ReshowDelay = 100, AutoPopDelay = 8000, ShowAlways = true };
+    // レリッククリックで開く外部リンク（URLテンプレート）の選択メニュー。
+    readonly ContextMenuStrip _relicLinkMenu = new();
     List<HitEntry> _hitMap = [];
     string? _hoveredId;
     readonly HashSet<string> _collapsedSections = new();
@@ -49,6 +54,7 @@ public partial class DeckOverviewForm : Form
             foreach (var bmp in _imageCache.Values) bmp?.Dispose();
             _pictureBox.Image?.Dispose();
             _hoverTip.Dispose();
+            _relicLinkMenu.Dispose();
             components?.Dispose();
         }
         base.Dispose(disposing);
@@ -174,6 +180,7 @@ public partial class DeckOverviewForm : Form
         var relics = _relics ?? [];
 
         int cardsPerRow = Math.Max(1, (availableWidth - 2 * PadX + Gap) / (CardW + Gap));
+        int relicsPerRow = Math.Max(1, (availableWidth - 2 * PadX + Gap) / (RelicTile + Gap));
 
         int totalHeight = PadY;
         foreach (var (_, cards) in groups)
@@ -181,7 +188,7 @@ public partial class DeckOverviewForm : Form
             int rows = (cards.Count + cardsPerRow - 1) / cardsPerRow;
             totalHeight += HeaderH + rows * (CardH + Gap) + SectionGap;
         }
-        int relicRows = relics.Count > 0 ? (relics.Count + cardsPerRow - 1) / cardsPerRow : 1;
+        int relicRows = relics.Count > 0 ? (relics.Count + relicsPerRow - 1) / relicsPerRow : 1;
         totalHeight += HeaderH + relicRows * (RelicH + Gap) + SectionGap;
         totalHeight += PadY;
 
@@ -227,12 +234,12 @@ public partial class DeckOverviewForm : Form
         {
             for (int i = 0; i < relics.Count; i++)
             {
-                int col = i % cardsPerRow;
-                int row = i / cardsPerRow;
+                int col = i % relicsPerRow;
+                int row = i / relicsPerRow;
                 var relicRect = new Rectangle(
-                    PadX + col * (CardW + Gap),
+                    PadX + col * (RelicTile + Gap),
                     y + row * (RelicH + Gap),
-                    CardW, RelicH);
+                    RelicTile, RelicH);
                 _hitMap.Add(new HitEntry(relicRect, relics[i].Id, true));
                 DrawRelicTile(g, relics[i], relicRect);
             }
@@ -250,6 +257,7 @@ public partial class DeckOverviewForm : Form
     Bitmap ComposeFromSections(int availableWidth)
     {
         int cardsPerRow = Math.Max(1, (availableWidth - 2 * PadX + Gap) / (CardW + Gap));
+        int relicsPerRow = Math.Max(1, (availableWidth - 2 * PadX + Gap) / (RelicTile + Gap));
         bool jaMode = AppLanguage.IsJapanese;
         int deckTotal = _deckTotalOverride ?? 0;
 
@@ -261,7 +269,7 @@ public partial class DeckOverviewForm : Form
             if (!collapsed)
             {
                 int cardRows  = sec.Cards.Count  > 0 ? (sec.Cards.Count  + cardsPerRow - 1) / cardsPerRow : 0;
-                int relicRows = sec.Relics.Count > 0 ? (sec.Relics.Count + cardsPerRow - 1) / cardsPerRow : 0;
+                int relicRows = sec.Relics.Count > 0 ? (sec.Relics.Count + relicsPerRow - 1) / relicsPerRow : 0;
                 if (cardRows > 0)  totalH += cardRows  * (CardH  + Gap);
                 if (relicRows > 0) totalH += relicRows  * (RelicH + Gap) + (cardRows > 0 ? Gap : 0);
                 if (cardRows == 0 && relicRows == 0) totalH += RelicH;
@@ -307,11 +315,11 @@ public partial class DeckOverviewForm : Form
                 if (sec.Relics.Count > 0)
                 {
                     if (cardRows > 0) y += Gap;
-                    int relicRows = (sec.Relics.Count + cardsPerRow - 1) / cardsPerRow;
+                    int relicRows = (sec.Relics.Count + relicsPerRow - 1) / relicsPerRow;
                     for (int i = 0; i < sec.Relics.Count; i++)
                     {
-                        int col = i % cardsPerRow, row = i / cardsPerRow;
-                        var relicRect = new Rectangle(PadX + col * (CardW + Gap), y + row * (RelicH + Gap), CardW, RelicH);
+                        int col = i % relicsPerRow, row = i / relicsPerRow;
+                        var relicRect = new Rectangle(PadX + col * (RelicTile + Gap), y + row * (RelicH + Gap), RelicTile, RelicH);
                         _hitMap.Add(new HitEntry(relicRect, sec.Relics[i].Id, true));
                         DrawRelicTile(g, sec.Relics[i], relicRect);
                     }
@@ -359,13 +367,14 @@ public partial class DeckOverviewForm : Form
         bool ja = AppLanguage.IsJapanese;
         var groups = BuildKeywordGroups(_cards ?? [], _relics ?? []);
         int cardsPerRow = Math.Max(1, (availableWidth - 2 * PadX + Gap) / (CardW + Gap));
+        int relicsPerRow = Math.Max(1, (availableWidth - 2 * PadX + Gap) / (RelicTile + Gap));
         int deckTotal = _deckTotalOverride ?? (_cards ?? []).Sum(c => c.Count);
 
         int totalHeight = PadY;
         foreach (var (_, groupCards, groupRelics) in groups)
         {
             int cardRows  = groupCards.Count  > 0 ? (groupCards.Count  + cardsPerRow - 1) / cardsPerRow : 0;
-            int relicRows = groupRelics.Count > 0 ? (groupRelics.Count + cardsPerRow - 1) / cardsPerRow : 0;
+            int relicRows = groupRelics.Count > 0 ? (groupRelics.Count + relicsPerRow - 1) / relicsPerRow : 0;
             totalHeight += HeaderH;
             if (cardRows  > 0) totalHeight += cardRows  * (CardH  + Gap);
             if (relicRows > 0) totalHeight += relicRows * (RelicH + Gap) + (cardRows > 0 ? Gap : 0);
@@ -401,11 +410,11 @@ public partial class DeckOverviewForm : Form
             if (groupRelics.Count > 0)
             {
                 if (cardRows > 0) y += Gap;
-                int relicRows = (groupRelics.Count + cardsPerRow - 1) / cardsPerRow;
+                int relicRows = (groupRelics.Count + relicsPerRow - 1) / relicsPerRow;
                 for (int i = 0; i < groupRelics.Count; i++)
                 {
-                    int col = i % cardsPerRow, row = i / cardsPerRow;
-                    var relicRect = new Rectangle(PadX + col * (CardW + Gap), y + row * (RelicH + Gap), CardW, RelicH);
+                    int col = i % relicsPerRow, row = i / relicsPerRow;
+                    var relicRect = new Rectangle(PadX + col * (RelicTile + Gap), y + row * (RelicH + Gap), RelicTile, RelicH);
                     _hitMap.Add(new HitEntry(relicRect, groupRelics[i].Id, true));
                     DrawRelicTile(g, groupRelics[i], relicRect);
                 }
@@ -583,44 +592,37 @@ public partial class DeckOverviewForm : Form
         g.DrawRectangle(borderPen, rect);
 
         const int ImgPad = 2;
-        int imgSize = rect.Height - ImgPad * 2;
-        // StS2Shared.Services にも同名の RelicImageService（パスマップ）があるため、
-        // atlas 描画用の Toys 実装を完全修飾で指定する。
-        var img = StS2Toys.Services.RelicImageService.GetRelicBitmap(relic.Id);
+        // 個別 PNG（relic_images.json → relics_png/）を表示。atlas 切り出しは使わない。
+        var img = StS2Toys.Services.RelicImageService.GetRelicPng(relic.Id);
         if (img is not null)
         {
+            // アスペクト比を保持してタイル内に内接・中央寄せ。
+            int boxW = rect.Width - ImgPad * 2;
+            int boxH = rect.Height - ImgPad * 2;
+            double scale = Math.Min((double)boxW / img.Width, (double)boxH / img.Height);
+            int w = Math.Max(1, (int)Math.Round(img.Width * scale));
+            int h = Math.Max(1, (int)Math.Round(img.Height * scale));
+            int x = rect.X + (rect.Width - w) / 2;
+            int y = rect.Y + (rect.Height - h) / 2;
             var oldInterp = g.InterpolationMode;
             g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            g.DrawImage(img, new Rectangle(rect.X + ImgPad, rect.Y + ImgPad, imgSize, imgSize));
+            g.DrawImage(img, new Rectangle(x, y, w, h));
             g.InterpolationMode = oldInterp;
+            return;
         }
 
-        // テキストエリア：画像の右側（画像なしの場合は全幅）
-        int textX = rect.X + (img is not null ? imgSize + ImgPad * 2 + 2 : 4);
-        int textW = rect.Right - textX - 2;
-        if (textW > 8)
+        // フォールバック：PNG が未マッピング／未生成のときは名前を中央表示（空白を避ける）。
+        using var fmt = new StringFormat
         {
-            using var fmt = new StringFormat
-            {
-                Alignment = StringAlignment.Near,
-                LineAlignment = StringAlignment.Center,
-                Trimming = StringTrimming.EllipsisCharacter,
-            };
-            int halfH = rect.Height / 2;
-            bool ja = AppLanguage.IsJapanese;
-            var primaryName   = ja ? relic.NameJa : relic.NameEn;
-            var secondaryName = ja ? relic.NameEn  : relic.NameJa;
-
-            using var fontPrimary = new Font("Segoe UI", 7.5f, FontStyle.Bold);
-            using var fgPrimary = new SolidBrush(fgColor);
-            g.DrawString(primaryName, fontPrimary, fgPrimary,
-                new RectangleF(textX, rect.Y, textW, halfH), fmt);
-
-            using var fontSecondary = new Font("Segoe UI", 6f);
-            using var fgSecondary = new SolidBrush(Color.FromArgb(150, fgColor.R, fgColor.G, fgColor.B));
-            g.DrawString(secondaryName, fontSecondary, fgSecondary,
-                new RectangleF(textX, rect.Y + halfH, textW, halfH), fmt);
-        }
+            Alignment = StringAlignment.Center,
+            LineAlignment = StringAlignment.Center,
+            Trimming = StringTrimming.EllipsisCharacter,
+        };
+        var name = AppLanguage.IsJapanese ? relic.NameJa : relic.NameEn;
+        using var font = new Font("Segoe UI", 7f, FontStyle.Bold);
+        using var fg = new SolidBrush(fgColor);
+        g.DrawString(name, font, fg,
+            new RectangleF(rect.X + 2, rect.Y + 2, rect.Width - 4, rect.Height - 4), fmt);
     }
 
     Bitmap? GetCardThumbnail(string cardId, string type)
@@ -658,11 +660,41 @@ public partial class DeckOverviewForm : Form
 
     void OnPictureBoxClick(object? sender, MouseEventArgs e)
     {
+        // セクションヘッダ（セクション表示時のみ）→ 折りたたみトグル。
         var header = _sectionHeaderMap.FirstOrDefault(h => h.Rect.Contains(e.Location));
-        if (header.Key is null) return;
-        if (!_collapsedSections.Remove(header.Key))
-            _collapsedSections.Add(header.Key);
-        RecomposeIfNeeded();
+        if (header.Key is not null)
+        {
+            if (!_collapsedSections.Remove(header.Key))
+                _collapsedSections.Add(header.Key);
+            RecomposeIfNeeded();
+            return;
+        }
+
+        // レリック → 設定済み外部リンク（URLテンプレート）をブラウザで開く。
+        if (e.Button != MouseButtons.Left) return;
+        var hit = _hitMap.FirstOrDefault(h => h.Rect.Contains(e.Location));
+        if (hit is not { IsRelic: true }) return;
+
+        var links = SiteLinkService.BuildLinks(UrlTemplateService.Load(), "relic", hit.Id);
+        if (links.Count == 0) return;
+        if (links.Count == 1) { OpenUrl(links[0].Url); return; }
+
+        // 複数テンプレートはメニューで選択。
+        _relicLinkMenu.Items.Clear();
+        foreach (var link in links)
+        {
+            var url = link.Url;
+            var item = new ToolStripMenuItem($"{link.Label}: {link.Url}");
+            item.Click += (_, _) => OpenUrl(url);
+            _relicLinkMenu.Items.Add(item);
+        }
+        _relicLinkMenu.Show(_pictureBox, e.Location);
+    }
+
+    static void OpenUrl(string url)
+    {
+        try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
+        catch { }
     }
 
     void OnPictureBoxMouseMove(object? sender, MouseEventArgs e)
@@ -676,6 +708,7 @@ public partial class DeckOverviewForm : Form
         }
         _pictureBox.Cursor = Cursors.Default;
         var hit = _hitMap.FirstOrDefault(h => h.Rect.Contains(e.Location));
+        if (hit is { IsRelic: true }) _pictureBox.Cursor = Cursors.Hand; // クリックでリンクを開ける示唆
         if (hit?.Id == _hoveredId) return;
         _hoveredId = hit?.Id;
         if (hit is null) { _hoverTip.Hide(_pictureBox); return; }

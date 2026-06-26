@@ -211,7 +211,7 @@ namespace StS2Toys
             // btnFilterBlock
             // 
             btnFilterBlock.Dock = DockStyle.Top;
-            btnFilterBlock.Location = new Point(0, 396);
+            btnFilterBlock.Location = new Point(0, 276);
             btnFilterBlock.Name = "btnFilterBlock";
             btnFilterBlock.Size = new Size(150, 30);
             btnFilterBlock.TabIndex = 7;
@@ -221,7 +221,7 @@ namespace StS2Toys
             // btnEncounterOverview
             // 
             btnEncounterOverview.Dock = DockStyle.Top;
-            btnEncounterOverview.Location = new Point(0, 366);
+            btnEncounterOverview.Location = new Point(0, 246);
             btnEncounterOverview.Name = "btnEncounterOverview";
             btnEncounterOverview.Size = new Size(150, 30);
             btnEncounterOverview.TabIndex = 6;
@@ -231,7 +231,7 @@ namespace StS2Toys
             // btnHpHistory
             // 
             btnHpHistory.Dock = DockStyle.Top;
-            btnHpHistory.Location = new Point(0, 336);
+            btnHpHistory.Location = new Point(0, 216);
             btnHpHistory.Name = "btnHpHistory";
             btnHpHistory.Size = new Size(150, 30);
             btnHpHistory.TabIndex = 5;
@@ -244,7 +244,7 @@ namespace StS2Toys
             lblGroupOther.Dock = DockStyle.Top;
             lblGroupOther.Font = new Font("Segoe UI", 7.5F, FontStyle.Bold);
             lblGroupOther.ForeColor = Color.White;
-            lblGroupOther.Location = new Point(0, 318);
+            lblGroupOther.Location = new Point(0, 198);
             lblGroupOther.Name = "lblGroupOther";
             lblGroupOther.Padding = new Padding(4, 0, 0, 0);
             lblGroupOther.Size = new Size(150, 18);

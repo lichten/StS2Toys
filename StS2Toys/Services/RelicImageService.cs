@@ -13,6 +13,35 @@ static class RelicImageService
     static Bitmap? _atlas;
     static Dictionary<string, Rectangle>? _regions;
     static readonly Dictionary<string, Bitmap?> _cache = new(StringComparer.OrdinalIgnoreCase);
+    static readonly Dictionary<string, Bitmap?> _pngCache = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// レリックの個別 PNG（<c>tools/extracted/images/relics_png/</c> 配下）を読む。
+    /// パスは <see cref="StS2Shared.Services.RelicImageService.GetRelativePath"/>（relic_images.json）で解決するため、
+    /// レリック追加・画像差し替えは JSON/PNG の更新だけで追従する（atlas 切り出しの <see cref="GetRelicBitmap"/> とは別系統）。
+    /// 画像が無い（未マッピング／未生成）レリックは null。
+    /// </summary>
+    public static Bitmap? GetRelicPng(string relicId)
+    {
+        if (_pngCache.TryGetValue(relicId, out var cached)) return cached;
+
+        var rel = StS2Shared.Services.RelicImageService.GetRelativePath(relicId);
+        var root = FindExtractedDir();
+        if (rel is null || root is null) return _pngCache[relicId] = null;
+
+        var path = Path.Combine(root, "images",
+            StS2Shared.Services.RelicImageService.RelicsDirName,
+            rel.Replace('/', Path.DirectorySeparatorChar));
+        if (!File.Exists(path)) return _pngCache[relicId] = null;
+
+        try
+        {
+            using var fs = File.OpenRead(path);
+            using var img = Image.FromStream(fs);
+            return _pngCache[relicId] = new Bitmap(img);
+        }
+        catch { return _pngCache[relicId] = null; }
+    }
 
     public static Bitmap? GetRelicBitmap(string relicId)
     {
