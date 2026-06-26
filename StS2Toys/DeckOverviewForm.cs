@@ -25,8 +25,8 @@ public partial class DeckOverviewForm : Form
     private int? _deckTotalOverride;
     private readonly Dictionary<string, Bitmap?> _imageCache = new();
     readonly ToolTip _hoverTip = new() { InitialDelay = 400, ReshowDelay = 100, AutoPopDelay = 8000, ShowAlways = true };
-    // レリッククリックで開く外部リンク（URLテンプレート）の選択メニュー。
-    readonly ContextMenuStrip _relicLinkMenu = new();
+    // カード／レリッククリックで開く外部リンク（URLテンプレート）の選択メニュー。
+    readonly ContextMenuStrip _linkMenu = new();
     List<HitEntry> _hitMap = [];
     string? _hoveredId;
     readonly HashSet<string> _collapsedSections = new();
@@ -54,7 +54,7 @@ public partial class DeckOverviewForm : Form
             foreach (var bmp in _imageCache.Values) bmp?.Dispose();
             _pictureBox.Image?.Dispose();
             _hoverTip.Dispose();
-            _relicLinkMenu.Dispose();
+            _linkMenu.Dispose();
             components?.Dispose();
         }
         base.Dispose(disposing);
@@ -670,25 +670,26 @@ public partial class DeckOverviewForm : Form
             return;
         }
 
-        // レリック → 設定済み外部リンク（URLテンプレート）をブラウザで開く。
+        // カード／レリック → 設定済み外部リンク（URLテンプレート）をブラウザで開く。
         if (e.Button != MouseButtons.Left) return;
         var hit = _hitMap.FirstOrDefault(h => h.Rect.Contains(e.Location));
-        if (hit is not { IsRelic: true }) return;
+        if (hit is null) return;
 
-        var links = SiteLinkService.BuildLinks(UrlTemplateService.Load(), "relic", hit.Id);
+        var kind = hit.IsRelic ? "relic" : "card";
+        var links = SiteLinkService.BuildLinks(UrlTemplateService.Load(), kind, hit.Id);
         if (links.Count == 0) return;
         if (links.Count == 1) { OpenUrl(links[0].Url); return; }
 
         // 複数テンプレートはメニューで選択。
-        _relicLinkMenu.Items.Clear();
+        _linkMenu.Items.Clear();
         foreach (var link in links)
         {
             var url = link.Url;
             var item = new ToolStripMenuItem($"{link.Label}: {link.Url}");
             item.Click += (_, _) => OpenUrl(url);
-            _relicLinkMenu.Items.Add(item);
+            _linkMenu.Items.Add(item);
         }
-        _relicLinkMenu.Show(_pictureBox, e.Location);
+        _linkMenu.Show(_pictureBox, e.Location);
     }
 
     static void OpenUrl(string url)
@@ -708,7 +709,7 @@ public partial class DeckOverviewForm : Form
         }
         _pictureBox.Cursor = Cursors.Default;
         var hit = _hitMap.FirstOrDefault(h => h.Rect.Contains(e.Location));
-        if (hit is { IsRelic: true }) _pictureBox.Cursor = Cursors.Hand; // クリックでリンクを開ける示唆
+        if (hit is not null) _pictureBox.Cursor = Cursors.Hand; // クリックでリンクを開ける示唆
         if (hit?.Id == _hoveredId) return;
         _hoveredId = hit?.Id;
         if (hit is null) { _hoverTip.Hide(_pictureBox); return; }
