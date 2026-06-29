@@ -150,6 +150,23 @@ $pck = "C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\SlayTheSp
 
 出力先はすべて `StS2Shared/Resources/`。extractor 実行後に `StS2Shared` を再ビルドすることで埋め込みリソースが更新される。
 
+### StS2Toys — セーブデータビューア
+
+進行中ランのセーブを読み、デッキ・レリックを表示する。サイドのボタンで複数のサブ概観ウィンドウを開く
+（いずれも `DeckOverviewForm` を再利用。カード/レリックは Bitmap に動的描画し、クリックで外部リンクを開く）。
+
+**キャラクター概観（`btnCharacterOverview` → `EnableCharacterMode()`）**
+- 1つの `DeckOverviewForm` で5キャラ分を扱う統合フォーム。上部のドロップダウンで「自動（セーブ）」＋5キャラを選択
+  （`SetCurrentCharacter` がランのキャラに追従）。
+- デッキを**キーワードグループ**で分類して表示（`BuildKeywordGroups` → `ComposeImageKeyword`）。グループ構成は：
+  1. キャラ固有メカニクス群（`CharacterMechanics.MechanicsFor(label)` の `Func<string,bool>` フィルタ。カード・レリック両方を振り分け）
+  2. **ブロック関連**（`CardDatabaseService.IsBlockGiver`。カードのみのクロス集計グループ）
+  3. **プレイすると消滅する**（Power・廃棄・幽体・消滅付与エンチャント＝`IsDisposable`。旧「デッキ枚数理論値」フォームの統合先）
+  4. **その他**（どのグループにも属さない残り）
+- ブロック関連・消滅グループは**クロス集計**で、メカニクス群と重複するカードをそのまま重複表示する。
+  ただし該当カードは `assignedCards` に登録し「その他」からは除外する（重複の二重カウント回避）。
+- グループ見出しのカウントは `FormatCardCount`（`N枚中M枚(P%)`）。上部の統計バーは `BuildCharacterStats`。
+
 ### StS2CardBrowser — カードブラウザ
 
 - `CardBrowserForm.cs` が `CharacterMechanics.All` を読み込んでサイドバーボタンを動的生成
