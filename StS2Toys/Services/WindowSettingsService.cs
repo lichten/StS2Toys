@@ -13,7 +13,6 @@ record AppSettings(
     int? SidePanelWidth = null,
     SubWindowSettings? CharacterOverview = null,
     SubWindowSettings? CombinedOverview = null,
-    SubWindowSettings? DisappearanceOverview = null,
     string? Language = null,
     SubWindowSettings? LiveCapture = null);
 

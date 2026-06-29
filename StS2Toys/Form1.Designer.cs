@@ -30,7 +30,6 @@ namespace StS2Toys
             btnHpHistory = new Button();
             lblGroupOther = new Label();
             btnCharacterOverview = new Button();
-            btnDisappearanceOverview = new Button();
             btnCombinedOverview = new Button();
             lblGroupOverview = new Label();
             btnCardDetail = new Button();
@@ -196,7 +195,6 @@ namespace StS2Toys
             panelSideButtons.Controls.Add(btnHpHistory);
             panelSideButtons.Controls.Add(lblGroupOther);
             panelSideButtons.Controls.Add(btnCharacterOverview);
-            panelSideButtons.Controls.Add(btnDisappearanceOverview);
             panelSideButtons.Controls.Add(btnCombinedOverview);
             panelSideButtons.Controls.Add(lblGroupOverview);
             panelSideButtons.Controls.Add(btnCardDetail);
@@ -261,17 +259,7 @@ namespace StS2Toys
             btnCharacterOverview.TabIndex = 8;
             btnCharacterOverview.Text = "○ キャラクター概観";
             btnCharacterOverview.Click += BtnCharacterOverview_Click;
-            // 
-            // btnDisappearanceOverview
-            // 
-            btnDisappearanceOverview.Dock = DockStyle.Top;
-            btnDisappearanceOverview.Location = new Point(0, 138);
-            btnDisappearanceOverview.Name = "btnDisappearanceOverview";
-            btnDisappearanceOverview.Size = new Size(150, 30);
-            btnDisappearanceOverview.TabIndex = 15;
-            btnDisappearanceOverview.Text = "○ デッキ枚数理論値";
-            btnDisappearanceOverview.Click += BtnDisappearanceOverview_Click;
-            // 
+            //
             // btnCombinedOverview
             // 
             btnCombinedOverview.Dock = DockStyle.Top;
@@ -484,7 +472,6 @@ namespace StS2Toys
         private Button btnEncounterOverview;
         private Button btnFilterBlock;
         private Button btnCharacterOverview;
-        private Button btnDisappearanceOverview;
         private Label lblGroupOverview;
         private Label lblGroupOther;
         private SplitContainer splitContainer;

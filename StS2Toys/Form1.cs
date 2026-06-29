@@ -13,7 +13,6 @@ namespace StS2Toys
         private CardDetailForm? _detailViewer;
         private DeckOverviewForm? _combinedOverview;
         private DeckOverviewForm? _characterOverview;
-        private DeckOverviewForm? _disappearanceOverview;
         private EncounterOverviewForm? _encounterOverview;
         private HpHistoryForm? _hpHistory;
         private LiveCaptureForm? _liveCapture;
@@ -24,7 +23,6 @@ namespace StS2Toys
         private SubWindowSettings? _encounterOverviewSettings;
         private SubWindowSettings? _hpHistorySettings;
         private SubWindowSettings? _characterOverviewSettings;
-        private SubWindowSettings? _disappearanceOverviewSettings;
         private IReadOnlyList<DeckCard>? _lastDeckCards;
         private IReadOnlyList<RelicEntry>? _lastRelics;
         private RunSaveData? _lastRunData;
@@ -72,7 +70,6 @@ namespace StS2Toys
             _encounterOverview?.Close();
             _hpHistory?.Close();
             _characterOverview?.Close();
-            _disappearanceOverview?.Close();
         }
 
         void RestoreWindowSettings()
@@ -86,7 +83,6 @@ namespace StS2Toys
             _encounterOverviewSettings = app.EncounterOverview;
             _hpHistorySettings = app.HpHistory;
             _characterOverviewSettings = app.CharacterOverview;
-            _disappearanceOverviewSettings = app.DisappearanceOverview;
             _liveCaptureSettings = app.LiveCapture;
 
             if (app.SidePanelWidth is int w)
@@ -115,8 +111,6 @@ namespace StS2Toys
                 _combinedOverviewSettings = WindowToSub(_combinedOverview);
             if (_characterOverview is { IsDisposed: false })
                 _characterOverviewSettings = WindowToSub(_characterOverview);
-            if (_disappearanceOverview is { IsDisposed: false })
-                _disappearanceOverviewSettings = WindowToSub(_disappearanceOverview);
             if (_encounterOverview is { IsDisposed: false })
                 _encounterOverviewSettings = WindowToSub(_encounterOverview);
             if (_hpHistory is { IsDisposed: false })
@@ -127,7 +121,7 @@ namespace StS2Toys
             var state = WindowState == FormWindowState.Minimized ? FormWindowState.Normal : WindowState;
             var bounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
             var main = new WindowSettings(bounds.X, bounds.Y, bounds.Width, bounds.Height, state.ToString());
-            WindowSettingsService.Save(new AppSettings(main, _imageViewerSettings, _cardDetailSettings, _hpHistorySettings, _encounterOverviewSettings, splitContainerOuter.SplitterDistance, _characterOverviewSettings, _combinedOverviewSettings, _disappearanceOverviewSettings, AppLanguage.IsJapanese ? "ja" : "en", _liveCaptureSettings));
+            WindowSettingsService.Save(new AppSettings(main, _imageViewerSettings, _cardDetailSettings, _hpHistorySettings, _encounterOverviewSettings, splitContainerOuter.SplitterDistance, _characterOverviewSettings, _combinedOverviewSettings, AppLanguage.IsJapanese ? "ja" : "en", _liveCaptureSettings));
         }
 
         static SubWindowSettings WindowToSub(Form form) =>
@@ -139,7 +133,6 @@ namespace StS2Toys
             if (_encounterOverviewSettings?.Visible == true)  BtnEncounterOverview_Click(null, EventArgs.Empty);
             if (_hpHistorySettings?.Visible == true)          BtnHpHistory_Click(null, EventArgs.Empty);
             if (_characterOverviewSettings?.Visible == true)  BtnCharacterOverview_Click(null, EventArgs.Empty);
-            if (_disappearanceOverviewSettings?.Visible == true) BtnDisappearanceOverview_Click(null, EventArgs.Empty);
             if (_liveCaptureSettings?.Visible == true)           BtnLiveCapture_Click(null, EventArgs.Empty);
         }
 
@@ -355,7 +348,6 @@ namespace StS2Toys
 
             RefreshCombinedOverview();
             RefreshCharacterOverview();
-            RefreshDisappearanceOverview();
         }
 
         void DisplayRelics(PlayerData player)
@@ -384,7 +376,6 @@ namespace StS2Toys
 
             RefreshCombinedOverview();
             RefreshCharacterOverview();
-            RefreshDisappearanceOverview();
         }
 
         void RefreshCombinedOverview()
@@ -461,65 +452,6 @@ namespace StS2Toys
             "Curse" => "呪い", "Status" => "状態異常", "Quest" => "クエスト",
             _ => type.Length > 0 ? type : "その他"
         };
-
-        void BtnDisappearanceOverview_Click(object? sender, EventArgs e)
-        {
-            if (_disappearanceOverview is null || _disappearanceOverview.IsDisposed || !_disappearanceOverview.Visible)
-            {
-                if (_disappearanceOverview is null || _disappearanceOverview.IsDisposed)
-                {
-                    _disappearanceOverview = new DeckOverviewForm();
-                    ApplySubWindowSettings(_disappearanceOverview, _disappearanceOverviewSettings, new Point(Right + 4, Top));
-                    _disappearanceOverview.FormClosed += (_, _) =>
-                    {
-                        _disappearanceOverviewSettings = BoundsToSub(_disappearanceOverview.Bounds);
-                        UpdateDisappearanceOverviewButton(false);
-                    };
-                }
-                _disappearanceOverview.Show(this);
-                UpdateDisappearanceOverviewButton(true);
-                RefreshDisappearanceOverview();
-            }
-            else
-            {
-                _disappearanceOverview.Hide();
-                UpdateDisappearanceOverviewButton(false);
-            }
-        }
-
-        void UpdateDisappearanceOverviewButton(bool visible)
-        {
-            btnDisappearanceOverview.Text = visible ? "● デッキ枚数理論値" : "○ デッキ枚数理論値";
-            btnDisappearanceOverview.ForeColor = visible ? Color.DarkSlateBlue : SystemColors.ControlText;
-        }
-
-        void RefreshDisappearanceOverview()
-        {
-            if (_disappearanceOverview is null || _disappearanceOverview.IsDisposed || !_disappearanceOverview.Visible) return;
-            if (_lastDeckCards is null) return;
-
-            bool ja = AppLanguage.IsJapanese;
-            var cards  = _lastDeckCards;
-            var relics = _lastRelics ?? [];
-            int deckTotal = cards.Sum(c => c.Count);
-
-            bool IsDisposable(DeckCard c) =>
-                c.Type == "Power"
-                || CardDatabaseService.IsExhaustKeyword(c.Id)
-                || CardDatabaseService.IsEtherealKeyword(c.Id)
-                || CardDatabaseService.IsExhaustGainingEnchantment(c.EnchantmentId);
-
-            var sections = new List<OverviewSection>
-            {
-                new("Disappears in Battle", "戦闘中に消滅する",
-                    cards.Where(c =>  IsDisposable(c)).OrderBy(c => ja ? c.NameJa : c.NameEn).ToList(), []),
-                new("Persists in Battle", "戦闘中に消滅しない",
-                    cards.Where(c => !IsDisposable(c)).OrderBy(c => ja ? c.NameJa : c.NameEn).ToList(),
-                    relics),
-            };
-
-            _disappearanceOverview.SetSections(sections, deckTotal);
-        }
 
         void RefreshEncounterOverview()
         {

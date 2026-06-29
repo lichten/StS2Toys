@@ -35,6 +35,8 @@ public partial class DeckOverviewForm : Form
     // キャラクター概観モード（5キャラ統合）。EnableCharacterMode で有効化。
     static readonly string[] CharacterLabels = { "Necrobinder", "Ironclad", "Silent", "Defect", "Regent" };
     bool _characterMode;
+    // キャラクター概観の先頭に「戦闘中に消滅する」グループを表示する（旧「デッキ枚数理論値」フォームの統合先）。
+    bool _showDisposableGroup;
     string? _autoCharacterId;
 
     public DeckOverviewForm()
@@ -111,6 +113,7 @@ public partial class DeckOverviewForm : Form
     public void EnableCharacterMode()
     {
         _characterMode = true;
+        _showDisposableGroup = true;
         _charSelector.Items.Clear();
         _charSelector.Items.Add("自動（セーブ）");
         foreach (var l in CharacterLabels) _charSelector.Items.Add(l);
@@ -340,6 +343,14 @@ public partial class DeckOverviewForm : Form
         return bmp;
     }
 
+    // 戦闘中に消滅する（＝戦闘終了まで残らない）カードか。Power・廃棄・幽体・消滅付与エンチャント。
+    // 旧「デッキ枚数理論値」フォームの分類ロジックをそのまま移設。
+    static bool IsDisposable(DeckCard c) =>
+        c.Type == "Power"
+        || CardDatabaseService.IsExhaustKeyword(c.Id)
+        || CardDatabaseService.IsEtherealKeyword(c.Id)
+        || CardDatabaseService.IsExhaustGainingEnchantment(c.EnchantmentId);
+
     List<(string Label, List<DeckCard> Cards, List<RelicEntry> Relics)> BuildKeywordGroups(
         IReadOnlyList<DeckCard> cards, IReadOnlyList<RelicEntry> relics)
     {
@@ -347,6 +358,7 @@ public partial class DeckOverviewForm : Form
         var assignedCards  = new HashSet<DeckCard>();
         var assignedRelics = new HashSet<RelicEntry>();
         var result = new List<(string Label, List<DeckCard> Cards, List<RelicEntry> Relics)>();
+
         foreach (var (labelEn, labelJa, filter) in _keywordGroups!)
         {
             var cardGroup  = cards.Where(c => filter(c.Id)).OrderBy(c => ja ? c.NameJa : c.NameEn).ToList();
@@ -355,6 +367,16 @@ public partial class DeckOverviewForm : Form
             foreach (var r in relicGroup) assignedRelics.Add(r);
             result.Add((ja ? labelJa : labelEn, cardGroup, relicGroup));
         }
+
+        // 「戦闘中に消滅する」グループ（旧フォームの統合）。メカニクス群の後・「その他」の直前に出し、
+        // 該当カードは assignedCards に登録して「その他」と重複させない。
+        if (_showDisposableGroup)
+        {
+            var disposable = cards.Where(IsDisposable).OrderBy(c => ja ? c.NameJa : c.NameEn).ToList();
+            foreach (var c in disposable) assignedCards.Add(c);
+            result.Add((ja ? "プレイすると消滅する" : "Disappears in Battle", disposable, new List<RelicEntry>()));
+        }
+
         var otherCards  = cards.Where(c => !assignedCards.Contains(c)).OrderBy(c => ja ? c.NameJa : c.NameEn).ToList();
         var otherRelics = relics.Where(r => !assignedRelics.Contains(r)).OrderBy(r => ja ? r.NameJa : r.NameEn).ToList();
         if (otherCards.Count > 0 || otherRelics.Count > 0)
