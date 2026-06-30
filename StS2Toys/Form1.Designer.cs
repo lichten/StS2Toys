@@ -19,6 +19,9 @@ namespace StS2Toys
             btnToggleAuto = new Button();
             btnOpen = new Button();
             lblGroupFile = new Label();
+            lblGroupCapture = new Label();
+            btnCaptureSource = new Button();
+            lblGroupSettings = new Label();
             panelInfo = new Panel();
             lblInfo = new Label();
             splitContainerOuter = new SplitContainer();
@@ -30,10 +33,6 @@ namespace StS2Toys
             btnCombinedOverview = new Button();
             lblGroupOverview = new Label();
             _top = new FlowLayoutPanel();
-            _radioGroup = new FlowLayoutPanel();
-            _lblCapture = new Label();
-            _rbWgc = new RadioButton();
-            _rbGdi = new RadioButton();
             _cbAuto = new CheckBox();
             _btnCapture = new Button();
             _btnLinks = new Button();
@@ -65,7 +64,6 @@ namespace StS2Toys
             splitContainerOuter.SuspendLayout();
             panelSideButtons.SuspendLayout();
             _top.SuspendLayout();
-            _radioGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)_outer).BeginInit();
             _outer.Panel1.SuspendLayout();
             _outer.Panel2.SuspendLayout();
@@ -124,6 +122,9 @@ namespace StS2Toys
             //
             // panelSideButtons
             //
+            panelSideButtons.Controls.Add(_btnLinks);
+            panelSideButtons.Controls.Add(btnLang);
+            panelSideButtons.Controls.Add(lblGroupSettings);
             panelSideButtons.Controls.Add(btnEncounterOverview);
             panelSideButtons.Controls.Add(btnHpHistory);
             panelSideButtons.Controls.Add(lblGroupOther);
@@ -132,10 +133,13 @@ namespace StS2Toys
             panelSideButtons.Controls.Add(lblGroupOverview);
             panelSideButtons.Controls.Add(lblUpdateFlash);
             panelSideButtons.Controls.Add(lblLastUpdated);
-            panelSideButtons.Controls.Add(btnLang);
             panelSideButtons.Controls.Add(btnToggleAuto);
             panelSideButtons.Controls.Add(btnOpen);
             panelSideButtons.Controls.Add(lblGroupFile);
+            panelSideButtons.Controls.Add(_btnCapture);
+            panelSideButtons.Controls.Add(_cbAuto);
+            panelSideButtons.Controls.Add(btnCaptureSource);
+            panelSideButtons.Controls.Add(lblGroupCapture);
             panelSideButtons.Dock = DockStyle.Fill;
             panelSideButtons.Location = new Point(0, 0);
             panelSideButtons.Name = "panelSideButtons";
@@ -224,6 +228,44 @@ namespace StS2Toys
             lblGroupFile.Text = "ファイル / 更新";
             lblGroupFile.TextAlign = ContentAlignment.MiddleLeft;
             //
+            // lblGroupCapture
+            //
+            lblGroupCapture.BackColor = SystemColors.ControlDark;
+            lblGroupCapture.Dock = DockStyle.Top;
+            lblGroupCapture.Font = new Font("Segoe UI", 7.5F, FontStyle.Bold);
+            lblGroupCapture.ForeColor = Color.White;
+            lblGroupCapture.Location = new Point(0, 0);
+            lblGroupCapture.Name = "lblGroupCapture";
+            lblGroupCapture.Padding = new Padding(4, 0, 0, 0);
+            lblGroupCapture.Size = new Size(150, 18);
+            lblGroupCapture.TabIndex = 21;
+            lblGroupCapture.Text = "キャプチャ";
+            lblGroupCapture.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // lblGroupSettings
+            //
+            lblGroupSettings.BackColor = SystemColors.ControlDark;
+            lblGroupSettings.Dock = DockStyle.Top;
+            lblGroupSettings.Font = new Font("Segoe UI", 7.5F, FontStyle.Bold);
+            lblGroupSettings.ForeColor = Color.White;
+            lblGroupSettings.Location = new Point(0, 0);
+            lblGroupSettings.Name = "lblGroupSettings";
+            lblGroupSettings.Padding = new Padding(4, 0, 0, 0);
+            lblGroupSettings.Size = new Size(150, 18);
+            lblGroupSettings.TabIndex = 26;
+            lblGroupSettings.Text = "設定";
+            lblGroupSettings.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // btnCaptureSource
+            //
+            btnCaptureSource.Dock = DockStyle.Top;
+            btnCaptureSource.Location = new Point(0, 18);
+            btnCaptureSource.Name = "btnCaptureSource";
+            btnCaptureSource.Size = new Size(150, 30);
+            btnCaptureSource.TabIndex = 22;
+            btnCaptureSource.Text = "取得: WGC";
+            btnCaptureSource.Click += BtnCaptureSource_Click;
+            //
             // btnOpen
             //
             btnOpen.Dock = DockStyle.Top;
@@ -279,10 +321,6 @@ namespace StS2Toys
             // _top
             //
             _top.AutoSize = true;
-            _top.Controls.Add(_radioGroup);
-            _top.Controls.Add(_cbAuto);
-            _top.Controls.Add(_btnCapture);
-            _top.Controls.Add(_btnLinks);
             _top.Controls.Add(_lblCharacter);
             _top.Controls.Add(_cbCharacter);
             _top.Dock = DockStyle.Top;
@@ -292,73 +330,35 @@ namespace StS2Toys
             _top.Size = new Size(646, 53);
             _top.TabIndex = 2;
             //
-            // _radioGroup
-            //
-            _radioGroup.AutoSize = true;
-            _radioGroup.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            _radioGroup.Controls.Add(_lblCapture);
-            _radioGroup.Controls.Add(_rbWgc);
-            _radioGroup.Controls.Add(_rbGdi);
-            _radioGroup.Location = new Point(8, 8);
-            _radioGroup.Margin = new Padding(0);
-            _radioGroup.Name = "_radioGroup";
-            _radioGroup.Size = new Size(210, 35);
-            _radioGroup.TabIndex = 0;
-            _radioGroup.WrapContents = false;
-            //
-            // _lblCapture
-            //
-            _lblCapture.AutoSize = true;
-            _lblCapture.Location = new Point(0, 6);
-            _lblCapture.Margin = new Padding(0, 6, 2, 0);
-            _lblCapture.Name = "_lblCapture";
-            _lblCapture.Size = new Size(52, 25);
-            _lblCapture.TabIndex = 0;
-            _lblCapture.Text = "取得:";
-            //
-            // _rbWgc
-            //
-            _rbWgc.AutoSize = true;
-            _rbWgc.Location = new Point(57, 3);
-            _rbWgc.Name = "_rbWgc";
-            _rbWgc.Size = new Size(77, 29);
-            _rbWgc.TabIndex = 1;
-            _rbWgc.Text = "WGC";
-            //
-            // _rbGdi
-            //
-            _rbGdi.AutoSize = true;
-            _rbGdi.Location = new Point(140, 3);
-            _rbGdi.Name = "_rbGdi";
-            _rbGdi.Size = new Size(67, 29);
-            _rbGdi.TabIndex = 2;
-            _rbGdi.Text = "GDI";
-            //
             // _cbAuto
             //
-            _cbAuto.AutoSize = true;
-            _cbAuto.Location = new Point(221, 11);
+            _cbAuto.AutoSize = false;
+            _cbAuto.Dock = DockStyle.Top;
+            _cbAuto.Location = new Point(0, 48);
             _cbAuto.Name = "_cbAuto";
-            _cbAuto.Size = new Size(110, 29);
-            _cbAuto.TabIndex = 1;
+            _cbAuto.Padding = new Padding(8, 0, 0, 0);
+            _cbAuto.Size = new Size(150, 30);
+            _cbAuto.TabIndex = 23;
             _cbAuto.Text = "自動監視";
             //
             // _btnCapture
             //
-            _btnCapture.AutoSize = true;
-            _btnCapture.Location = new Point(337, 11);
+            _btnCapture.AutoSize = false;
+            _btnCapture.Dock = DockStyle.Top;
+            _btnCapture.Location = new Point(0, 78);
             _btnCapture.Name = "_btnCapture";
-            _btnCapture.Size = new Size(123, 35);
-            _btnCapture.TabIndex = 2;
+            _btnCapture.Size = new Size(150, 30);
+            _btnCapture.TabIndex = 24;
             _btnCapture.Text = "手動キャプチャ";
             //
             // _btnLinks
             //
-            _btnLinks.AutoSize = true;
-            _btnLinks.Location = new Point(466, 11);
+            _btnLinks.AutoSize = false;
+            _btnLinks.Dock = DockStyle.Top;
+            _btnLinks.Location = new Point(0, 30);
             _btnLinks.Name = "_btnLinks";
-            _btnLinks.Size = new Size(98, 35);
-            _btnLinks.TabIndex = 3;
+            _btnLinks.Size = new Size(150, 30);
+            _btnLinks.TabIndex = 25;
             _btnLinks.Text = "リンク設定";
             //
             // _lblCharacter
@@ -568,8 +568,6 @@ namespace StS2Toys
             panelSideButtons.ResumeLayout(false);
             _top.ResumeLayout(false);
             _top.PerformLayout();
-            _radioGroup.ResumeLayout(false);
-            _radioGroup.PerformLayout();
             _outer.Panel1.ResumeLayout(false);
             _outer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)_outer).EndInit();
@@ -600,12 +598,11 @@ namespace StS2Toys
         private Button btnCharacterOverview;
         private Label lblGroupOverview;
         private Label lblGroupOther;
+        private Label lblGroupCapture;
+        private Button btnCaptureSource;
+        private Label lblGroupSettings;
 
         private FlowLayoutPanel _top;
-        private FlowLayoutPanel _radioGroup;
-        private Label _lblCapture;
-        private RadioButton _rbWgc;
-        private RadioButton _rbGdi;
         private CheckBox _cbAuto;
         private Button _btnCapture;
         private Button _btnLinks;

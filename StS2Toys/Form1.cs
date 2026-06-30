@@ -31,6 +31,7 @@ namespace StS2Toys
         private readonly ShopItemRecognizer _shop = new();
         private readonly ScreenRecognizer _screen;
         private string _lastSignature = "";
+        private bool _useGdi;   // false=WGC（既定）、true=GDI。左パネルの取得方式トグルで切替。
         private readonly ContextMenuStrip _linkMenu = new();
         private List<UrlTemplate> _templates = UrlTemplateService.Load();
 
@@ -61,7 +62,6 @@ namespace StS2Toys
             _cbCharacter.SelectedIndex = 0;
 
             WireCaptureEvents();
-            _rbWgc.Checked = true;
             UpdateStartupStatus();
         }
 
@@ -560,9 +560,6 @@ namespace StS2Toys
 
         void WireCaptureEvents()
         {
-            _rbWgc.CheckedChanged += (_, _) => { if (_rbWgc.Checked) _loop.SetFrameSource(new WgcFrameSource()); };
-            _rbGdi.CheckedChanged += (_, _) => { if (_rbGdi.Checked) _loop.SetFrameSource(new GdiFrameSource()); };
-
             _cbAuto.CheckedChanged += (_, _) =>
             {
                 if (_cbAuto.Checked) _loop.Start();
@@ -582,6 +579,16 @@ namespace StS2Toys
                     ? null
                     : (string)_cbCharacter.SelectedItem!;
         }
+
+        void BtnCaptureSource_Click(object? sender, EventArgs e)
+        {
+            _useGdi = !_useGdi;
+            _loop.SetFrameSource(_useGdi ? new GdiFrameSource() : new WgcFrameSource());
+            UpdateCaptureSourceButton();
+        }
+
+        void UpdateCaptureSourceButton() =>
+            btnCaptureSource.Text = _useGdi ? "取得: GDI" : "取得: WGC";
 
         static void SetSplitterDistance(SplitContainer sc, int distance)
         {
