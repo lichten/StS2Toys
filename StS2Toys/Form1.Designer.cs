@@ -13,14 +13,12 @@ namespace StS2Toys
 
         private void InitializeComponent()
         {
-            panelTop = new Panel();
             lblUpdateFlash = new Label();
             lblLastUpdated = new Label();
             btnLang = new Button();
             btnToggleAuto = new Button();
-            panelFileControls = new Panel();
-            txtFilePath = new TextBox();
             btnOpen = new Button();
+            lblGroupFile = new Label();
             panelInfo = new Panel();
             lblInfo = new Label();
             splitContainerOuter = new SplitContainer();
@@ -60,8 +58,6 @@ namespace StS2Toys
             _previewHeaderPanel = new Panel();
             _capturePreview = new PictureBox();
             _previewHeaderLabel = new Label();
-            panelTop.SuspendLayout();
-            panelFileControls.SuspendLayout();
             panelInfo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainerOuter).BeginInit();
             splitContainerOuter.Panel1.SuspendLayout();
@@ -82,91 +78,6 @@ namespace StS2Toys
             _previewHeaderPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)_capturePreview).BeginInit();
             SuspendLayout();
-            //
-            // panelTop
-            //
-            panelTop.Controls.Add(lblUpdateFlash);
-            panelTop.Controls.Add(lblLastUpdated);
-            panelTop.Controls.Add(btnLang);
-            panelTop.Controls.Add(btnToggleAuto);
-            panelTop.Controls.Add(panelFileControls);
-            panelTop.Dock = DockStyle.Top;
-            panelTop.Location = new Point(0, 0);
-            panelTop.Name = "panelTop";
-            panelTop.Padding = new Padding(8, 8, 8, 4);
-            panelTop.Size = new Size(800, 44);
-            panelTop.TabIndex = 2;
-            //
-            // lblUpdateFlash
-            //
-            lblUpdateFlash.Dock = DockStyle.Fill;
-            lblUpdateFlash.ForeColor = Color.ForestGreen;
-            lblUpdateFlash.Location = new Point(298, 8);
-            lblUpdateFlash.Name = "lblUpdateFlash";
-            lblUpdateFlash.Size = new Size(134, 32);
-            lblUpdateFlash.TabIndex = 0;
-            lblUpdateFlash.TextAlign = ContentAlignment.MiddleCenter;
-            //
-            // lblLastUpdated
-            //
-            lblLastUpdated.Dock = DockStyle.Left;
-            lblLastUpdated.Location = new Point(143, 8);
-            lblLastUpdated.Name = "lblLastUpdated";
-            lblLastUpdated.Padding = new Padding(8, 0, 0, 0);
-            lblLastUpdated.Size = new Size(155, 32);
-            lblLastUpdated.TabIndex = 1;
-            lblLastUpdated.Text = "最終更新: --:--:--";
-            lblLastUpdated.TextAlign = ContentAlignment.MiddleLeft;
-            //
-            // btnLang
-            //
-            btnLang.Dock = DockStyle.Left;
-            btnLang.Location = new Point(98, 8);
-            btnLang.Name = "btnLang";
-            btnLang.Size = new Size(45, 32);
-            btnLang.TabIndex = 3;
-            btnLang.Text = "JP";
-            btnLang.Click += BtnLang_Click;
-            //
-            // btnToggleAuto
-            //
-            btnToggleAuto.Dock = DockStyle.Left;
-            btnToggleAuto.Location = new Point(8, 8);
-            btnToggleAuto.Name = "btnToggleAuto";
-            btnToggleAuto.Size = new Size(90, 32);
-            btnToggleAuto.TabIndex = 2;
-            btnToggleAuto.Text = "○ 自動更新";
-            btnToggleAuto.Click += BtnToggleAuto_Click;
-            //
-            // panelFileControls
-            //
-            panelFileControls.Controls.Add(txtFilePath);
-            panelFileControls.Controls.Add(btnOpen);
-            panelFileControls.Dock = DockStyle.Right;
-            panelFileControls.Location = new Point(432, 8);
-            panelFileControls.Name = "panelFileControls";
-            panelFileControls.Padding = new Padding(4, 0, 0, 0);
-            panelFileControls.Size = new Size(360, 32);
-            panelFileControls.TabIndex = 3;
-            //
-            // txtFilePath
-            //
-            txtFilePath.Dock = DockStyle.Fill;
-            txtFilePath.Location = new Point(4, 0);
-            txtFilePath.Name = "txtFilePath";
-            txtFilePath.ReadOnly = true;
-            txtFilePath.Size = new Size(246, 31);
-            txtFilePath.TabIndex = 0;
-            //
-            // btnOpen
-            //
-            btnOpen.Dock = DockStyle.Right;
-            btnOpen.Location = new Point(250, 0);
-            btnOpen.Name = "btnOpen";
-            btnOpen.Size = new Size(110, 32);
-            btnOpen.TabIndex = 1;
-            btnOpen.Text = "ファイルを開く";
-            btnOpen.Click += BtnOpen_Click;
             //
             // panelInfo
             //
@@ -219,6 +130,12 @@ namespace StS2Toys
             panelSideButtons.Controls.Add(btnCharacterOverview);
             panelSideButtons.Controls.Add(btnCombinedOverview);
             panelSideButtons.Controls.Add(lblGroupOverview);
+            panelSideButtons.Controls.Add(lblUpdateFlash);
+            panelSideButtons.Controls.Add(lblLastUpdated);
+            panelSideButtons.Controls.Add(btnLang);
+            panelSideButtons.Controls.Add(btnToggleAuto);
+            panelSideButtons.Controls.Add(btnOpen);
+            panelSideButtons.Controls.Add(lblGroupFile);
             panelSideButtons.Dock = DockStyle.Fill;
             panelSideButtons.Location = new Point(0, 0);
             panelSideButtons.Name = "panelSideButtons";
@@ -292,6 +209,72 @@ namespace StS2Toys
             lblGroupOverview.TabIndex = 14;
             lblGroupOverview.Text = "概観";
             lblGroupOverview.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // lblGroupFile
+            //
+            lblGroupFile.BackColor = SystemColors.ControlDark;
+            lblGroupFile.Dock = DockStyle.Top;
+            lblGroupFile.Font = new Font("Segoe UI", 7.5F, FontStyle.Bold);
+            lblGroupFile.ForeColor = Color.White;
+            lblGroupFile.Location = new Point(0, 0);
+            lblGroupFile.Name = "lblGroupFile";
+            lblGroupFile.Padding = new Padding(4, 0, 0, 0);
+            lblGroupFile.Size = new Size(150, 18);
+            lblGroupFile.TabIndex = 15;
+            lblGroupFile.Text = "ファイル / 更新";
+            lblGroupFile.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // btnOpen
+            //
+            btnOpen.Dock = DockStyle.Top;
+            btnOpen.Location = new Point(0, 18);
+            btnOpen.Name = "btnOpen";
+            btnOpen.Size = new Size(150, 30);
+            btnOpen.TabIndex = 16;
+            btnOpen.Text = "ファイルを開く";
+            btnOpen.Click += BtnOpen_Click;
+            //
+            // btnToggleAuto
+            //
+            btnToggleAuto.Dock = DockStyle.Top;
+            btnToggleAuto.Location = new Point(0, 48);
+            btnToggleAuto.Name = "btnToggleAuto";
+            btnToggleAuto.Size = new Size(150, 30);
+            btnToggleAuto.TabIndex = 17;
+            btnToggleAuto.Text = "○ 自動更新";
+            btnToggleAuto.Click += BtnToggleAuto_Click;
+            //
+            // btnLang
+            //
+            btnLang.Dock = DockStyle.Top;
+            btnLang.Location = new Point(0, 78);
+            btnLang.Name = "btnLang";
+            btnLang.Size = new Size(150, 30);
+            btnLang.TabIndex = 18;
+            btnLang.Text = "JP";
+            btnLang.Click += BtnLang_Click;
+            //
+            // lblLastUpdated
+            //
+            lblLastUpdated.Dock = DockStyle.Top;
+            lblLastUpdated.Location = new Point(0, 108);
+            lblLastUpdated.Name = "lblLastUpdated";
+            lblLastUpdated.Padding = new Padding(8, 0, 0, 0);
+            lblLastUpdated.Size = new Size(150, 24);
+            lblLastUpdated.TabIndex = 19;
+            lblLastUpdated.Text = "最終更新: --:--:--";
+            lblLastUpdated.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // lblUpdateFlash
+            //
+            lblUpdateFlash.Dock = DockStyle.Top;
+            lblUpdateFlash.ForeColor = Color.ForestGreen;
+            lblUpdateFlash.Location = new Point(0, 132);
+            lblUpdateFlash.Name = "lblUpdateFlash";
+            lblUpdateFlash.Padding = new Padding(8, 0, 0, 0);
+            lblUpdateFlash.Size = new Size(150, 24);
+            lblUpdateFlash.TabIndex = 20;
+            lblUpdateFlash.TextAlign = ContentAlignment.MiddleLeft;
             //
             // _top
             //
@@ -575,12 +558,8 @@ namespace StS2Toys
             ClientSize = new Size(800, 520);
             Controls.Add(splitContainerOuter);
             Controls.Add(panelInfo);
-            Controls.Add(panelTop);
             Name = "Form1";
             Text = "StS2 Deck Viewer";
-            panelTop.ResumeLayout(false);
-            panelFileControls.ResumeLayout(false);
-            panelFileControls.PerformLayout();
             panelInfo.ResumeLayout(false);
             splitContainerOuter.Panel1.ResumeLayout(false);
             splitContainerOuter.Panel2.ResumeLayout(false);
@@ -605,14 +584,12 @@ namespace StS2Toys
             ResumeLayout(false);
         }
 
-        private Panel panelTop;
-        private Panel panelFileControls;
         private Button btnToggleAuto;
         private Button btnLang;
         private Label lblLastUpdated;
         private Label lblUpdateFlash;
         private Button btnOpen;
-        private TextBox txtFilePath;
+        private Label lblGroupFile;
         private Panel panelInfo;
         private Label lblInfo;
         private SplitContainer splitContainerOuter;

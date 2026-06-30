@@ -11,6 +11,7 @@ namespace StS2Toys
     public partial class Form1 : Form
     {
         private FileSystemWatcher? _watcher;
+        private string _currentPath = "";
         private readonly System.Windows.Forms.Timer _reloadTimer = new() { Interval = 500 };
         private readonly System.Windows.Forms.Timer _flashTimer = new() { Interval = 2000 };
         private DeckOverviewForm? _combinedOverview;
@@ -181,8 +182,8 @@ namespace StS2Toys
         {
             if (_watcher != null)
                 StopWatching();
-            else if (!string.IsNullOrEmpty(txtFilePath.Text))
-                StartWatching(txtFilePath.Text);
+            else if (!string.IsNullOrEmpty(_currentPath))
+                StartWatching(_currentPath);
         }
 
         void BtnLang_Click(object? sender, EventArgs e)
@@ -199,7 +200,7 @@ namespace StS2Toys
             try
             {
                 var data = SaveDataService.Load(path);
-                txtFilePath.Text = path;
+                _currentPath = path;
                 DisplayData(data);
                 lblLastUpdated.Text = $"最終更新: {DateTime.Now:HH:mm:ss}";
                 StartWatching(path);
@@ -238,10 +239,10 @@ namespace StS2Toys
 
         void ReloadCurrentFile()
         {
-            if (string.IsNullOrEmpty(txtFilePath.Text)) return;
+            if (string.IsNullOrEmpty(_currentPath)) return;
             try
             {
-                var data = SaveDataService.Load(txtFilePath.Text);
+                var data = SaveDataService.Load(_currentPath);
                 DisplayData(data);
                 lblLastUpdated.Text = $"最終更新: {DateTime.Now:HH:mm:ss}";
                 lblUpdateFlash.Text = "✓ 更新しました";
