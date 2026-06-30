@@ -100,6 +100,22 @@ public partial class EncounterOverviewForm : Form
         return set;
     }
 
+    /// <summary>
+    /// 表示中 Act でセーブが確定済みのボス ID 集合（接頭辞除去）。Act 入場時に確定するため戦闘前でも出る。
+    /// セーブに無い Act（未到達＝Rooms null）や未読込なら空集合。
+    /// </summary>
+    HashSet<string> BuildPredictedBossSet(EncounterActService.ActEncounters group)
+    {
+        var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var act = _data?.Acts.FirstOrDefault(a =>
+            string.Equals(ToRaw(a.Id), group.Id, StringComparison.OrdinalIgnoreCase));
+        var rooms = act?.Rooms;
+        if (rooms is null) return set;
+        if (!string.IsNullOrEmpty(rooms.BossId)) set.Add(ToRaw(rooms.BossId));
+        if (!string.IsNullOrEmpty(rooms.SecondBossId)) set.Add(ToRaw(rooms.SecondBossId));
+        return set;
+    }
+
     Bitmap RenderContent(int w)
     {
         _hitMap.Clear();
@@ -120,6 +136,7 @@ public partial class EncounterOverviewForm : Form
 
         bool isCurrentAct = _autoActId is not null && string.Equals(group.Id, _autoActId, StringComparison.OrdinalIgnoreCase);
         var visited = isCurrentAct ? BuildVisitedSet() : [];
+        var predicted = BuildPredictedBossSet(group);
 
         var boss = group.BossOrder.Count > 0 ? group.BossOrder : group.Boss;
         (string Ja, string En, IReadOnlyList<string> Ids)[] tiers =
@@ -166,6 +183,7 @@ public partial class EncounterOverviewForm : Form
             {
                 var rect = new Rectangle(PadX, y, w - 2 * PadX, RowH);
                 DrawEncounterRow(g, encId, rect, ja, visited.Contains(ToRaw(encId)),
+                    predicted.Contains(ToRaw(encId)),
                     nameFont, nameBrush, grayBrush, checkBrush, rowPen);
                 _hitMap.Add((rect, encId));
                 y += RowH;
@@ -176,9 +194,16 @@ public partial class EncounterOverviewForm : Form
         return bmp;
     }
 
-    void DrawEncounterRow(Graphics g, string encId, Rectangle rect, bool ja, bool visited,
+    void DrawEncounterRow(Graphics g, string encId, Rectangle rect, bool ja, bool visited, bool predicted,
         Font nameFont, Brush nameBrush, Brush grayBrush, Brush checkBrush, Pen rowPen)
     {
+        // 遭遇予定ボスのハイライト背景（最背面。遭遇済みなら後段のディムで落ち着く）。
+        if (predicted)
+        {
+            using var hi = new SolidBrush(Color.FromArgb(255, 250, 224));
+            g.FillRectangle(hi, rect);
+        }
+
         // 名前
         var name = EncounterDatabaseService.GetEncounterName(encId, ja);
         int textX = rect.X + 20;
@@ -188,7 +213,10 @@ public partial class EncounterOverviewForm : Form
             Trimming = StringTrimming.EllipsisCharacter,
             FormatFlags = StringFormatFlags.NoWrap,
         };
-        g.DrawString(name, nameFont, visited ? grayBrush : nameBrush,
+        using var predictedFont = predicted && !visited ? new Font(nameFont, FontStyle.Bold) : null;
+        using var predictedBrush = new SolidBrush(Color.FromArgb(200, 120, 0));
+        Brush nb = visited ? grayBrush : (predicted ? predictedBrush : nameBrush);
+        g.DrawString(name, predictedFont ?? nameFont, nb,
             new RectangleF(textX, rect.Y, NameColW, rect.Height), fmt);
 
         // モンスターサムネ
@@ -231,6 +259,12 @@ public partial class EncounterOverviewForm : Form
             g.FillRectangle(dim, rect);
             using var checkFont = new Font("Segoe UI", 11f, FontStyle.Bold);
             g.DrawString("✓", checkFont, checkBrush, new PointF(rect.X, rect.Y + (rect.Height - 20) / 2));
+        }
+        else if (predicted)
+        {
+            // 未遭遇の遭遇予定ボスは左端（✓ と同位置）に ★。
+            using var starFont = new Font("Segoe UI", 11f, FontStyle.Bold);
+            g.DrawString("★", starFont, predictedBrush, new PointF(rect.X, rect.Y + (rect.Height - 20) / 2));
         }
 
         // 行区切り
