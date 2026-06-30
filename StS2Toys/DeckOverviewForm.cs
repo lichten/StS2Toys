@@ -365,7 +365,7 @@ public partial class DeckOverviewForm : Form
         foreach (var (labelEn, labelJa, filter) in _keywordGroups!)
         {
             var cardGroup  = cards.Where(c => filter(c.Id)).OrderBy(c => ja ? c.NameJa : c.NameEn).ToList();
-            var relicGroup = relics.Where(r => filter(r.Id)).OrderBy(r => ja ? r.NameJa : r.NameEn).ToList();
+            var relicGroup = relics.Where(r => filter(r.Id)).ToList(); // レリックは取得順を保持
             foreach (var c in cardGroup)  assignedCards.Add(c);
             foreach (var r in relicGroup) assignedRelics.Add(r);
             result.Add((ja ? labelJa : labelEn, cardGroup, relicGroup));
@@ -391,7 +391,7 @@ public partial class DeckOverviewForm : Form
         }
 
         var otherCards  = cards.Where(c => !assignedCards.Contains(c)).OrderBy(c => ja ? c.NameJa : c.NameEn).ToList();
-        var otherRelics = relics.Where(r => !assignedRelics.Contains(r)).OrderBy(r => ja ? r.NameJa : r.NameEn).ToList();
+        var otherRelics = relics.Where(r => !assignedRelics.Contains(r)).ToList(); // レリックは取得順を保持
         if (otherCards.Count > 0 || otherRelics.Count > 0)
             result.Add((ja ? "その他" : "Other", otherCards, otherRelics));
         return result;
