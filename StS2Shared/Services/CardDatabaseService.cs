@@ -365,21 +365,29 @@ public static class CardDatabaseService
         return result;
     }
 
+    // Star の増減に「反応」するだけのカード（プレイヤー自身が Star を増減させない）。
+    // 例: ブラックホール "Whenever you spend or gain {singleStarIcon}, ..."。
+    // 「Starを得る」「Starを使用する」どちらのグループに出しても直観に反するため両方から除外する。
+    static HashSet<string> ComputeRegentStarReactive()
+        => ComputeByPlainText("spend or gain {singleStarIcon}");
+
     static HashSet<string> ComputeRegentStarGain()
     {
-        var result = ComputeByPlainText("starIcons()", "Gain {singleStarIcon}", "gain {singleStarIcon}");
+        var result = ComputeByPlainText("starIcons()", "gain {singleStarIcon}");
         result.Add("ROYAL_GAMBLE"); // "Gain {Stars:diff()} {singleStarIcon}" — 既存パターン非対応のため手動追加
+        result.ExceptWith(ComputeRegentStarReactive());
         return result;
     }
 
     static HashSet<string> ComputeRegentStarSpend()
     {
         var result = ComputeByPlainText(
-            "spend {singleStarIcon}", "spend or gain {singleStarIcon}",
+            "spend {singleStarIcon}",
             "{singleStarIcon} are used", "{singleStarIcon} cost", "{StarThreshold");
         // Starをマナコストとして消費するカードを追加（card_star_costs.json から）
         foreach (var id in LoadStarCostIds())
             result.Add(id);
+        result.ExceptWith(ComputeRegentStarReactive());
         return result;
     }
 
