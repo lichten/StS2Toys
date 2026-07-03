@@ -47,6 +47,16 @@ public sealed class AncientRelicRecognizer
     /// </summary>
     public int MaxNameDist { get; set; } = 2;
 
+    /// <summary>
+    /// 名前バンドの縦スキャン範囲（クライアント高さ比）。固定較正位置から ±この範囲を数段階試し、
+    /// 名前一致が最良の位置を採用する。NPC 差・DPI/ウィンドウサイズ差による小さな縦ずれを吸収する
+    /// （固定バンドは実測で ±0.01 しか許容せず、テスカタラ以外や実キャプチャで外れやすい）。
+    /// </summary>
+    public double BandScanRange { get; set; } = 0.035;
+
+    /// <summary>縦スキャンの試行数（中心＋上下対称。奇数で中心を含む）。</summary>
+    public int BandScanSteps { get; set; } = 7;
+
     // ── アイコン照合（名前 family の中を見分ける）─────────────────────────────
     /// <summary>アイコン中心の名前バンド中心からの水平オフセット（クライアント幅比。負＝左）。</summary>
     public double IconDxFrac { get; set; } = -0.112;
@@ -84,10 +94,9 @@ public sealed class AncientRelicRecognizer
         var perBand = new List<IReadOnlyList<BandCand>>(NameBands.Count);
         foreach (var band in NameBands)
         {
-            var nameRect = ToPixels(client, band, frame);
-            var iconRect = IconRect(client, band, frame);
-            rects.Add(nameRect);
-            perBand.Add(RankBand(frame, nameRect, iconRect, out _));
+            var r = ScanBand(frame, client, band);
+            rects.Add(r.NameRect);
+            perBand.Add(r.Cands);
         }
 
         var chosen = AssignUnique(perBand);
@@ -112,12 +121,11 @@ public sealed class AncientRelicRecognizer
         var perBand = new List<IReadOnlyList<BandCand>>(NameBands.Count);
         foreach (var band in NameBands)
         {
-            var nameRect = ToPixels(client, band, frame);
-            var iconRect = IconRect(client, band, frame);
-            nameRects.Add(nameRect);
-            iconRects.Add(iconRect);
-            perBand.Add(RankBand(frame, nameRect, iconRect, out var text));
-            texts.Add(text);
+            var r = ScanBand(frame, client, band);
+            nameRects.Add(r.NameRect);
+            iconRects.Add(r.IconRect);
+            perBand.Add(r.Cands);
+            texts.Add(r.Ocr);
         }
 
         var chosen = AssignUnique(perBand);
@@ -144,6 +152,51 @@ public sealed class AncientRelicRecognizer
     static ShopItemRecognizer.Candidate ToCandidate(BandCand c) =>
         new(c.Id, CardDatabaseService.GetRelicTitle(c.Id, japanese: true),
             c.NameDist == int.MaxValue ? c.IconChi : c.NameDist);
+
+    /// <summary>1バンドのスキャン結果（採用した位置の名前/アイコン矩形・OCR テキスト・候補列）。</summary>
+    readonly record struct BandResult(Rectangle NameRect, Rectangle IconRect, string Ocr, IReadOnlyList<BandCand> Cands);
+
+    /// <summary>
+    /// 名前バンドを較正位置から縦に ±<see cref="BandScanRange"/> スキャンし、名前一致が最良（最小編集距離）の
+    /// 位置の結果を採る。中心（ずれ0）を最初に試し、完全一致（距離0）が出れば即打ち切る（通常はここで確定）。
+    /// これにより NPC 差・DPI/ウィンドウサイズ差の小さな縦ずれでも名前テキストにバンドを「吸着」させる。
+    /// </summary>
+    BandResult ScanBand(Bitmap frame, Rectangle client, NameBand band)
+    {
+        BandResult best = default;
+        int bestScore = int.MaxValue;
+        bool have = false;
+        foreach (var dy in ScanOffsets())
+        {
+            var b = new NameBand(band.CxFrac, band.CyFrac + dy, band.WFrac, band.HFrac);
+            var nameRect = ToPixels(client, b, frame);
+            var iconRect = IconRect(client, b, frame);
+            var cands = RankBand(frame, nameRect, iconRect, out var ocr);
+            int score = cands.Count > 0 ? cands.Min(c => c.NameDist) : int.MaxValue;
+            if (!have || score < bestScore) // 中心を先に試すので同点は中心寄りが残る
+            {
+                have = true;
+                bestScore = score;
+                best = new BandResult(nameRect, iconRect, ocr, cands);
+                if (bestScore == 0) break; // 完全一致が出たら以降のずれ位置は不要
+            }
+        }
+        return best;
+    }
+
+    /// <summary>縦スキャンのオフセット列（クライアント高さ比）。中心 0 → ±unit → ±2unit … の順。</summary>
+    IEnumerable<double> ScanOffsets()
+    {
+        yield return 0.0;
+        int half = Math.Max(0, BandScanSteps / 2);
+        if (half == 0 || BandScanRange <= 0) yield break;
+        double unit = BandScanRange / half;
+        for (int k = 1; k <= half; k++)
+        {
+            yield return k * unit;
+            yield return -k * unit;
+        }
+    }
 
     /// <summary>
     /// 1バンドを名前 OCR で family に絞り、その中をアイコン色で順位付けした候補列（アイコン距離昇順）を返す。

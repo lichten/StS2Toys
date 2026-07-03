@@ -291,7 +291,15 @@ public sealed class CaptureLoop : IDisposable
         var client = WindowClientArea.Resolve(hwnd, frame.Width, frame.Height);
         var screen = screenReco.Recognize(frame, client, charId);
 
-        var ctx = $"[キャラ:{charId ?? "自動?"}]";
+        // 診断: 環境変数 STS2_DUMP_DIR が設定されていれば、実キャプチャフレームを画面種別ごとに
+        // PNG 保存する（{dir}\live_{type}.png、上書き、約1秒に1回に間引き）。ライブ WGC フレームを
+        // 取り出して capture-verify で再現・比較するための切り分け用。
+        TryDumpFrame(frame, screen.Type);
+
+        // 診断: 実キャプチャのフレーム寸法と解決した client 矩形を表示に含める（ライブのジオメトリ
+        // ずれ＝DPI/ウィンドウサイズ差の切り分け用）。認識に失敗した時に何を見ているか分かるようにする。
+        var geom = $"[frame {frame.Width}x{frame.Height} client {client.X},{client.Y},{client.Width},{client.Height}]";
+        var ctx = $"[キャラ:{charId ?? "自動?"}]{geom}";
         int accessories = screen.Shop is { } s ? s.Items.Count(i => i.Accepted) : 0;
         string status = screen.Type switch
         {
@@ -309,6 +317,25 @@ public sealed class CaptureLoop : IDisposable
         Updated?.Invoke(new Result(status, screen.Type == ScreenRecognizer.ScreenType.CardSelect,
             screen.Cards, Array.Empty<OcrTextSpan>(),
             screen.CardBoxes, Array.Empty<Rectangle>(), preview, screen.Shop, screen.Type));
+    }
+
+    DateTime _lastDumpUtc = DateTime.MinValue;
+
+    /// <summary>環境変数 STS2_DUMP_DIR が指すフォルダへ、実キャプチャフレームを画面種別ごとに保存する（診断用）。</summary>
+    void TryDumpFrame(Bitmap frame, ScreenRecognizer.ScreenType type)
+    {
+        var dir = Environment.GetEnvironmentVariable("STS2_DUMP_DIR");
+        if (string.IsNullOrWhiteSpace(dir)) return;
+        var now = DateTime.UtcNow;
+        if ((now - _lastDumpUtc).TotalMilliseconds < 1000) return; // 約1秒に1回に間引く
+        _lastDumpUtc = now;
+        try
+        {
+            Directory.CreateDirectory(dir);
+            using var copy = new Bitmap(frame);
+            copy.Save(Path.Combine(dir, $"live_{type}.png"), System.Drawing.Imaging.ImageFormat.Png);
+        }
+        catch { /* 保存失敗は無視 */ }
     }
 
     public void Dispose()

@@ -18,8 +18,8 @@ if (!File.Exists(pngPath)) { Console.WriteLine($"file not found: {pngPath}"); re
 Rectangle? clientOverride = null;
 string? cropsDir = null;
 double? dy = null, bandH = null, bandW = null, cx = null;
-double? iconDx = null, iconSize = null, iconMax = null;
-int? scale = null;
+double? iconDx = null, iconSize = null, iconMax = null, scanRange = null;
+int? scale = null, scanSteps = null;
 for (int i = 1; i < args.Length; i++)
 {
     switch (args[i])
@@ -38,6 +38,8 @@ for (int i = 1; i < args.Length; i++)
         case "--icondx" when i + 1 < args.Length: iconDx = double.Parse(args[++i]); break;
         case "--iconsize" when i + 1 < args.Length: iconSize = double.Parse(args[++i]); break;
         case "--iconmax" when i + 1 < args.Length: iconMax = double.Parse(args[++i]); break;
+        case "--scansteps" when i + 1 < args.Length: scanSteps = int.Parse(args[++i]); break;
+        case "--scanrange" when i + 1 < args.Length: scanRange = double.Parse(args[++i]); break;
     }
 }
 
@@ -54,6 +56,8 @@ if (scale is int sc) ancient.TitleScale = sc;
 if (iconDx is double idx) ancient.IconDxFrac = idx;
 if (iconSize is double isz) ancient.IconSizeFrac = isz;
 if (iconMax is double imx) ancient.IconMaxDistance = imx;
+if (scanSteps is int ss) ancient.BandScanSteps = ss;       // 1 で縦スキャン無効（旧挙動）
+if (scanRange is double sr) ancient.BandScanRange = sr;
 if (dy is not null || bandH is not null || bandW is not null || cx is not null)
     ancient.NameBands = ancient.NameBands
         .Select(b => new AncientRelicRecognizer.NameBand(
@@ -86,4 +90,23 @@ foreach (var it in det.Items)
         string.Join(" / ", it.Candidates.Select(c => $"{c.Id} ({c.Name})"));
     Console.WriteLine($"    accepted={it.Accepted}  {label}");
 }
+Console.WriteLine();
+
+// 3) ショップ誤検出（プリエンプト）診断。ScreenRecognizer は shop 判定を先に走らせ、
+//    IsShop:true なら AncientSelect に到達しない（ScreenRecognizer.cs:93-97）。
+var shopReco = new ShopItemRecognizer();
+var shop = shopReco.Detect(bmp, client);
+Console.WriteLine($"Shop probe: IsShop={shop.IsShop}  accepted={shop.Items.Count(i => i.Accepted)}/{shop.Items.Count} (MinMatchesForShop={shopReco.MinMatchesForShop})");
+foreach (var it in shop.Items)
+{
+    var label = it.Candidates.Count == 0 ? "(no match)" :
+        string.Join(" / ", it.Candidates.Select(c => $"{c.Id} ({c.Name}) d={c.Distance:F3}"));
+    Console.WriteLine($"    {it.Kind} accepted={it.Accepted}  {label}");
+}
+Console.WriteLine();
+
+// 4) 実ディスパッチ再現（ScreenRecognizer.Recognize）。ライブアプリの最終判定と同じ。
+var screenReco = new ScreenRecognizer(shopReco);
+var screen = screenReco.Recognize(bmp, client, null);
+Console.WriteLine($"ScreenRecognizer.Recognize => {screen.Type}  (portraits available={screenReco.IsAvailable})");
 return 0;
