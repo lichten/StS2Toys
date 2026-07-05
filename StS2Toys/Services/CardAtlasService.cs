@@ -96,14 +96,9 @@ static class CardAtlasService
 
     static string? FindSpritesDir()
     {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null)
-        {
-            var candidate = Path.Combine(dir.FullName, "tools", "extracted",
-                "images", "atlases", "card_atlas.sprites");
-            if (Directory.Exists(candidate)) return candidate;
-            dir = dir.Parent;
-        }
-        return null;
+        var atlasesDir = StS2Shared.Services.AssetLocator.ImagesDir("atlases");
+        if (atlasesDir is null) return null;
+        var candidate = Path.Combine(atlasesDir, "card_atlas.sprites");
+        return Directory.Exists(candidate) ? candidate : null;
     }
 }

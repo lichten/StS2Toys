@@ -104,17 +104,10 @@ public sealed class TemplateCardRecognizer : ICardRecognizer
         return _db;
     }
 
-    /// <summary>tools/extracted/images/card_portraits_png を上位ディレクトリに遡って探す。</summary>
+    /// <summary>card_portraits_png ディレクトリを <see cref="AssetLocator"/> 経由で解決する。</summary>
     static string? ResolvePortraitsDir()
     {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir != null)
-        {
-            var candidate = Path.Combine(dir.FullName, "tools", "extracted", "images",
-                CardImageService.PortraitsDirName);
-            if (Directory.Exists(candidate)) return candidate;
-            dir = dir.Parent;
-        }
-        return null;
+        var candidate = AssetLocator.ImagesDir(CardImageService.PortraitsDirName);
+        return candidate != null && Directory.Exists(candidate) ? candidate : null;
     }
 }

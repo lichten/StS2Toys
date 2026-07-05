@@ -343,13 +343,7 @@ public sealed class AncientRelicRecognizer
 
     static string? ResolveImagesDir(string dirName)
     {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir != null)
-        {
-            var candidate = Path.Combine(dir.FullName, "tools", "extracted", "images", dirName);
-            if (Directory.Exists(candidate)) return candidate;
-            dir = dir.Parent;
-        }
-        return null;
+        var candidate = AssetLocator.ImagesDir(dirName);
+        return candidate != null && Directory.Exists(candidate) ? candidate : null;
     }
 }

@@ -3883,17 +3883,7 @@ static string Layout(string title, string activeId, string accent, CharData[] ch
         """;
 }
 
-static string? FindToolsRoot(string startDir)
-{
-    var dir = startDir;
-    while (dir != null)
-    {
-        var candidate = Path.Combine(dir, "tools", "extracted");
-        if (Directory.Exists(candidate)) return candidate;
-        dir = Path.GetDirectoryName(dir);
-    }
-    return null;
-}
+static string? FindToolsRoot(string startDir) => AssetLocator.FindExtractedRoot(startDir);
 
 static string? FindArticlesDir(string distDir)
 {

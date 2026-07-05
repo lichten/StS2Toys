@@ -451,14 +451,7 @@ public sealed class MainForm : Form
 
     static string? ResolvePortraitsDir()
     {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir != null)
-        {
-            var candidate = Path.Combine(dir.FullName, "tools", "extracted", "images",
-                CardImageService.PortraitsDirName);
-            if (Directory.Exists(candidate)) return candidate;
-            dir = dir.Parent;
-        }
-        return null;
+        var candidate = AssetLocator.ImagesDir(CardImageService.PortraitsDirName);
+        return candidate != null && Directory.Exists(candidate) ? candidate : null;
     }
 }

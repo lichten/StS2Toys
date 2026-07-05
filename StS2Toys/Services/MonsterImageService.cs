@@ -28,15 +28,5 @@ static class MonsterImageService
         catch { return _cache[dirName] = null; }
     }
 
-    static string? FindExtractedDir()
-    {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null)
-        {
-            var candidate = Path.Combine(dir.FullName, "tools", "extracted");
-            if (Directory.Exists(candidate)) return candidate;
-            dir = dir.Parent;
-        }
-        return null;
-    }
+    static string? FindExtractedDir() => StS2Shared.Services.AssetLocator.FindExtractedRoot();
 }

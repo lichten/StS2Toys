@@ -675,14 +675,9 @@ public partial class DeckOverviewForm : Form
     {
         if (_portraitsDir != null) return _portraitsDir;
 
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir != null)
-        {
-            var candidate = Path.Combine(dir.FullName, "tools", "extracted", "images", "card_portraits_png");
-            if (Directory.Exists(candidate))
-                return _portraitsDir = candidate;
-            dir = dir.Parent;
-        }
+        var candidate = AssetLocator.ImagesDir(CardImageService.PortraitsDirName);
+        if (candidate != null && Directory.Exists(candidate))
+            return _portraitsDir = candidate;
         return null;
     }
 
