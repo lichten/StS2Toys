@@ -17,4 +17,10 @@
     <ProjectReference Include="..\StS2Capture.Core\StS2Capture.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- モンスター画像生成は StS2Shared.Spine 経由で SkiaSharp を使う。単一ファイル self-contained
+         publish に native（libSkiaSharp）を確実に同梱するため、Win32 native を明示参照する保険。 -->
+    <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.116.1" />
+  </ItemGroup>
+
 </Project>

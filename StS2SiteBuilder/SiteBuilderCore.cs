@@ -7,6 +7,7 @@ using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using StS2Shared.Services;
+using StS2Shared.Spine;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using ISImage  = SixLabors.ImageSharp.Image;
@@ -4411,6 +4412,7 @@ static string ExtractPageTitle(string filePath)
     static HashSet<string> GenerateMonsterGifs(string animationsDir, string creatureVisualsDir, string outDir, string toolsRoot, Action<string> log)
     {
         Directory.CreateDirectory(outDir);
+        var disk = new DiskAssetSource(toolsRoot);
         var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         int generated = 0, skipped = 0, failed = 0;
 
@@ -4423,25 +4425,19 @@ static string ExtractPageTitle(string filePath)
         {
             var gifPath = Path.Combine(outDir, $"{id}.gif");
             var pngPath = Path.Combine(outDir, $"{id}.png");
-            var tscnPath = Path.Combine(creatureVisualsDir, $"{id}.tscn");
-
-            CreatureVisual? cv = File.Exists(tscnPath) ? CreatureVisualParser.Parse(tscnPath, toolsRoot) : null;
-
-            // フォールバック: tscn 無し（または解決不能）でフォルダがあれば従来のフォルダ単位 Spine 描画
-            if (cv is null)
-            {
-                var folder = Path.Combine(animationsDir, id);
-                if (Directory.Exists(folder))
-                    cv = new CreatureVisual(CreatureVisualKind.Spine,
-                        Directory.GetFiles(folder, "*.skel.import").FirstOrDefault(),
-                        Directory.GetFiles(folder, "*.atlas.import").FirstOrDefault());
-            }
+            // creature_visuals/{id}.tscn → 無ければ animations/monsters/{id}/ にフォールバック（共有ロジック）
+            CreatureVisual? cv = MonsterResolver.Resolve(disk, id);
 
             if (cv is null || cv.Kind == CreatureVisualKind.Invisible)
                 continue; // 画像なし（? 表示）
 
             // キャッシュ判定: 入力（tscn / skel.import / 静的 ctex）より出力が新しければスキップ
-            var stamp = NewestWriteTime(tscnPath, cv.SkelImport, cv.StaticCtexPath);
+            var stamp = new[]
+            {
+                disk.GetLastWriteTimeUtc($"scenes/creature_visuals/{id}.tscn"),
+                disk.GetLastWriteTimeUtc(cv.SkelImport),
+                disk.GetLastWriteTimeUtc(cv.StaticCtexPath),
+            }.Max();
             bool spineCached = File.Exists(gifPath) && File.Exists(pngPath) &&
                                File.GetLastWriteTimeUtc(gifPath) >= stamp;
             bool staticCached = File.Exists(pngPath) &&
@@ -4459,9 +4455,10 @@ static string ExtractPageTitle(string filePath)
             {
                 if (cv.Kind == CreatureVisualKind.Static)
                 {
-                    using var src = SpineLoader.LoadCtexAsSKBitmap(cv.StaticCtexPath!);
-                    using var fitted = FitBitmap(src, w, h);
-                    SavePng(fitted, pngPath, w, h);
+                    var ctex = disk.Read(cv.StaticCtexPath!)!;
+                    using var src = SpineLoader.LoadCtexAsSKBitmap(ctex);
+                    using var fitted = SpineImaging.FitBitmap(src, w, h);
+                    SpineImaging.SavePng(fitted, pngPath, w, h);
                     generated++;
                     continue;
                 }
@@ -4472,16 +4469,10 @@ static string ExtractPageTitle(string filePath)
                 MonsterData? monsterData = null;
                 try
                 {
-                    monsterData = SpineLoader.LoadFromImports(cv.SkelImport, cv.AtlasImport, toolsRoot);
+                    monsterData = SpineLoader.LoadFromImports(cv.SkelImport!, cv.AtlasImport!, disk);
 
-                    // アニメ選択: tscn 指定 → idle 系 → 先頭。無ければ静止 setup pose。
-                    string? animName = null;
-                    if (cv.Animation is { } a && a != "-- Empty --" &&
-                        monsterData.SkeletonData.FindAnimation(a) != null)
-                        animName = a;
-                    animName ??= monsterData.Animations.FirstOrDefault(
-                                     x => x.Contains("idle", StringComparison.OrdinalIgnoreCase))
-                                 ?? monsterData.Animations.FirstOrDefault();
+                    // アニメ選択: tscn 指定 → idle 系 → 先頭。無ければ静止 setup pose。（共有ロジック）
+                    string? animName = SpineImaging.PickAnimationName(cv, monsterData);
 
                     float duration = 1f;
                     int frameCount = 1;
@@ -4544,45 +4535,6 @@ static string ExtractPageTitle(string filePath)
 
         log($"モンスター GIF: {generated} 件生成 / {skipped} 件スキップ / {failed} 件エラー");
         return result;
-    }
-
-    // 入力ファイル群のうち存在するものの最新更新時刻（キャッシュ判定用）
-    static DateTime NewestWriteTime(params string?[] paths)
-    {
-        var newest = DateTime.MinValue;
-        foreach (var p in paths)
-            if (p is not null && File.Exists(p))
-            {
-                var t = File.GetLastWriteTimeUtc(p);
-                if (t > newest) newest = t;
-            }
-        return newest;
-    }
-
-    // 静的テクスチャを w×h の背景(30,30,35)中央にアスペクト維持で配置
-    static SkiaSharp.SKBitmap FitBitmap(SkiaSharp.SKBitmap src, int w, int h)
-    {
-        var bitmap = new SkiaSharp.SKBitmap(w, h, SkiaSharp.SKColorType.Rgba8888, SkiaSharp.SKAlphaType.Premul);
-        using var canvas = new SkiaSharp.SKCanvas(bitmap);
-        canvas.Clear(new SkiaSharp.SKColor(30, 30, 35));
-        float scale = Math.Min((w - 8f) / src.Width, (h - 8f) / src.Height);
-        float dw = src.Width * scale, dh = src.Height * scale;
-        var dst = new SkiaSharp.SKRect((w - dw) / 2, (h - dh) / 2, (w + dw) / 2, (h + dh) / 2);
-        using var paint = new SkiaSharp.SKPaint { IsAntialias = true };
-        canvas.DrawBitmap(src, dst, paint);
-        return bitmap;
-    }
-
-    static void SavePng(SkiaSharp.SKBitmap bmp, string pngPath, int w, int h)
-    {
-        using var img = new Image<Rgba32>(w, h);
-        var pixels = bmp.Pixels;
-        for (int pi = 0; pi < pixels.Length; pi++)
-        {
-            var p = pixels[pi];
-            img[pi % w, pi / w] = new Rgba32(p.Red, p.Green, p.Blue, p.Alpha);
-        }
-        img.SaveAsPng(pngPath);
     }
 
     // ── モンスター一覧ページ ──────────────────────────────────────────────────────

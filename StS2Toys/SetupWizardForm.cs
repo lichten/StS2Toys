@@ -162,6 +162,7 @@ public partial class SetupWizardForm : Form
         "enchantments" => "エンチャント",
         "localization" => "テキスト",
         "game_text" => "ゲームテキスト生成",
+        "monsters" => "モンスター画像",
         _ => group,
     };
 }

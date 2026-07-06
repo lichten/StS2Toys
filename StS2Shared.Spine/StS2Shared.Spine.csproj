@@ -4,18 +4,19 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyName>StS2Shared.Assets</AssemblyName>
-    <RootNamespace>StS2Shared.Assets</RootNamespace>
+    <AssemblyName>StS2Shared.Spine</AssemblyName>
+    <RootNamespace>StS2Shared.Spine</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BCnEncoder.NET" Version="2.1.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+    <PackageReference Include="SkiaSharp" Version="3.116.1" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.116.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\StS2Shared\StS2Shared.csproj" />
-    <ProjectReference Include="..\StS2Shared.Spine\StS2Shared.Spine.csproj" />
+    <ProjectReference Include="..\SpineRuntime\SpineRuntime.csproj" />
   </ItemGroup>
 
 </Project>

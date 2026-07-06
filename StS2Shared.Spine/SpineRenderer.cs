@@ -1,7 +1,9 @@
 using SkiaSharp;
 using Spine;
 
-static class SpineRenderer
+namespace StS2Shared.Spine;
+
+public static class SpineRenderer
 {
     public static SKBitmap Render(MonsterData data, string? animationName, float time, int width, int height,
         string? skin = null, (float R, float G, float B, float A)? tint = null)

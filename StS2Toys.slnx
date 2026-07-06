@@ -8,4 +8,5 @@
   <Project Path="ctex-to-png/ctex-to-png.csproj" />
   <Project Path="StS2SiteBuilder/StS2SiteBuilder.csproj" />
   <Project Path="SpineRuntime/SpineRuntime.csproj" />
+  <Project Path="StS2Shared.Spine/StS2Shared.Spine.csproj" />
 </Solution>

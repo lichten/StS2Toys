@@ -1,3 +1,5 @@
+using StS2Shared.Spine;
+
 namespace StS2Shared.Assets;
 
 /// <summary>抽出の進捗（グループ名と、そのグループ内の完了数 / 総数）。</summary>
@@ -11,9 +13,9 @@ public sealed record ExtractProgress(string Group, int Done, int Total);
 /// すれば、配布モードのアプリがそのまま解決できる。進捗は <see cref="IProgress{T}"/>、キャンセルは
 /// <see cref="CancellationToken"/> で受ける（初回セットアップウィザードから再利用する想定）。
 ///
-/// 注: モンスター画像（<c>images/monsters/*.png</c>）は Spine アニメーションからのレンダリング成果物で
-/// <c>.pck</c> から単純抽出できないため本セットには含めない（StS2Toys 側は画像なしでも動作する）。
-/// これらは後続フェーズで Spine パイプラインを取り込む際に対応する。
+/// モンスター画像（<c>images/monsters/*.png</c>）は Spine スケルトンのレンダリング成果物のため単純抽出できない。
+/// <see cref="ExtractMonsters"/> が <c>.pck</c> を直読みして先頭フレームを描画し、SiteBuilder と同じ
+/// 生成パイプライン（StS2Shared.Spine）で <c>images/monsters/{id}.png</c> を生成する（GIF は非生成）。
 /// </summary>
 public sealed class AssetExtractor
 {
@@ -58,6 +60,64 @@ public sealed class AssetExtractor
         // 派生ゲームテキスト（card_database/card_descriptions/potion_database/monster_names）を
         // 抽出ルート直下に生成。配布ビルドで埋め込みを除外した際の外部解決先になる。
         LocTextDeriver.Derive(_pck, _outRoot, progress, ct);
+
+        // モンスター画像を pck 直読みで Spine レンダリングして images/monsters/{id}.png へ生成。
+        ExtractMonsters(progress, ct);
+    }
+
+    /// <summary>
+    /// 各モンスターの先頭フレームを <c>.pck</c> 直読みで描画し <c>images/monsters/{id}.png</c> に書き出す。
+    /// 個別モンスターの失敗はスキップして全体を止めない（キャンセルのみ伝播）。画像なし（Invisible）は書かない。
+    /// </summary>
+    void ExtractMonsters(IProgress<ExtractProgress>? progress, CancellationToken ct)
+    {
+        var src = new PckAssetSource(_pck);
+        var ids = EnumerateMonsterIds();
+
+        for (int i = 0; i < ids.Count; i++)
+        {
+            ct.ThrowIfCancellationRequested();
+            try
+            {
+                var png = MonsterPngRenderer.TryRenderFirstFramePng(src, ids[i]);
+                if (png is not null)
+                {
+                    var outPath = ResolveOut("images/monsters/" + ids[i] + ".png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outPath)!);
+                    File.WriteAllBytes(outPath, png);
+                }
+            }
+            catch (OperationCanceledException) { throw; }
+            catch { /* 個別モンスターの解決/描画失敗はスキップ（? 表示に degrade。全体は継続） */ }
+
+            progress?.Report(new ExtractProgress("monsters", i + 1, ids.Count));
+        }
+    }
+
+    /// <summary>
+    /// レンダリング対象モンスターの ID 一覧を <c>.pck</c> から直接列挙する
+    /// （<c>scenes/creature_visuals/{id}.tscn</c> ∪ <c>animations/monsters/{id}/…</c>）。
+    /// 外部解決される <see cref="MonsterDatabaseService"/> に依存しないため、抽出中（最終ディレクトリ未作成）でも
+    /// 正しい一覧が得られる。<see cref="Spine.MonsterResolver"/> が実際に読む入力そのものと一致する。
+    /// </summary>
+    List<string> EnumerateMonsterIds()
+    {
+        var ids = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        const string tscnPrefix = "scenes/creature_visuals/";
+        foreach (var e in _pck.EnumerateUnder(tscnPrefix))
+            if (e.ResPath.EndsWith(".tscn", StringComparison.OrdinalIgnoreCase))
+                ids.Add(e.ResPath[tscnPrefix.Length..^".tscn".Length]);
+
+        const string animPrefix = "animations/monsters/";
+        foreach (var e in _pck.EnumerateUnder(animPrefix))
+        {
+            var rest = e.ResPath[animPrefix.Length..];
+            var slash = rest.IndexOf('/');
+            if (slash > 0) ids.Add(rest[..slash]);
+        }
+
+        return ids.ToList();
     }
 
     // ── 抽出ストラテジ ────────────────────────────────────────────────────────
