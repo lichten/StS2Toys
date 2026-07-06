@@ -18,15 +18,12 @@ public sealed class TemplateCardRecognizer : ICardRecognizer
     public double MinMargin { get; set; } = 0.04;
 
     readonly CardRegionDetector _detector = new();
-    readonly string? _portraitsDir;
+    // 配布モードでは初回セットアップ完了前に構築され得るため遅延解決（導入後に自動で拾う）。
+    string? _portraitsDir;
+    string? PortraitsDir => _portraitsDir ??= ResolvePortraitsDir();
     Dictionary<string, float[]>? _db; // CardId → 正規化 HSV ヒストグラム（遅延構築）
 
-    public TemplateCardRecognizer()
-    {
-        _portraitsDir = ResolvePortraitsDir();
-    }
-
-    public bool IsAvailable => _portraitsDir is not null;
+    public bool IsAvailable => PortraitsDir is not null;
 
     /// <summary>枠色プロファイル（キャラ別）。矩形検出器へ転送する。</summary>
     public FrameColorProfile FrameProfile
@@ -82,26 +79,29 @@ public sealed class TemplateCardRecognizer : ICardRecognizer
         return new Match(bestId, best, conf);
     }
 
+    static readonly Dictionary<string, float[]> EmptyDb = new();
+
     Dictionary<string, float[]> EnsureDb()
     {
         if (_db is not null) return _db;
-        _db = new();
-        if (_portraitsDir is null) return _db;
+        var dir = PortraitsDir;
+        if (dir is null) return EmptyDb; // 未セットアップ：空をキャッシュせず次フレームで再試行
 
+        var db = new Dictionary<string, float[]>();
         foreach (var id in CardDatabaseService.GetAllCardIds())
         {
-            var path = CardImageService.GetSourcePath(_portraitsDir, id);
+            var path = CardImageService.GetSourcePath(dir, id);
             if (path is null || !File.Exists(path)) continue;
             try
             {
                 using var bmp = new Bitmap(path);
                 // 在ゲーム絵窓は下 15%（種別装飾）を除外するので、portrait も上 85% に揃える。
                 int ph = Math.Max(1, (int)(bmp.Height * (1.0 - PortraitBottomTrim)));
-                _db[id] = HsvHistogram.Compute(bmp, new Rectangle(0, 0, bmp.Width, ph));
+                db[id] = HsvHistogram.Compute(bmp, new Rectangle(0, 0, bmp.Width, ph));
             }
             catch { /* 壊れた画像はスキップ */ }
         }
-        return _db;
+        return _db = db; // アセット解決後に初めて確定キャッシュ
     }
 
     /// <summary>card_portraits_png ディレクトリを <see cref="AssetLocator"/> 経由で解決する。</summary>

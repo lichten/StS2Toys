@@ -62,17 +62,19 @@ public sealed class ShopItemRecognizer
         new(Kind.Potion, 0.518, 0.744), new(Kind.Potion, 0.5925, 0.744), new(Kind.Potion, 0.6693, 0.744),
     };
 
-    readonly string? _relicsDir = ResolveImagesDir(RelicImageService.RelicsDirName);
-    readonly string? _potionsDir = ResolveImagesDir(PotionImageService.PotionsDirName);
+    // 配布モードでは初回セットアップ完了前に構築され得るため遅延解決（導入後に自動で拾う）。
+    string? _relicsDir, _potionsDir;
+    string? RelicsDir  => _relicsDir  ??= ResolveImagesDir(RelicImageService.RelicsDirName);
+    string? PotionsDir => _potionsDir ??= ResolveImagesDir(PotionImageService.PotionsDirName);
     Dictionary<string, float[]>? _relicDb, _potionDb;
 
-    public bool IsAvailable => _relicsDir is not null && _potionsDir is not null;
+    public bool IsAvailable => RelicsDir is not null && PotionsDir is not null;
 
     public Result Detect(Bitmap frame, Rectangle client)
     {
-        var relicDb = EnsureDb(ref _relicDb, _relicsDir,
+        var relicDb = EnsureDb(ref _relicDb, RelicsDir,
             CardDatabaseService.GetAllRelicIds(), RelicImageService.GetSourcePath, ShopBackground);
-        var potionDb = EnsureDb(ref _potionDb, _potionsDir,
+        var potionDb = EnsureDb(ref _potionDb, PotionsDir,
             PotionImageService.Ids, PotionImageService.GetSourcePath, ShopBackground);
 
         int side = Math.Max(8, (int)(client.Height * SlotSizeFrac));
@@ -134,12 +136,14 @@ public sealed class ShopItemRecognizer
         return result;
     }
 
+    static readonly Dictionary<string, float[]> EmptyDb = new();
+
     Dictionary<string, float[]> EnsureDb(ref Dictionary<string, float[]>? cache, string? dir,
         IEnumerable<string> ids, Func<string, string, string?> resolve, Color background)
     {
         if (cache is not null) return cache;
-        cache = new(StringComparer.Ordinal);
-        if (dir is null) return cache;
+        if (dir is null) return EmptyDb; // 未セットアップ：空をキャッシュせず次フレームで再試行
+        var db = new Dictionary<string, float[]>(StringComparer.Ordinal);
         foreach (var id in ids)
         {
             var path = resolve(dir, id);
@@ -148,12 +152,12 @@ public sealed class ShopItemRecognizer
             {
                 using var bmp = new Bitmap(path);
                 // 透過余白をトリムしてアートを枠いっぱいに → 画面背景色で合成してから集計（照合成立の鍵）。
-                cache[id] = HsvHistogram.Compute(bmp,
+                db[id] = HsvHistogram.Compute(bmp,
                     HsvHistogram.AlphaBoundingBox(bmp), background, SatBins, ValBins);
             }
             catch { /* 壊れた画像はスキップ */ }
         }
-        return cache;
+        return cache = db; // アセット解決後に初めて確定キャッシュ
     }
 
     void TrySaveCrop(Bitmap frame, Rectangle rect)

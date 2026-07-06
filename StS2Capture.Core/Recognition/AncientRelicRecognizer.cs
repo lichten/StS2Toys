@@ -78,7 +78,9 @@ public sealed class AncientRelicRecognizer
     static int _cropSeq;
 
     readonly OcrEngine? _engine = OcrEngineHelper.CreateEngine();
-    readonly string? _relicsDir = ResolveImagesDir(RelicImageService.RelicsDirName);
+    // 配布モードでは初回セットアップ完了前に構築され得るため遅延解決（導入後に自動で拾う）。
+    string? _relicsDir;
+    string? RelicsDir => _relicsDir ??= ResolveImagesDir(RelicImageService.RelicsDirName);
     CardNameIndex? _index;
     Dictionary<string, float[]>? _iconDb;
 
@@ -276,24 +278,27 @@ public sealed class AncientRelicRecognizer
     }
 
     /// <summary>レリックアイコン（透過 PNG）→ 背景合成済み HSV ヒストグラムの索引を遅延構築する。</summary>
+    static readonly Dictionary<string, float[]> EmptyIconDb = new();
+
     Dictionary<string, float[]> IconDb()
     {
         if (_iconDb is not null) return _iconDb;
-        _iconDb = new(StringComparer.Ordinal);
-        if (_relicsDir is null) return _iconDb;
+        var dir = RelicsDir;
+        if (dir is null) return EmptyIconDb; // 未セットアップ：空をキャッシュせず次フレームで再試行
+        var db = new Dictionary<string, float[]>(StringComparer.Ordinal);
         foreach (var id in CardDatabaseService.GetAllRelicIds())
         {
-            var path = RelicImageService.GetSourcePath(_relicsDir, id);
+            var path = RelicImageService.GetSourcePath(dir, id);
             if (path is null || !File.Exists(path)) continue;
             try
             {
                 using var bmp = new Bitmap(path);
-                _iconDb[id] = HsvHistogram.Compute(bmp, HsvHistogram.AlphaBoundingBox(bmp),
+                db[id] = HsvHistogram.Compute(bmp, HsvHistogram.AlphaBoundingBox(bmp),
                     IconBackground, IconSatBins, IconValBins);
             }
             catch { /* 壊れた画像はスキップ */ }
         }
-        return _iconDb;
+        return _iconDb = db; // アセット解決後に初めて確定キャッシュ
     }
 
     Rectangle IconRect(Rectangle client, NameBand band, Bitmap frame)

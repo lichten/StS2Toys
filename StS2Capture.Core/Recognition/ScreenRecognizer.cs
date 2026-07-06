@@ -72,7 +72,10 @@ public sealed class ScreenRecognizer
 
     readonly ShopItemRecognizer _shop;
     readonly AncientRelicRecognizer _ancient = new();
-    readonly string? _portraitsDir = ResolvePortraitsDir();
+    // 配布モードでは初回セットアップ完了前（Form1 構築時）に本認識器が作られ得るため、
+    // ディレクトリは遅延解決する（アセット導入後に自動で拾い、再起動不要にする）。
+    string? _portraitsDir;
+    string? PortraitsDir => _portraitsDir ??= ResolvePortraitsDir();
 
     // キャラ正規化キー（大文字、"" = ニュートラル）→ (CardId, 正規化 HSV ヒストグラム)。遅延構築。
     Dictionary<string, List<(string Id, float[] Hist)>>? _cardDb;
@@ -80,7 +83,7 @@ public sealed class ScreenRecognizer
 
     public ScreenRecognizer(ShopItemRecognizer shop) => _shop = shop;
 
-    public bool IsAvailable => _portraitsDir is not null;
+    public bool IsAvailable => PortraitsDir is not null;
 
     readonly record struct Match(string CardId, double Distance, double Confidence);
 
@@ -181,16 +184,19 @@ public sealed class ScreenRecognizer
     }
 
     /// <summary>キャラ別 portrait DB を遅延構築する（<see cref="TemplateCardRecognizer"/> の構築を踏襲）。</summary>
+    static readonly Dictionary<string, List<(string Id, float[] Hist)>> EmptyCardDb = new();
+
     Dictionary<string, List<(string Id, float[] Hist)>> EnsureCardDb()
     {
         if (_cardDb is not null) return _cardDb;
-        _cardDb = new(StringComparer.Ordinal);
-        _cardDbAll = new();
-        if (_portraitsDir is null) return _cardDb;
+        var dir = PortraitsDir;
+        if (dir is null) return EmptyCardDb; // 未セットアップ：空をキャッシュせず次フレームで再試行
 
+        var db = new Dictionary<string, List<(string Id, float[] Hist)>>(StringComparer.Ordinal);
+        var all = new List<(string Id, float[] Hist)>();
         foreach (var id in CardDatabaseService.GetAllCardIds())
         {
-            var path = CardImageService.GetSourcePath(_portraitsDir, id);
+            var path = CardImageService.GetSourcePath(dir, id);
             if (path is null || !File.Exists(path)) continue;
             try
             {
@@ -198,14 +204,15 @@ public sealed class ScreenRecognizer
                 int ph = Math.Max(1, (int)(bmp.Height * (1.0 - PortraitBottomTrim)));
                 var hist = HsvHistogram.Compute(bmp, new Rectangle(0, 0, bmp.Width, ph));
                 var key = CardDatabaseService.GetCardCharacter(id).ToUpperInvariant(); // "" = ニュートラル
-                if (!_cardDb.TryGetValue(key, out var bucket))
-                    _cardDb[key] = bucket = new();
+                if (!db.TryGetValue(key, out var bucket))
+                    db[key] = bucket = new();
                 bucket.Add((id, hist));
-                _cardDbAll.Add((id, hist));
+                all.Add((id, hist));
             }
             catch { /* 壊れた画像はスキップ */ }
         }
-        return _cardDb;
+        _cardDbAll = all;
+        return _cardDb = db; // アセット解決後に初めて確定キャッシュ
     }
 
     static Rectangle ToPixels(Rectangle client, CardSlot slot)
