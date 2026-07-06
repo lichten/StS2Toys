@@ -42,7 +42,22 @@ public partial class SetupWizardForm : Form
         _btnCancel.Click += (_, _) => _cts?.Cancel();
         _btnSkip.Click += (_, _) => { Outcome = SetupOutcome.Skipped; DialogResult = DialogResult.Cancel; Close(); };
 
+        // 進捗ラベルは初期空だと 1 行分の高さを持たず、抽出開始で文言が入った瞬間に
+        // 高さが増えて下部が見切れうる。常に 1 行分を確保するためプレースホルダを入れる。
+        _lblProgress.Text = " ";
+
         Load += (_, _) => Detect();
+    }
+
+    protected override void OnLoad(EventArgs e)
+    {
+        base.OnLoad(e); // 先に Detect() が走り _lblStatus 文言（1〜2行）が確定する
+        // ラップ確定後（フォント DPI スケール適用済み）の内容高さを実測し、足りなければ
+        // フォームを広げる。幅を渡して測ることで複数行ラベルが正しい行数で高さ計算される。
+        // 固定高だと日本語＋高 DPI で下部（進捗・ボタン列）が見切れるため。
+        int needed = _root.GetPreferredSize(new Size(ClientSize.Width, 0)).Height;
+        if (needed > ClientSize.Height)
+            ClientSize = new Size(ClientSize.Width, needed);
     }
 
     void Detect()
