@@ -85,6 +85,18 @@ public sealed class ScreenRecognizer
 
     public bool IsAvailable => PortraitsDir is not null;
 
+    /// <summary>
+    /// カード／レリック／ポーション／エンシェントの照合 DB を事前構築する（キャプチャは行わない）。
+    /// 初回キャプチャで同期構築される重い遅延ビルドを、起動直後の背景スレッドで前倒しして体感を改善する。
+    /// アセット未解決時は各ビルダが空で即返るため無害（次回以降に遅延構築される）。
+    /// </summary>
+    public void Warmup()
+    {
+        EnsureCardDb();
+        _shop.Warmup();
+        _ancient.Warmup();
+    }
+
     readonly record struct Match(string CardId, double Distance, double Confidence);
 
     public ScreenResult Recognize(Bitmap frame, Rectangle client, string? currentCharacterId)

@@ -89,6 +89,13 @@ public sealed class AncientRelicRecognizer
 
     CardNameIndex Index => _index ??= CardNameIndex.BuildRelics();
 
+    /// <summary>アイコン照合 DB とレリック名索引を事前構築する（初回 Detect の重い遅延構築を前倒し）。</summary>
+    public void Warmup()
+    {
+        _ = IconDb();
+        _ = Index;
+    }
+
     /// <summary>名前＋アイコンで各行を識別し、検出したレリックを返す。matched(IsShop)＝MinMatches 以上採用。</summary>
     public ShopItemRecognizer.Result Detect(Bitmap frame, Rectangle client)
     {

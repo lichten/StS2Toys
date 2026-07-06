@@ -71,6 +71,21 @@ namespace StS2Toys
             // キャプチャ内容ペインの初期分割（実サイズ確定後に設定）。
             SetSplitterDistance(_outer, (int)(_outer.Width * 0.55));
             SetSplitterDistance(_left, (int)(_left.Height * 0.5));
+
+            // 画面認識の照合 DB（数百枚の画像→HSV ヒストグラム、cold で十数秒）を背景で事前構築し、
+            // 初回「手動キャプチャ」の待ちを不可視化する。長時間 CPU を使うため、スレッドプール
+            // （通常優先度・キャプチャの Task.Run と競合）ではなく低優先度の専用スレッドで実行する。
+            // アセット未解決（未セットアップ）なら各ビルダが空で即返るためスキップ相当。
+            new System.Threading.Thread(() =>
+            {
+                try { if (_screen.IsAvailable) _screen.Warmup(); }
+                catch { /* 起動を妨げない */ }
+            })
+            {
+                IsBackground = true,
+                Priority = System.Threading.ThreadPriority.BelowNormal,
+                Name = "RecognizerWarmup",
+            }.Start();
         }
 
         /// <summary>
@@ -658,7 +673,17 @@ namespace StS2Toys
                 else _loop.Stop();
             };
 
-            _btnCapture.Click += (_, _) => Task.Run(_loop.CaptureOnce);
+            // 押下中はボタンを無効化＋「キャプチャ中…」表示で活動を可視化し、二重起動も防ぐ。
+            // 重い初期化（WGC 初回フレーム待ち等）が残っても無反応に見えないようにする。
+            _btnCapture.Click += async (_, _) =>
+            {
+                _btnCapture.Enabled = false;
+                var prev = _btnCapture.Text;
+                _btnCapture.Text = "キャプチャ中…";
+                _status.Text = "認識中…";
+                try { await Task.Run(_loop.CaptureOnce); }
+                finally { _btnCapture.Text = prev; _btnCapture.Enabled = true; }
+            };
             _btnLinks.Click += (_, _) => EditLinkTemplates();
 
             // 検出結果リスト（カード／ショップ）左クリックで情報ページリンクを開く。

@@ -70,6 +70,15 @@ public sealed class ShopItemRecognizer
 
     public bool IsAvailable => RelicsDir is not null && PotionsDir is not null;
 
+    /// <summary>relic/potion の照合 DB を事前構築する（初回 Detect の重い遅延構築を起動時に前倒し）。</summary>
+    public void Warmup()
+    {
+        EnsureDb(ref _relicDb, RelicsDir,
+            CardDatabaseService.GetAllRelicIds(), RelicImageService.GetSourcePath, ShopBackground);
+        EnsureDb(ref _potionDb, PotionsDir,
+            PotionImageService.Ids, PotionImageService.GetSourcePath, ShopBackground);
+    }
+
     public Result Detect(Bitmap frame, Rectangle client)
     {
         var relicDb = EnsureDb(ref _relicDb, RelicsDir,
