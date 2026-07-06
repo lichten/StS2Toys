@@ -7,7 +7,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```powershell
 dotnet build                                  # ソリューション全体
 dotnet run --project StS2Toys                 # セーブデータビューア
-dotnet run --project StS2CardBrowser          # カードブラウザ
 dotnet run --project card-type-extractor      # カードメタデータ再生成（要ゲームDLL）
 ```
 
@@ -39,9 +38,14 @@ $pck = "C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\SlayTheSp
 | プロジェクト | 役割 |
 |---|---|
 | `StS2Shared` | 全アプリが参照する共有ライブラリ（サービス・メカニクス定義） |
-| `StS2Toys` | セーブデータビューア（デッキ・レリック表示） |
-| `StS2CardBrowser` | カードブラウザ（キャラクター・メカニクスフィルタ付き） |
+| `StS2Shared.Assets` | `.pck` 読み取り（`PckReader`/`CtexDecoder`）と配布セットアップの抽出エンジン（`AssetExtractor`/`AssetSetup`/`SteamLocator`/`LocTextDeriver`） |
+| `StS2Shared.Spine` | Spine 描画の共有ライブラリ（`SpineLoader`/`SpineRenderer`/`CreatureVisual`。`IAssetSource` でディスク/pck 両対応、`MonsterPngRenderer`）。SiteBuilder と配布セットアップが共用 |
+| `StS2Toys` | セーブデータビューア（デッキ・レリック・敵情報・HP変動・ポーション確率・ライブキャプチャ） |
+| `StS2Capture.Core` | ライブ画面キャプチャ（WGC）と画面認識（カード選択/ショップ/エンシェント。固定矩形＋HSV 照合、OCR はエンシェントのみ） |
+| `StS2Capture` | キャプチャ検証用の単体アプリ（試験用） |
+| `StS2SiteBuilder` | 静的サイトジェネレータ |
 | `card-type-extractor` | ゲーム DLL の IL を解析してカードメタデータ JSON を生成するCLIツール |
+| `ctex-to-png` | `.ctex`→PNG 変換 CLI（relics/events/ancients/potions ほか、extract-pck サブコマンドあり） |
 | `SpineRuntime` | spine-csharp の pure C# ランタイム（データ構造のみ、描画なし） |
 
 ### StS2Shared — 共有ライブラリ
@@ -125,7 +129,8 @@ $pck = "C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\SlayTheSp
 | `Services/EncounterDatabaseService.cs` | エンカウンター・アクト名の EN/JP ルックアップ |
 | `Services/MonsterCombatService.cs` | モンスター戦闘データ（`monster_combat.json`）＋行動パターン（`monster_move_patterns.json`）。ムーブ名/インテント名/パワー名/説明は `monsters`/`intents`/`powers` ローカライズから解決 |
 | `Services/DescriptionFormatter.cs` | `[gold]...[/gold]` 等の BBタグと `{Var:format}` テンプレートを除去・解決 |
-| `CharacterMechanics.cs` | キャラクター × メカニクスのフィルタ定義（`Func<string, bool>` の配列）。CardBrowser のサイドバー構造と 1:1 対応 |
+| `Services/PotionOddsService.cs` | 次戦闘のポーション報酬ドロップ確率。セーブの `players[].odds.potion_reward_odds_value`（＝現在の実確率そのもの）から算出。エリート +12.5%、White Beast Statue で確定100%。根拠は `docs/potion-drop-odds.md` |
+| `CharacterMechanics.cs` | キャラクター × メカニクスのフィルタ定義（`Func<string, bool>` の配列）。Toys のキャラクター概観と SiteBuilder が参照 |
 
 ### データの流れ（共通パターン）
 
@@ -150,10 +155,35 @@ $pck = "C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\SlayTheSp
 
 出力先はすべて `StS2Shared/Resources/`。extractor 実行後に `StS2Shared` を再ビルドすることで埋め込みリソースが更新される。
 
+### 配布モード（一般ユーザー向け self-contained 配布）
+
+開発モードとは別に、ビルド済み exe を GitHub Releases で配布する（詳細設計は `docs/distribution-plan.md`）。
+
+- **アセット解決の 2 段構え**（`StS2Shared/Services/AssetLocator.cs`）:
+  開発モード＝exe から親を遡って `tools/extracted` を探す → 配布モード＝
+  `%LocalAppData%\StS2Toys\assets\v{version}`（最新バージョン）を使う。どちらも無ければ未セットアップ。
+- **初回セットアップ**: `SetupWizardForm` → `AssetSetup.RunSetup`（`_staging` へ抽出し成功時のみ
+  `v{version}` へ原子 Move）→ `AssetExtractor.ExtractViewerAssets`（カード/レリック/エンチャント/
+  ローカライズ/派生テキストの抽出＋**モンスター画像は pck 直読みで Spine レンダリング**して
+  `images/monsters/{id}.png` を生成）。
+- **配布 publish**: `-p:ExcludeGameText=true` でゲームテキスト埋め込みを除外し、
+  `ResourceResolver.OpenText` が「埋め込み → 外部（抽出済みファイル）」の 2 段で解決する。
+  タグ `v*` を push すると `.github/workflows/release.yml` が単一 exe を Releases に添付する。
+- **注意点（過去に踏んだ罠）**:
+  - セットアップ実行中は最終 `v{version}` が未存在。**外部解決（`OpenText`/`AssetLocator`）に頼る
+    処理をセットアップ経路に置かない**（例: モンスター ID は `MonsterDatabaseService` ではなく
+    pck 直列挙で得る）。
+  - 認識器などのアセットディレクトリ参照は**遅延解決**にする（構築時に一度だけ解決すると、
+    初回セットアップ完了後もプロセス中は未設定のままになり再起動が必要になる）。
+
 ### StS2Toys — セーブデータビューア
 
 進行中ランのセーブを読み、デッキ・レリックを表示する。サイドのボタンで複数のサブ概観ウィンドウを開く
 （いずれも `DeckOverviewForm` を再利用。カード/レリックは Bitmap に動的描画し、クリックで外部リンクを開く）。
+ほかに敵情報（`EncounterOverviewForm`。遭遇済み・次のボスの先読みハイライト＋モンスター画像）、HP変動グラフ、
+ポーション報酬ドロップ確率（`PotionOddsService`。サイドパネル常時表示、`docs/potion-drop-odds.md`）、
+ライブ画面キャプチャ（StS2Capture.Core、`docs/StS2Toys-LiveCapture.md`）、初回セットアップウィザードを持つ。
+ファイル監視の自動リロードにより、セーブ更新でこれらの表示は自動更新される。
 
 **キャラクター概観（`btnCharacterOverview` → `EnableCharacterMode()`）**
 - 1つの `DeckOverviewForm` で5キャラ分を扱う統合フォーム。上部のドロップダウンで「自動（セーブ）」＋5キャラを選択
@@ -166,13 +196,6 @@ $pck = "C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\SlayTheSp
 - ブロック関連・消滅グループは**クロス集計**で、メカニクス群と重複するカードをそのまま重複表示する。
   ただし該当カードは `assignedCards` に登録し「その他」からは除外する（重複の二重カウント回避）。
 - グループ見出しのカウントは `FormatCardCount`（`N枚中M枚(P%)`）。上部の統計バーは `BuildCharacterStats`。
-
-### StS2CardBrowser — カードブラウザ
-
-- `CardBrowserForm.cs` が `CharacterMechanics.All` を読み込んでサイドバーボタンを動的生成
-- キャラクター選択時はキャラクター帰属フィルタ、メカニクス選択時はメカニクスフィルタに切り替わる（キャラクターフィルタを置換する）
-- サムネイル画像は `tools/extracted/images/card_portraits_png/{character}/{id}.png` から読み込み
-- コスト表示は `GetCardCost()` が返す文字列（"0"〜"3+"・"X"・"-"）。スターコストは現在エネルギーコストと同じ数値で表示される（区別なし）
 
 ### StS2SiteBuilder — 静的サイトジェネレータ
 
@@ -206,7 +229,8 @@ SiteBuilder の `timeline.html`（spiracle.gg/monsters の Timeline タブ相当
 アクト×階層でエンカウンター・登場モンスターを一覧表示する（`BuildTimelinePage`）。
 モンスターは**モデル粒度**の ID 空間（例 `bowlbug_rock`）で、`monster_names` と `encounter_monsters` で共通。
 画像/ページは ID をそのまま使うため、Spine フォルダがある ID のみ画像表示される。
-Spine レンダリングには `SpineLoader.cs` / `SpineRenderer.cs`（StS2SiteBuilder 内）と
+Spine レンダリングには `StS2Shared.Spine`（`SpineLoader`/`SpineRenderer`/`CreatureVisual`、
+SiteBuilder からは `DiskAssetSource` 経由）と
 `SpineRuntime` プロジェクト（spine-csharp の pure C# ランタイム）を使用する。
 
 **デプロイ（rsync でレンタルサーバーへ転送）：**

@@ -116,7 +116,6 @@ dotnet build
 | アプリ | コマンド | 説明 |
 |--------|----------|------|
 | セーブデータビューア | `dotnet run --project StS2Toys` | デッキ・レリックの閲覧 |
-| カードブラウザ | `dotnet run --project StS2CardBrowser` | キャラクター・メカニクスでフィルタリング |
 | 静的サイトジェネレータ | `dotnet run --project StS2SiteBuilder` | ゲーム情報サイトの生成 |
 
 ---
