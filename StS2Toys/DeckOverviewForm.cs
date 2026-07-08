@@ -350,8 +350,8 @@ public partial class DeckOverviewForm : Form
     // 旧「デッキ枚数理論値」フォームの分類ロジックをそのまま移設。
     static bool IsDisposable(DeckCard c) =>
         c.Type == "Power"
-        || CardDatabaseService.IsExhaustKeyword(c.Id)
-        || CardDatabaseService.IsEtherealKeyword(c.Id)
+        || CardDatabaseService.IsExhaustKeyword(c.Id, c.IsUpgraded)
+        || CardDatabaseService.IsEtherealKeyword(c.Id, c.IsUpgraded)
         || CardDatabaseService.IsExhaustGainingEnchantment(c.EnchantmentId);
 
     List<(string Label, List<DeckCard> Cards, List<RelicEntry> Relics)> BuildKeywordGroups(

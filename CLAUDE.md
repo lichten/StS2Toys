@@ -62,6 +62,7 @@ $pck = "C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\SlayTheSp
   SiteBuilder のキャラアクセント色（`CharData.Accent` = 白文字背景でも可読な `MapDrawingColor`）に使う
 - `card_star_costs.json` — スターコストを持つカードの ID リスト（`get_CanonicalStarCost > 0` または `get_HasStarCostX` が true のもの）
 - `card_upgraded_costs.json` — アップグレードでコストが変わるカードのみ収録（`OnUpgrade` の `EnergyCost.UpgradeBy/To` から抽出）。`CardDatabaseService.GetUpgradedCost(Value)` で参照
+- `card_upgraded_keywords.json` — アップグレードでキーワード集合が基本（`card_keywords.json`）と変わるカードのみ収録（ID → アップグレード後キーワード配列）。`OnUpgrade` 内の `RemoveKeyword`/`AddKeyword(CardKeyword)` を IL 走査で拾い、基本集合 − Remove + Add で算出（例: `CARD.HOTFIX`/`CARD.SYNCHRONIZE` は廃棄が外れて `[]`）。`CardDatabaseService.IsExhaustKeyword(id, upgraded)` / `IsEtherealKeyword(id, upgraded)` が参照し、Toys のキャラクター概観「プレイすると消滅する」グループでアップグレード後の消滅判定に使う
 - `card_stats.json` — カードのキャノニカル変数（ダメージ・ブロック値など）
 - `card_images.json` — カード ID → 画像のソース相対パス（`card_portraits_png/` 基準、例 `silent/abrasive.png`）。
   extractor が実ファイルをスキャンして生成。`Services/CardImageService.cs` で参照し、SiteBuilder/Toys 双方の画像解決を一元化

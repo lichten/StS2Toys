@@ -731,6 +731,8 @@ var rarities      = new Dictionary<string, string>(StringComparer.OrdinalIgnoreC
 var cardStats     = new Dictionary<string, Dictionary<string, int>>(StringComparer.OrdinalIgnoreCase);
 var starCostCards = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 var cardKeywords  = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+// アップグレード後にキーワード集合が基本と変わるカードのみ収録（OnUpgrade の RemoveKeyword/AddKeyword 由来）
+var cardUpgradedKeywords = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
 // get_CanonicalKeywords が返す int → キーワード名 のマッピング
 // (DLLのenum値を実験的に特定)
@@ -1015,6 +1017,9 @@ foreach (var typeHandle in mr.TypeDefinitions)
     // UpgradeValueBy → UpgradedXxx = base + N
     // UpgradeValueTo → UpgradedXxx = N（絶対値）
     // ldsfld 経由の delta（非リテラル）は解決不能のためスキップ
+    // 併せて OnUpgrade 内の RemoveKeyword/AddKeyword(CardKeyword) を拾い、アップグレード後キーワード差分を得る。
+    var removedKw = new List<int>();
+    var addedKw   = new List<int>();
     foreach (var mh in typeDef.GetMethods())
     {
         var method = mr.GetMethodDefinition(mh);
@@ -1070,6 +1075,12 @@ foreach (var typeHandle in mr.TypeDefinitions)
                     upgVar = null;
                     pendingAmount = null;
                 }
+                else if ((name == "RemoveKeyword" || name == "AddKeyword") && pendingAmount.HasValue)
+                {
+                    // アップグレードでキーワードを外す/付与する（引数は CardKeyword 定数 = 直前の ldc.i4）
+                    (name == "RemoveKeyword" ? removedKw : addedKw).Add(pendingAmount.Value);
+                    pendingAmount = null;
+                }
                 else
                 {
                     pendingAmount = null;
@@ -1113,6 +1124,19 @@ foreach (var typeHandle in mr.TypeDefinitions)
                 cardKeywords[cardId] = kwNames;
         }
         break;
+    }
+
+    // アップグレード後キーワード集合 = 基本 − RemoveKeyword + AddKeyword。基本と異なる場合のみ収録。
+    if (removedKw.Count > 0 || addedKw.Count > 0)
+    {
+        static IEnumerable<string> ToNames(List<int> ids, Dictionary<int, string> map) =>
+            ids.Select(v => map.TryGetValue(v, out var n) ? n : null).Where(n => n != null).Select(n => n!);
+        var baseKw = cardKeywords.TryGetValue(cardId, out var b) ? b : new List<string>();
+        var upgraded = new HashSet<string>(baseKw, StringComparer.OrdinalIgnoreCase);
+        upgraded.ExceptWith(ToNames(removedKw, keywordNameById));
+        upgraded.UnionWith(ToNames(addedKw, keywordNameById));
+        if (!upgraded.SetEquals(baseKw))
+            cardUpgradedKeywords[cardId] = upgraded.OrderBy(k => k, StringComparer.Ordinal).ToList();
     }
 }
 
@@ -1359,6 +1383,17 @@ var kwEntries = cardKeywords.OrderBy(kv => kv.Key).Select(kv =>
 });
 WriteJson(kwOutPath, "{\n" + string.Join(",\n", kwEntries) + "\n}\n");
 Console.WriteLine(kwOutPath);
+
+// card_upgraded_keywords.json 出力 (アップグレードで基本と変わるカードのみ → アップグレード後キーワード集合)
+var upgKwOutPath = Path.Combine(Path.GetDirectoryName(outPath)!, "card_upgraded_keywords.json");
+Console.Error.WriteLine($"Extracted {cardUpgradedKeywords.Count} upgraded card keyword mappings.");
+var upgKwEntries = cardUpgradedKeywords.OrderBy(kv => kv.Key).Select(kv =>
+{
+    var kwList = string.Join(", ", kv.Value.Select(k => $"\"{k}\""));
+    return $"  \"{kv.Key}\": [{kwList}]";
+});
+WriteJson(upgKwOutPath, "{\n" + string.Join(",\n", upgKwEntries) + "\n}\n");
+Console.WriteLine(upgKwOutPath);
 
 // 生ローカライズ JSON をバージョンフォルダへ取り込む（版の固定）。
 // tools/extracted は git 未追跡でゲーム更新時に内容が変わるため、各バージョンの版を

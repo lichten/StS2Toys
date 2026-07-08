@@ -183,6 +183,8 @@ public static class CardDatabaseService
     static readonly HashSet<string> _etherealRelated = ComputeByTag("[gold]Ethereal[/gold]");
     static readonly HashSet<string> _cardExhaustKeyword  = LoadKeywordSet("EXHAUST");
     static readonly HashSet<string> _cardEtherealKeyword = LoadKeywordSet("ETHEREAL");
+    // アップグレードで基本と変わるカードのみ収録（rawId → アップグレード後キーワード集合）
+    static readonly Dictionary<string, HashSet<string>> _upgradedKeywords = LoadUpgradedKeywords();
     static readonly HashSet<string> _ironcladStrike = ComputeByNameContaining("Strike");
     static readonly HashSet<string> _silentPoison  = ComputeByTag("[gold]Poison[/gold]");
     static readonly HashSet<string> _silentShiv    = ComputeByGoldTagContaining("Shiv");
@@ -425,6 +427,26 @@ public static class CardDatabaseService
         return result;
     }
 
+    // card_upgraded_keywords.json から rawId → アップグレード後キーワード集合を構築（無ければ空 dict）
+    static Dictionary<string, HashSet<string>> LoadUpgradedKeywords()
+    {
+        var asm = Assembly.GetExecutingAssembly();
+        var name = ResourceResolver.ResolveVersioned(asm, "card_upgraded_keywords.json");
+        var result = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+        if (name is null) return result;
+        using var stream = asm.GetManifestResourceStream(name)!;
+        var doc = JsonDocument.Parse(stream);
+        foreach (var prop in doc.RootElement.EnumerateObject())
+        {
+            var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var kw in prop.Value.EnumerateArray())
+                if (kw.GetString() is { Length: > 0 } s)
+                    set.Add(s);
+            result[ToRawId(prop.Name)] = set;
+        }
+        return result;
+    }
+
     static HashSet<string> BuildDefectZeroEnergy()
     {
         var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -573,6 +595,17 @@ public static class CardDatabaseService
     // DLL の get_CanonicalKeywords から抽出した正確なキーワード判定
     public static bool IsExhaustKeyword(string id)  => _cardExhaustKeyword.Contains(ToRawId(id));
     public static bool IsEtherealKeyword(string id) => _cardEtherealKeyword.Contains(ToRawId(id));
+
+    // アップグレード状態を考慮したキーワード判定。OnUpgrade で廃棄/幽体が外れる（または付与される）カードは
+    // card_upgraded_keywords.json のアップグレード後集合で判定し、変化しないカードは基本判定にフォールバックする。
+    public static bool IsExhaustKeyword(string id, bool upgraded) =>
+        upgraded && _upgradedKeywords.TryGetValue(ToRawId(id), out var s)
+            ? s.Contains("EXHAUST")
+            : IsExhaustKeyword(id);
+    public static bool IsEtherealKeyword(string id, bool upgraded) =>
+        upgraded && _upgradedKeywords.TryGetValue(ToRawId(id), out var s)
+            ? s.Contains("ETHEREAL")
+            : IsEtherealKeyword(id);
 
     // ---- card stats (card_stats.json) ----
 
