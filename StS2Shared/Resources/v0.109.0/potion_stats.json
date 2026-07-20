@@ -1,0 +1,138 @@
+{
+  "AMBERGRIS": {
+    "DynamicVar": 50
+  },
+  "BEETLE_JUICE": {
+    "Repeat": 4
+  },
+  "BLOCK_POTION": {
+    "Block": 4
+  },
+  "BLOOD_POTION": {
+    "DynamicVar": 20
+  },
+  "BONE_BREW": {
+    "Summon": 15
+  },
+  "BOTTLED_POTENTIAL": {
+    "Cards": 5
+  },
+  "CLARITY": {
+    "Cards": 1,
+    "ClarityPower": 3
+  },
+  "COSMIC_CONCOCTION": {
+    "Cards": 3
+  },
+  "CUNNING_POTION": {
+    "Cards": 3
+  },
+  "CURE_ALL": {
+    "Cards": 2,
+    "Energy": 1
+  },
+  "DEXTERITY_POTION": {
+    "Dexterity": 2
+  },
+  "DISTILLED_CHAOS": {
+    "Repeat": 3
+  },
+  "ENERGY_POTION": {
+    "Energy": 2
+  },
+  "EXPLOSIVE_AMPOULE": {
+    "Damage": 4
+  },
+  "FIRE_POTION": {
+    "Damage": 4
+  },
+  "FLEX_POTION": {
+    "Strength": 5
+  },
+  "FOCUS_POTION": {
+    "FocusPower": 2
+  },
+  "FOUL_POTION": {
+    "Damage": 4,
+    "Gold": 100
+  },
+  "FRUIT_JUICE": {
+    "MaxHp": 5
+  },
+  "FYSH_OIL": {
+    "Dexterity": 1,
+    "Strength": 0
+  },
+  "GLOWWATER_POTION": {
+    "Cards": 10
+  },
+  "HEART_OF_IRON": {
+    "PlatingPower": 7
+  },
+  "KINGS_COURAGE": {
+    "Forge": 15
+  },
+  "LIQUID_BRONZE": {
+    "ThornsPower": 3
+  },
+  "POISON_POTION": {
+    "Poison": 6
+  },
+  "POTION_OF_BINDING": {
+    "Vulnerable": 0,
+    "Weak": 1
+  },
+  "POTION_OF_CAPACITY": {
+    "Repeat": 2
+  },
+  "POTION_OF_DOOM": {
+    "Doom": 33
+  },
+  "POTION_SHAPED_ROCK": {
+    "Damage": 4
+  },
+  "POT_OF_GHOULS": {
+    "Cards": 2
+  },
+  "POWDERED_DEMISE": {
+    "DynamicVar": 9
+  },
+  "RADIANT_TINCTURE": {
+    "Energy": 1,
+    "RadiancePower": 3
+  },
+  "REGEN_POTION": {
+    "RegenPower": 5
+  },
+  "SHACKLING_POTION": {
+    "Strength": 7
+  },
+  "SHIP_IN_A_BOTTLE": {
+    "Block": 4
+  },
+  "SNECKO_OIL": {
+    "Cards": 7,
+    "_testEnergyCostOverride": -1
+  },
+  "SPEED_POTION": {
+    "Dexterity": 5
+  },
+  "STABLE_SERUM": {
+    "Repeat": 2
+  },
+  "STAR_POTION": {
+    "Stars": 3
+  },
+  "STRENGTH_POTION": {
+    "Strength": 2
+  },
+  "SWIFT_POTION": {
+    "Cards": 3
+  },
+  "VULNERABLE_POTION": {
+    "Vulnerable": 3
+  },
+  "WEAK_POTION": {
+    "Weak": 3
+  }
+}

@@ -65,7 +65,9 @@ $pck = "C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\SlayTheSp
 - `card_upgraded_keywords.json` — アップグレードでキーワード集合が基本（`card_keywords.json`）と変わるカードのみ収録（ID → アップグレード後キーワード配列）。`OnUpgrade` 内の `RemoveKeyword`/`AddKeyword(CardKeyword)` を IL 走査で拾い、基本集合 − Remove + Add で算出（例: `CARD.HOTFIX`/`CARD.SYNCHRONIZE` は廃棄が外れて `[]`）。`CardDatabaseService.IsExhaustKeyword(id, upgraded)` / `IsEtherealKeyword(id, upgraded)` が参照し、Toys のキャラクター概観「プレイすると消滅する」グループでアップグレード後の消滅判定に使う
 - `card_stats.json` — カードのキャノニカル変数（ダメージ・ブロック値など）
 - `card_images.json` — カード ID → 画像のソース相対パス（`card_portraits_png/` 基準、例 `silent/abrasive.png`）。
-  extractor が実ファイルをスキャンして生成。`Services/CardImageService.cs` で参照し、SiteBuilder/Toys 双方の画像解決を一元化
+  extractor が実ファイルをスキャンして生成。`Services/CardImageService.cs` で参照し、SiteBuilder/Toys 双方の画像解決を一元化。
+  注: スキャン元の `card_portraits_png/` は `ctex-to-png`（無引数）が生成するため、`tools/extracted` をクリーン展開した直後は
+  まだ存在せず本ファイルがスキップされる。**クリーン展開時は extractor → `ctex-to-png`（無引数）→ extractor 再実行**の順で回す
 - `relic_images.json` — レリック ID（接頭辞なし大文字、例 `AKABEKO`）→ 画像のソース相対パス（`relics_png/` 基準、例 `akabeko.png`・`beta/belt_buckle.png`）。
   extractor が `tools/extracted/images/relics/` の `.png.import` をスキャンして生成（`beta/` 含む）。`Services/RelicImageService.cs` で参照。
   PNG 実体は `dotnet run --project ctex-to-png -- relics` で `.ctex` を変換し `tools/extracted/images/relics_png/` に生成する
@@ -94,7 +96,8 @@ $pck = "C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\SlayTheSp
   generic `Add<T>()` と `newobj` 双方から走査し、プール由来の出所を `Shared` / キャラ名 / `Event` / `Token` で付与（優先順 Shared > Event > Token > 各キャラ）。
   注: 現バージョンではキャラ専用プールは空で標準ポーションは全て `Shared`。どのプールにも属さない特殊・生成系ポーションは未収録（将来プールが埋まれば自動で拾う）
 - `potion_images.json` — ポーション ID（例 `FIRE_POTION`）→ 画像のソース相対パス（`potions_png/` 基準、例 `fire_potion.png`）。
-  extractor が `tools/extracted/images/potions/` の `.png.import` をスキャンして生成（サブフォルダ無し）。
+  extractor が `tools/extracted/images/potions/` の `.png.import` をスキャンして生成。ルート直下を優先し、
+  無ければサブフォルダを探索する（v0.109.0 で本体画像が `large/` へ移動したため。値は `large/fire_potion.png` 形式）。
   PNG 実体は `dotnet run --project ctex-to-png -- potions` で `.ctex` を変換し `tools/extracted/images/potions_png/` に生成する
 - `potion_database.json` — ポーションの EN/JP 表示名（`POTION.` 接頭辞）。ローカライズの `{ID}.title` から生成
 - `potion_descriptions.json` — ポーションの EN/JP 説明文（生テキスト＝タグ・`{Var}` 保持）。ローカライズの `{ID}.description` から生成

@@ -1,0 +1,7 @@
+{
+  "IRONCLAD": { "name": "red", "nameColor": "#FF5555", "mapDrawingColor": "#CB282B", "dialogueColor": "#590700", "energyOutlineColor": "#801212", "targetingLineColor": "#E15847" },
+  "SILENT": { "name": "green", "nameColor": "#7FFF00", "mapDrawingColor": "#2F6729", "dialogueColor": "#284719", "energyOutlineColor": "#004F04", "targetingLineColor": "#2EBD5E" },
+  "DEFECT": { "name": "blue", "nameColor": "#87CEEB", "mapDrawingColor": "#0D638C", "dialogueColor": "#13446B", "energyOutlineColor": "#163E64", "targetingLineColor": "#70B6ED" },
+  "NECROBINDER": { "name": "purple", "nameColor": "#EE82EE", "mapDrawingColor": "#AC0486", "dialogueColor": "#6B4658", "energyOutlineColor": "#702D6F", "targetingLineColor": "#FD98C9" },
+  "REGENT": { "name": "orange", "nameColor": "#FFA518", "mapDrawingColor": "#935206", "dialogueColor": "#52371D", "energyOutlineColor": "#784000", "targetingLineColor": "#BFA270" }
+}

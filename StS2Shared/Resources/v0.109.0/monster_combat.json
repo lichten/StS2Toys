@@ -1,0 +1,959 @@
+{
+  "aeonglass": {
+    "hp": { "min": 512, "minAsc": 535 },
+    "startingPowers": ["WITHERING_PRESENCE_POWER", "ARTIFACT_POWER"],
+    "moves": [
+      { "id": "EBB", "intents": ["ATTACK", "DEFEND"], "damage": 22, "damageAsc": 26, "block": 33 },
+      { "id": "EYE_LASERS", "intents": ["ATTACK"], "damage": 11, "damageAsc": 12, "hits": 2 },
+      { "id": "INCREASING_INTENSITY", "intents": ["STATUS", "BUFF"], "powers": [{ "id": "STRENGTH_POWER", "value": 1, "valueAsc": 2 }] }
+    ]
+  },
+  "architect": {
+    "hp": { "min": 9999, "max": 9999 },
+    "moves": [
+      { "id": "NOTHING" }
+    ]
+  },
+  "assassin_ruby_raider": {
+    "hp": { "min": 18, "max": 23, "minAsc": 19, "maxAsc": 24 },
+    "moves": [
+      { "id": "KILLSHOT", "intents": ["ATTACK"], "damage": 10, "damageAsc": 11 }
+    ]
+  },
+  "axe_ruby_raider": {
+    "hp": { "min": 20, "max": 22, "minAsc": 21, "maxAsc": 23 },
+    "moves": [
+      { "id": "SWING_", "intents": ["ATTACK", "DEFEND"], "damage": 5, "damageAsc": 6, "block": 5, "blockAsc": 6 },
+      { "id": "BIG_SWING", "intents": ["ATTACK"], "damage": 12, "damageAsc": 13 }
+    ]
+  },
+  "axebot": {
+    "hp": { "min": 70, "max": 78, "minAsc": 76, "maxAsc": 86 },
+    "startingPowers": ["STOCK_POWER"],
+    "moves": [
+      { "id": "BOOT_UP", "intents": ["DEFEND", "BUFF"], "block": 10, "blockAsc": 15, "powers": [{ "id": "STRENGTH_POWER" }] },
+      { "id": "ONE_TWO", "intents": ["ATTACK"], "damage": 9, "damageAsc": 10, "hits": 2 },
+      { "id": "HAMMER_UPPERCUT", "intents": ["ATTACK", "DEBUFF"], "damage": 12, "damageAsc": 14, "powers": [{ "id": "WEAK_POWER" }, { "id": "FRAIL_POWER" }] }
+    ]
+  },
+  "battle_friend_v1": {
+    "hp": { "min": 75, "max": 75 },
+    "startingPowers": ["BATTLEWORN_DUMMY_TIME_LIMIT_POWER"],
+    "moves": [
+      { "id": "NOTHING" }
+    ]
+  },
+  "battle_friend_v2": {
+    "hp": { "min": 150, "max": 150 },
+    "startingPowers": ["BATTLEWORN_DUMMY_TIME_LIMIT_POWER"],
+    "moves": [
+      { "id": "NOTHING" }
+    ]
+  },
+  "battle_friend_v3": {
+    "hp": { "min": 300, "max": 300 },
+    "startingPowers": ["BATTLEWORN_DUMMY_TIME_LIMIT_POWER"],
+    "moves": [
+      { "id": "NOTHING" }
+    ]
+  },
+  "big_dummy": {
+    "hp": { "min": 9999, "max": 9999 },
+    "moves": [
+      { "id": "NOTHING" }
+    ]
+  },
+  "bowlbug_egg": {
+    "hp": { "min": 21, "max": 22, "minAsc": 23, "maxAsc": 24 },
+    "moves": [
+      { "id": "BITE", "intents": ["ATTACK", "DEFEND"], "damage": 7, "damageAsc": 8, "block": 7, "blockAsc": 8 }
+    ]
+  },
+  "bowlbug_nectar": {
+    "hp": { "min": 35, "max": 38, "minAsc": 36, "maxAsc": 39 },
+    "moves": [
+      { "id": "THRASH", "intents": ["ATTACK"], "damage": 3 },
+      { "id": "BUFF", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER", "value": 15, "valueAsc": 16 }] }
+    ]
+  },
+  "bowlbug_rock": {
+    "hp": { "min": 45, "max": 48, "minAsc": 46, "maxAsc": 49 },
+    "startingPowers": ["IMBALANCED_POWER"],
+    "moves": [
+      { "id": "HEADBUTT", "intents": ["ATTACK"], "damage": 15, "damageAsc": 16 },
+      { "id": "DIZZY", "intents": ["STUN"] }
+    ]
+  },
+  "bowlbug_silk": {
+    "hp": { "min": 40, "max": 43, "minAsc": 41, "maxAsc": 44 },
+    "moves": [
+      { "id": "THRASH", "intents": ["ATTACK"], "damage": 4, "damageAsc": 5, "hits": 2 },
+      { "id": "TOXIC_SPIT", "intents": ["DEBUFF"], "powers": [{ "id": "WEAK_POWER" }] }
+    ]
+  },
+  "brute_ruby_raider": {
+    "hp": { "min": 30, "max": 33, "minAsc": 31, "maxAsc": 34 },
+    "moves": [
+      { "id": "BEAT", "intents": ["ATTACK"], "damage": 7, "damageAsc": 8 },
+      { "id": "ROAR", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER" }] }
+    ]
+  },
+  "bygone_effigy": {
+    "hp": { "min": 127, "minAsc": 132 },
+    "startingPowers": ["SLOW_POWER"],
+    "moves": [
+      { "id": "SLEEP", "intents": ["SLEEP"] },
+      { "id": "WAKE", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER" }] },
+      { "id": "SLEEP_MOVE_", "intents": ["SLEEP"] },
+      { "id": "SLASHES", "intents": ["ATTACK"], "damage": 13, "damageAsc": 15 }
+    ]
+  },
+  "byrdonis": {
+    "hp": { "min": 81, "max": 84, "minAsc": 90, "maxAsc": 90 },
+    "startingPowers": ["TERRITORIAL_POWER"],
+    "moves": [
+      { "id": "PECK", "intents": ["ATTACK"], "damage": 3, "damageAsc": 4, "hits": 3 },
+      { "id": "SWOOP", "intents": ["ATTACK"], "damage": 17, "damageAsc": 19 }
+    ]
+  },
+  "byrdpip": {
+    "hp": { "min": 9999, "max": 9999 },
+    "moves": [
+      { "id": "NOTHING" }
+    ]
+  },
+  "calcified_cultist": {
+    "hp": { "min": 38, "max": 41, "minAsc": 39, "maxAsc": 42 },
+    "moves": [
+      { "id": "INCANTATION", "intents": ["BUFF"], "powers": [{ "id": "RITUAL_POWER", "value": 2 }] },
+      { "id": "DARK_STRIKE", "intents": ["ATTACK"], "damage": 9, "damageAsc": 11 }
+    ]
+  },
+  "ceremonial_beast": {
+    "hp": { "min": 252, "minAsc": 262 },
+    "moves": [
+      { "id": "STAMP", "intents": ["BUFF"], "powers": [{ "id": "PLOW_POWER", "value": 150, "valueAsc": 160 }] },
+      { "id": "PLOW", "intents": ["ATTACK", "BUFF"], "damage": 18, "damageAsc": 20, "powers": [{ "id": "STRENGTH_POWER", "value": 2 }] },
+      { "id": "STUN", "intents": ["STUN"] },
+      { "id": "BEAST_CRY", "intents": ["DEBUFF"], "powers": [{ "id": "RINGING_POWER" }] },
+      { "id": "STOMP", "intents": ["ATTACK"], "damage": 15, "damageAsc": 17 },
+      { "id": "CRUSH", "intents": ["ATTACK", "BUFF"], "damage": 17, "damageAsc": 19, "powers": [{ "id": "STRENGTH_POWER", "value": 3, "valueAsc": 4 }] }
+    ]
+  },
+  "chomper": {
+    "hp": { "min": 60, "max": 64, "minAsc": 63, "maxAsc": 67 },
+    "startingPowers": ["ARTIFACT_POWER"],
+    "moves": [
+      { "id": "CLAMP", "intents": ["ATTACK"], "damage": 8, "damageAsc": 9, "hits": 2 },
+      { "id": "SCREECH", "intents": ["STATUS"] }
+    ]
+  },
+  "corpse_slug": {
+    "hp": { "min": 25, "max": 27, "minAsc": 27, "maxAsc": 29 },
+    "startingPowers": ["RAVENOUS_POWER"],
+    "moves": [
+      { "id": "WHIP_SLAP", "intents": ["ATTACK"], "damage": 3, "hits": 2 },
+      { "id": "GLOMP", "intents": ["ATTACK"], "damage": 8, "damageAsc": 9 },
+      { "id": "GOOP", "intents": ["DEBUFF"], "powers": [{ "id": "FRAIL_POWER", "value": 2 }] }
+    ]
+  },
+  "crossbow_ruby_raider": {
+    "hp": { "min": 18, "max": 21, "minAsc": 19, "maxAsc": 22 },
+    "moves": [
+      { "id": "FIRE", "intents": ["ATTACK"], "damage": 14, "damageAsc": 16 },
+      { "id": "RELOAD", "intents": ["DEFEND"] }
+    ]
+  },
+  "crusher": {
+    "hp": { "min": 209, "minAsc": 219 },
+    "startingPowers": ["BACK_ATTACK_LEFT_POWER", "CRAB_RAGE_POWER"],
+    "moves": [
+      { "id": "THRASH", "intents": ["ATTACK"], "damage": 12, "damageAsc": 14 },
+      { "id": "ENLARGING_STRIKE", "intents": ["ATTACK"], "damage": 4, "damageAsc": 4 },
+      { "id": "BUG_STING", "intents": ["ATTACK", "DEBUFF"], "damage": 6, "damageAsc": 7, "hits": 2, "powers": [{ "id": "WEAK_POWER" }, { "id": "FRAIL_POWER" }] },
+      { "id": "ADAPT", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER", "value": 2, "valueAsc": 3 }] },
+      { "id": "GUARDED_STRIKE", "intents": ["ATTACK", "DEFEND"], "damage": 12, "damageAsc": 14 }
+    ]
+  },
+  "cubex_construct": {
+    "hp": { "min": 65, "minAsc": 70 },
+    "startingPowers": ["ARTIFACT_POWER"],
+    "moves": [
+      { "id": "CHARGE_UP", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER" }] },
+      { "id": "REPEATER_BLAST", "intents": ["ATTACK", "BUFF"], "damage": 7, "damageAsc": 8, "powers": [{ "id": "STRENGTH_POWER" }] },
+      { "id": "REPEATER_BLAST_MOVE_", "intents": ["ATTACK", "BUFF"], "damage": 7, "damageAsc": 8, "powers": [{ "id": "STRENGTH_POWER" }] },
+      { "id": "EXPEL", "intents": ["ATTACK"], "damage": 5, "damageAsc": 6, "hits": 2 }
+    ]
+  },
+  "damp_cultist": {
+    "hp": { "min": 51, "max": 53, "minAsc": 52, "maxAsc": 54 },
+    "moves": [
+      { "id": "INCANTATION", "intents": ["BUFF"], "powers": [{ "id": "RITUAL_POWER", "value": 5, "valueAsc": 6 }] },
+      { "id": "DARK_STRIKE", "intents": ["ATTACK"], "damage": 1, "damageAsc": 3 }
+    ]
+  },
+  "decimillipede_segment": {
+    "hp": { "min": 40, "max": 46, "minAsc": 46, "maxAsc": 52 },
+    "startingPowers": ["REATTACH_POWER"],
+    "moves": [
+      { "id": "WRITHE", "intents": ["ATTACK"], "damage": 5, "damageAsc": 6, "hits": 2 },
+      { "id": "BULK", "intents": ["ATTACK", "BUFF"], "damage": 6, "damageAsc": 7, "powers": [{ "id": "STRENGTH_POWER", "value": 2 }] },
+      { "id": "CONSTRICT", "intents": ["ATTACK", "DEBUFF"], "damage": 8, "damageAsc": 9, "powers": [{ "id": "WEAK_POWER" }] },
+      { "id": "DEAD" },
+      { "id": "REATTACH", "intents": ["HEAL"], "powers": [{ "id": "REATTACH_POWER" }] }
+    ]
+  },
+  "devoted_sculptor": {
+    "hp": { "min": 162, "minAsc": 172 },
+    "moves": [
+      { "id": "FORBIDDEN_INCANTATION", "intents": ["BUFF"], "powers": [{ "id": "RITUAL_POWER" }] },
+      { "id": "SAVAGE", "intents": ["ATTACK"], "damage": 12, "damageAsc": 15 }
+    ]
+  },
+  "entomancer": {
+    "hp": { "min": 145, "minAsc": 155 },
+    "startingPowers": ["PERSONAL_HIVE_POWER"],
+    "moves": [
+      { "id": "PHEROMONE_SPIT", "intents": ["BUFF"], "powers": [{ "id": "PERSONAL_HIVE_POWER" }, { "id": "STRENGTH_POWER" }] },
+      { "id": "BEES", "intents": ["ATTACK"], "damage": 3, "damageAsc": 3, "hits": 7 },
+      { "id": "SPEAR", "intents": ["ATTACK"], "damage": 18, "damageAsc": 20 }
+    ]
+  },
+  "exoskeleton": {
+    "hp": { "min": 24, "max": 28, "minAsc": 25, "maxAsc": 29 },
+    "startingPowers": ["HARD_TO_KILL_POWER"],
+    "moves": [
+      { "id": "SKITTER", "intents": ["ATTACK"], "damage": 1, "hits": 3 },
+      { "id": "MANDIBLES", "intents": ["ATTACK"], "damage": 8, "damageAsc": 9 },
+      { "id": "ENRAGE", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER" }] }
+    ]
+  },
+  "eye_with_teeth": {
+    "hp": { "min": 6 },
+    "startingPowers": ["ILLUSION_POWER"],
+    "moves": [
+      { "id": "DISTRACT", "intents": ["STATUS"] }
+    ]
+  },
+  "fabricator": {
+    "hp": { "min": 150, "minAsc": 155 },
+    "moves": [
+      { "id": "FABRICATE", "intents": ["SUMMON"] },
+      { "id": "FABRICATING_STRIKE", "intents": ["ATTACK", "SUMMON"], "damage": 18, "damageAsc": 21 },
+      { "id": "DISINTEGRATE", "intents": ["ATTACK"], "damage": 11, "damageAsc": 13 }
+    ]
+  },
+  "fake_merchant_monster": {
+    "hp": { "min": 165, "max": 165, "minAsc": 175, "maxAsc": 175 },
+    "moves": [
+      { "id": "SWIPE", "intents": ["ATTACK"], "damage": 13, "damageAsc": 15 },
+      { "id": "SPEW_COINS", "intents": ["ATTACK"], "damage": 2, "hits": 8 },
+      { "id": "THROW_RELIC", "intents": ["ATTACK", "DEBUFF"], "damage": 9, "damageAsc": 10, "powers": [{ "id": "FRAIL_POWER" }] },
+      { "id": "ENRAGE", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER" }] }
+    ]
+  },
+  "fat_gremlin": {
+    "hp": { "min": 13, "max": 17, "minAsc": 14, "maxAsc": 18 },
+    "moves": [
+      { "id": "SPAWNED", "intents": ["STUN"] },
+      { "id": "FLEE", "intents": ["ESCAPE"] }
+    ]
+  },
+  "flail_knight": {
+    "hp": { "min": 101, "minAsc": 108 },
+    "moves": [
+      { "id": "WAR_CHANT", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER" }] },
+      { "id": "FLAIL", "intents": ["ATTACK"], "damage": 9, "damageAsc": 10, "hits": 2 },
+      { "id": "RAM", "intents": ["ATTACK"], "damage": 15, "damageAsc": 17 }
+    ]
+  },
+  "flyconid": {
+    "hp": { "min": 47, "max": 49, "minAsc": 51, "maxAsc": 53 },
+    "moves": [
+      { "id": "VULNERABLE_SPORES", "intents": ["DEBUFF"], "powers": [{ "id": "VULNERABLE_POWER" }] },
+      { "id": "FRAIL_SPORES", "intents": ["ATTACK", "DEBUFF"], "damage": 8, "damageAsc": 9, "powers": [{ "id": "FRAIL_POWER" }] },
+      { "id": "SMASH", "intents": ["ATTACK"], "damage": 11, "damageAsc": 12 }
+    ]
+  },
+  "fogmog": {
+    "hp": { "min": 74, "minAsc": 78 },
+    "moves": [
+      { "id": "ILLUSION", "intents": ["SUMMON"] },
+      { "id": "SWIPE", "intents": ["ATTACK", "BUFF"], "damage": 8, "damageAsc": 9, "powers": [{ "id": "STRENGTH_POWER" }] },
+      { "id": "SWIPE_RANDOM", "intents": ["ATTACK", "BUFF"], "damage": 8, "damageAsc": 9, "powers": [{ "id": "STRENGTH_POWER" }] },
+      { "id": "HEADBUTT", "intents": ["ATTACK"], "damage": 14, "damageAsc": 16 }
+    ]
+  },
+  "fossil_stalker": {
+    "hp": { "min": 51, "max": 53, "minAsc": 54, "maxAsc": 56 },
+    "startingPowers": ["SUCK_POWER"],
+    "moves": [
+      { "id": "TACKLE", "intents": ["ATTACK", "DEBUFF"], "damage": 9, "damageAsc": 11, "powers": [{ "id": "FRAIL_POWER" }] },
+      { "id": "LATCH", "intents": ["ATTACK"], "damage": 12, "damageAsc": 14 },
+      { "id": "LASH", "intents": ["ATTACK"], "damage": 3, "damageAsc": 4, "hits": 2 }
+    ]
+  },
+  "frog_knight": {
+    "hp": { "min": 191, "minAsc": 199 },
+    "startingPowers": ["PLATING_POWER"],
+    "moves": [
+      { "id": "FOR_THE_QUEEN", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER" }] },
+      { "id": "STRIKE_DOWN_EVIL", "intents": ["ATTACK"], "damage": 21, "damageAsc": 23 },
+      { "id": "TONGUE_LASH", "intents": ["ATTACK", "DEBUFF"], "damage": 13, "damageAsc": 14, "powers": [{ "id": "FRAIL_POWER" }] },
+      { "id": "BEETLE_CHARGE", "intents": ["ATTACK"], "damage": 35, "damageAsc": 40 }
+    ]
+  },
+  "fuzzy_wurm_crawler": {
+    "hp": { "min": 55, "max": 57, "minAsc": 58, "maxAsc": 59 },
+    "moves": [
+      { "id": "FIRST_ACID_GOOP", "intents": ["ATTACK"], "damage": 4, "damageAsc": 6 },
+      { "id": "ACID_GOOP", "intents": ["ATTACK"], "damage": 4, "damageAsc": 6 },
+      { "id": "INHALE", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER" }] }
+    ]
+  },
+  "gas_bomb": {
+    "hp": { "min": 7, "minAsc": 8 },
+    "startingPowers": ["MINION_POWER"],
+    "moves": [
+      { "id": "EXPLODE", "intents": ["DEATH_BLOW"] }
+    ]
+  },
+  "globe_head": {
+    "hp": { "min": 148, "minAsc": 158 },
+    "startingPowers": ["GALVANIC_POWER"],
+    "moves": [
+      { "id": "THUNDER_STRIKE", "intents": ["ATTACK"], "damage": 6, "damageAsc": 7, "hits": 3 },
+      { "id": "SHOCKING_SLAP", "intents": ["ATTACK", "DEBUFF"], "damage": 13, "damageAsc": 14, "powers": [{ "id": "FRAIL_POWER" }] },
+      { "id": "GALVANIC_BURST", "intents": ["ATTACK", "BUFF"], "damage": 16, "damageAsc": 17, "powers": [{ "id": "STRENGTH_POWER" }] }
+    ]
+  },
+  "gremlin_merc": {
+    "hp": { "min": 47, "max": 49, "minAsc": 51, "maxAsc": 53 },
+    "startingPowers": ["SURPRISE_POWER", "THIEVERY_POWER"],
+    "moves": [
+      { "id": "GIMME", "intents": ["ATTACK"], "damage": 7, "damageAsc": 8, "hits": 2, "powers": [{ "id": "THIEVERY_POWER", "value": 2 }] },
+      { "id": "DOUBLE_SMASH", "intents": ["ATTACK", "DEBUFF"], "damage": 6, "damageAsc": 7, "hits": 2, "powers": [{ "id": "THIEVERY_POWER" }, { "id": "WEAK_POWER" }] },
+      { "id": "HEHE", "intents": ["ATTACK", "BUFF"], "damage": 8, "damageAsc": 9, "powers": [{ "id": "THIEVERY_POWER" }, { "id": "STRENGTH_POWER" }] }
+    ]
+  },
+  "guardbot": {
+    "hp": { "min": 16, "max": 20, "minAsc": 17, "maxAsc": 21 },
+    "moves": [
+      { "id": "GUARD", "intents": ["DEFEND"] }
+    ]
+  },
+  "haunted_ship": {
+    "hp": { "min": 63, "minAsc": 67 },
+    "moves": [
+      { "id": "SWIPE", "intents": ["ATTACK"], "damage": 13, "damageAsc": 14 },
+      { "id": "STOMP", "intents": ["ATTACK"], "damage": 4, "damageAsc": 5, "hits": 3 },
+      { "id": "HAUNT", "intents": ["DEBUFF", "STATUS"], "powers": [{ "id": "WEAK_POWER", "value": 5 }] }
+    ]
+  },
+  "hunter_killer": {
+    "hp": { "min": 121, "minAsc": 126 },
+    "moves": [
+      { "id": "TENDERIZING_GOOP", "intents": ["DEBUFF"], "powers": [{ "id": "TENDER_POWER" }] },
+      { "id": "BITE", "intents": ["ATTACK"], "damage": 17, "damageAsc": 19 },
+      { "id": "PUNCTURE", "intents": ["ATTACK"], "damage": 7, "damageAsc": 8, "hits": 3 }
+    ]
+  },
+  "infested_prism": {
+    "hp": { "min": 161, "minAsc": 171 },
+    "startingPowers": ["VITAL_SPARK_POWER"],
+    "moves": [
+      { "id": "JAB", "intents": ["ATTACK"], "damage": 15, "damageAsc": 17 },
+      { "id": "RADIATE", "intents": ["ATTACK", "DEFEND"], "damage": 11, "damageAsc": 13, "block": 11, "blockAsc": 13 },
+      { "id": "WHIRLWIND", "intents": ["ATTACK"], "damage": 5, "damageAsc": 6, "hits": 3 },
+      { "id": "PULSATE", "intents": ["ATTACK", "BUFF", "DEFEND"], "damage": 8, "damageAsc": 10, "block": 20, "blockAsc": 22, "powers": [{ "id": "VITAL_SPARK_POWER", "value": 2, "valueAsc": 3 }] }
+    ]
+  },
+  "inklet": {
+    "hp": { "min": 11, "max": 17, "minAsc": 12, "maxAsc": 18 },
+    "startingPowers": ["SLIPPERY_POWER"],
+    "moves": [
+      { "id": "JAB", "intents": ["ATTACK"], "damage": 3, "damageAsc": 4 },
+      { "id": "WHIRLWIND", "intents": ["ATTACK"], "damage": 2, "damageAsc": 3, "hits": 3 },
+      { "id": "PIERCING_GAZE", "intents": ["ATTACK"], "damage": 10, "damageAsc": 11 }
+    ]
+  },
+  "kin_follower": {
+    "hp": { "min": 58, "max": 59, "minAsc": 62, "maxAsc": 63 },
+    "startingPowers": ["MINION_POWER"],
+    "moves": [
+      { "id": "QUICK_SLASH", "intents": ["ATTACK"], "damage": 5, "damageAsc": 5 },
+      { "id": "BOOMERANG", "intents": ["ATTACK"], "damage": 2, "damageAsc": 2, "hits": 2 },
+      { "id": "POWER_DANCE", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER", "value": 2, "valueAsc": 3 }] }
+    ]
+  },
+  "kin_priest": {
+    "hp": { "min": 190, "minAsc": 199 },
+    "moves": [
+      { "id": "ORB_OF_FRAILTY", "intents": ["ATTACK", "DEBUFF"], "damage": 8, "damageAsc": 9, "powers": [{ "id": "FRAIL_POWER" }] },
+      { "id": "ORB_OF_WEAKNESS", "intents": ["ATTACK", "DEBUFF"], "damage": 8, "damageAsc": 9, "powers": [{ "id": "WEAK_POWER" }] },
+      { "id": "BEAM", "intents": ["ATTACK"], "damage": 3, "damageAsc": 3, "hits": 3 },
+      { "id": "RITUAL", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER", "value": 2, "valueAsc": 3 }] }
+    ]
+  },
+  "knowledge_demon": {
+    "hp": { "min": 379, "minAsc": 399 },
+    "moves": [
+      { "id": "CURSE_OF_KNOWLEDGE", "intents": ["DEBUFF"] },
+      { "id": "SLAP", "intents": ["ATTACK"], "damage": 17, "damageAsc": 18 },
+      { "id": "KNOWLEDGE_OVERWHELMING", "intents": ["ATTACK"], "damage": 8, "damageAsc": 9, "hits": 3 },
+      { "id": "PONDER", "intents": ["ATTACK", "HEAL", "BUFF"], "damage": 11, "damageAsc": 13, "powers": [{ "id": "STRENGTH_POWER", "value": 2, "valueAsc": 3 }] }
+    ]
+  },
+  "lagavulin_matriarch": {
+    "hp": { "min": 222, "minAsc": 233 },
+    "moves": [
+      { "id": "SLEEP", "intents": ["SLEEP"] },
+      { "id": "SLASH", "intents": ["ATTACK"], "damage": 19, "damageAsc": 21 },
+      { "id": "DISEMBOWEL", "intents": ["ATTACK"], "damage": 9, "damageAsc": 10, "hits": 2 },
+      { "id": "SOUL_SIPHON", "intents": ["DEBUFF", "BUFF"], "powers": [{ "id": "STRENGTH_POWER" }, { "id": "DEXTERITY_POWER" }] }
+    ]
+  },
+  "leaf_slime_m": {
+    "hp": { "min": 32, "max": 35, "minAsc": 33, "maxAsc": 36 },
+    "moves": [
+      { "id": "CLUMP_SHOT", "intents": ["ATTACK"], "damage": 8, "damageAsc": 9 },
+      { "id": "STICKY_SHOT", "intents": ["STATUS"] }
+    ]
+  },
+  "leaf_slime_s": {
+    "hp": { "min": 11, "max": 15, "minAsc": 12, "maxAsc": 16 },
+    "moves": [
+      { "id": "TACKLE", "intents": ["ATTACK"], "damage": 3, "damageAsc": 4 },
+      { "id": "GOOP", "intents": ["STATUS"] }
+    ]
+  },
+  "living_fog": {
+    "hp": { "min": 80, "minAsc": 82 },
+    "moves": [
+      { "id": "ADVANCED_GAS", "intents": ["ATTACK", "CARD_DEBUFF"], "damage": 8, "damageAsc": 9, "powers": [{ "id": "SMOGGY_POWER" }] },
+      { "id": "BLOAT", "intents": ["ATTACK", "SUMMON"], "damage": 5, "damageAsc": 6 },
+      { "id": "SUPER_GAS_BLAST", "intents": ["ATTACK"], "damage": 8, "damageAsc": 9 }
+    ]
+  },
+  "living_shield": {
+    "hp": { "min": 55, "minAsc": 65 },
+    "startingPowers": ["RAMPART_POWER"],
+    "moves": [
+      { "id": "SHIELD_SLAM", "intents": ["ATTACK"], "damage": 6 },
+      { "id": "SMASH", "intents": ["ATTACK", "BUFF"], "damage": 16, "damageAsc": 18, "powers": [{ "id": "STRENGTH_POWER", "value": 3 }] }
+    ]
+  },
+  "louse_progenitor": {
+    "hp": { "min": 134, "max": 136, "minAsc": 138, "maxAsc": 141 },
+    "startingPowers": ["CURL_UP_POWER"],
+    "moves": [
+      { "id": "WEB_CANNON", "intents": ["ATTACK", "DEBUFF"], "damage": 9, "damageAsc": 10, "powers": [{ "id": "FRAIL_POWER" }] },
+      { "id": "POUNCE", "intents": ["ATTACK"], "damage": 14, "damageAsc": 16 },
+      { "id": "CURL_AND_GROW", "intents": ["DEFEND", "BUFF"], "block": 14, "blockAsc": 18, "powers": [{ "id": "STRENGTH_POWER" }] }
+    ]
+  },
+  "magi_knight": {
+    "hp": { "min": 82, "minAsc": 89 },
+    "moves": [
+      { "id": "POWER_SHIELD", "intents": ["ATTACK", "DEFEND"], "damage": 6, "damageAsc": 7, "block": 5, "blockAsc": 9 },
+      { "id": "DAMPEN", "intents": ["DEBUFF"], "powers": [{ "id": "DAMPEN_POWER" }] },
+      { "id": "PREP", "intents": ["DEFEND"], "block": 5, "blockAsc": 9 },
+      { "id": "MAGIC_BOMB", "intents": ["ATTACK"], "damage": 35, "damageAsc": 40 },
+      { "id": "RAM", "intents": ["ATTACK"], "damage": 10, "damageAsc": 11 }
+    ]
+  },
+  "mawler": {
+    "hp": { "min": 72, "minAsc": 76 },
+    "moves": [
+      { "id": "RIP_AND_TEAR", "intents": ["ATTACK"], "damage": 14, "damageAsc": 16 },
+      { "id": "ROAR", "intents": ["DEBUFF"], "powers": [{ "id": "VULNERABLE_POWER" }] },
+      { "id": "CLAW", "intents": ["ATTACK"], "damage": 4, "damageAsc": 5, "hits": 2 }
+    ]
+  },
+  "mecha_knight": {
+    "hp": { "min": 300, "minAsc": 320 },
+    "startingPowers": ["ARTIFACT_POWER"],
+    "moves": [
+      { "id": "CHARGE", "intents": ["ATTACK"], "damage": 25, "damageAsc": 30 },
+      { "id": "FLAMETHROWER", "intents": ["STATUS"] },
+      { "id": "WINDUP", "intents": ["DEFEND", "BUFF"], "powers": [{ "id": "STRENGTH_POWER" }] },
+      { "id": "HEAVY_CLEAVE", "intents": ["ATTACK"], "damage": 35, "damageAsc": 40 }
+    ]
+  },
+  "multi_attack_move_monster": {
+    "hp": { "min": 999, "max": 999 },
+    "moves": [
+      { "id": "POKE", "intents": ["ATTACK"], "damage": 1, "hits": 5 }
+    ]
+  },
+  "mysterious_knight": {
+    "startingPowers": ["STRENGTH_POWER", "PLATING_POWER"]
+  },
+  "myte": {
+    "hp": { "min": 61, "max": 67, "minAsc": 64, "maxAsc": 69 },
+    "moves": [
+      { "id": "TOXIC", "intents": ["STATUS"] },
+      { "id": "BITE", "intents": ["ATTACK"], "damage": 13, "damageAsc": 15 },
+      { "id": "SUCK", "intents": ["ATTACK", "BUFF"], "damage": 4, "damageAsc": 6, "powers": [{ "id": "STRENGTH_POWER", "value": 2, "valueAsc": 3 }] }
+    ]
+  },
+  "nibbit": {
+    "hp": { "min": 42, "max": 46, "minAsc": 44, "maxAsc": 48 },
+    "moves": [
+      { "id": "BUTT", "intents": ["ATTACK"], "damage": 12, "damageAsc": 13 },
+      { "id": "SLICE", "intents": ["ATTACK", "DEFEND"], "damage": 6, "damageAsc": 7, "block": 5, "blockAsc": 6 },
+      { "id": "HISS", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER", "value": 2, "valueAsc": 3 }] }
+    ]
+  },
+  "noisebot": {
+    "hp": { "min": 18, "max": 23, "minAsc": 19, "maxAsc": 24 },
+    "moves": [
+      { "id": "NOISE", "intents": ["STATUS"] }
+    ]
+  },
+  "one_hp_monster": {
+    "hp": { "min": 1, "max": 1 },
+    "moves": [
+      { "id": "NOTHING" }
+    ]
+  },
+  "osty": {
+    "hp": { "min": 1, "max": 1 },
+    "moves": [
+      { "id": "NOTHING" }
+    ]
+  },
+  "ovicopter": {
+    "hp": { "min": 124, "max": 130, "minAsc": 126, "maxAsc": 132 },
+    "moves": [
+      { "id": "LAY_EGGS", "intents": ["SUMMON"], "powers": [{ "id": "MINION_POWER" }] },
+      { "id": "SMASH", "intents": ["ATTACK"], "damage": 16, "damageAsc": 17 },
+      { "id": "TENDERIZER", "intents": ["ATTACK", "DEBUFF"], "damage": 7, "damageAsc": 8, "powers": [{ "id": "VULNERABLE_POWER" }] },
+      { "id": "NUTRITIONAL_PASTE", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER", "value": 3, "valueAsc": 4 }] }
+    ]
+  },
+  "owl_magistrate": {
+    "hp": { "min": 231, "minAsc": 247 },
+    "moves": [
+      { "id": "MAGISTRATE_SCRUTINY", "intents": ["ATTACK"], "damage": 16, "damageAsc": 17 },
+      { "id": "PECK_ASSAULT", "intents": ["ATTACK"], "damage": 4, "damageAsc": 4, "hits": 6 },
+      { "id": "JUDICIAL_FLIGHT", "intents": ["BUFF"], "powers": [{ "id": "SOAR_POWER" }] },
+      { "id": "VERDICT", "intents": ["ATTACK", "DEBUFF"], "damage": 33, "damageAsc": 36, "powers": [{ "id": "VULNERABLE_POWER" }, { "id": "SOAR_POWER" }] }
+    ]
+  },
+  "paels_legion": {
+    "hp": { "min": 9999, "max": 9999 },
+    "moves": [
+      { "id": "NOTHING" }
+    ]
+  },
+  "parafright": {
+    "hp": { "min": 21 },
+    "startingPowers": ["ILLUSION_POWER"],
+    "moves": [
+      { "id": "SLAM", "intents": ["ATTACK"], "damage": 16, "damageAsc": 17 }
+    ]
+  },
+  "phantasmal_gardener": {
+    "hp": { "min": 26, "max": 31, "minAsc": 27, "maxAsc": 32 },
+    "startingPowers": ["SKITTISH_POWER"],
+    "moves": [
+      { "id": "BITE", "intents": ["ATTACK"], "damage": 5, "damageAsc": 5 },
+      { "id": "LASH", "intents": ["ATTACK"], "damage": 7, "damageAsc": 7 },
+      { "id": "FLAIL", "intents": ["ATTACK"], "damage": 1, "hits": 3 },
+      { "id": "ENLARGE", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER", "value": 2, "valueAsc": 3 }] }
+    ]
+  },
+  "phrog_parasite": {
+    "hp": { "min": 61, "max": 64, "minAsc": 66, "maxAsc": 68 },
+    "startingPowers": ["INFESTED_POWER"],
+    "moves": [
+      { "id": "INFECT", "intents": ["STATUS"] },
+      { "id": "LASH", "intents": ["ATTACK"], "damage": 4, "damageAsc": 5, "hits": 4 }
+    ]
+  },
+  "punch_construct": {
+    "hp": { "min": 55, "minAsc": 60 },
+    "startingPowers": ["ARTIFACT_POWER"],
+    "moves": [
+      { "id": "READY", "intents": ["DEFEND"] },
+      { "id": "STRONG_PUNCH", "intents": ["ATTACK"], "damage": 14, "damageAsc": 16 },
+      { "id": "FAST_PUNCH", "intents": ["ATTACK", "DEBUFF"], "damage": 5, "damageAsc": 6, "hits": 2, "powers": [{ "id": "FRAIL_POWER", "value": 2 }] }
+    ]
+  },
+  "queen": {
+    "hp": { "min": 400, "minAsc": 419 },
+    "moves": [
+      { "id": "PUPPET_STRINGS", "intents": ["CARD_DEBUFF"], "powers": [{ "id": "CHAINS_OF_BINDING_POWER" }] },
+      { "id": "YOU_ARE_MINE", "intents": ["DEBUFF"], "powers": [{ "id": "FRAIL_POWER" }, { "id": "WEAK_POWER" }, { "id": "VULNERABLE_POWER" }] },
+      { "id": "BURN_BRIGHT_FOR_ME", "intents": ["BUFF", "DEFEND"], "powers": [{ "id": "STRENGTH_POWER" }] },
+      { "id": "OFF_WITH_YOUR_HEAD", "intents": ["ATTACK"], "damage": 3, "damageAsc": 4, "hits": 5 },
+      { "id": "EXECUTION", "intents": ["ATTACK"], "damage": 15, "damageAsc": 18 },
+      { "id": "ENRAGE", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER" }] }
+    ]
+  },
+  "rocket": {
+    "hp": { "min": 199, "minAsc": 209 },
+    "startingPowers": ["SURROUNDED_POWER", "BACK_ATTACK_RIGHT_POWER", "CRAB_RAGE_POWER"],
+    "moves": [
+      { "id": "TARGETING_RETICLE", "intents": ["ATTACK"], "damage": 3, "damageAsc": 4 },
+      { "id": "PRECISION_BEAM", "intents": ["ATTACK"], "damage": 18, "damageAsc": 20 },
+      { "id": "CHARGE_UP", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER", "value": 2, "valueAsc": 3 }] },
+      { "id": "LASER", "intents": ["ATTACK"], "damage": 31, "damageAsc": 35 },
+      { "id": "RECHARGE", "intents": ["SLEEP"] }
+    ]
+  },
+  "scroll_of_biting": {
+    "hp": { "min": 30, "max": 37, "minAsc": 33, "maxAsc": 39 },
+    "startingPowers": ["PAPER_CUTS_POWER"],
+    "moves": [
+      { "id": "CHOMP", "intents": ["ATTACK"], "damage": 14, "damageAsc": 16 },
+      { "id": "CHEW", "intents": ["ATTACK"], "damage": 5, "damageAsc": 6, "hits": 2 },
+      { "id": "MORE_TEETH", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER" }] }
+    ]
+  },
+  "seapunk": {
+    "hp": { "min": 44, "max": 46, "minAsc": 47, "maxAsc": 49 },
+    "moves": [
+      { "id": "SEA_KICK", "intents": ["ATTACK"], "damage": 11, "damageAsc": 13 },
+      { "id": "SPINNING_KICK", "intents": ["ATTACK"], "damage": 2, "hits": 4 },
+      { "id": "BUBBLE_BURP", "intents": ["BUFF", "DEFEND"], "block": 7, "blockAsc": 8, "powers": [{ "id": "STRENGTH_POWER", "value": 1, "valueAsc": 2 }] }
+    ]
+  },
+  "sewer_clam": {
+    "hp": { "min": 56, "minAsc": 58 },
+    "startingPowers": ["PLATING_POWER"],
+    "moves": [
+      { "id": "PRESSURIZE", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER" }] },
+      { "id": "JET", "intents": ["ATTACK"], "damage": 10, "damageAsc": 11 }
+    ]
+  },
+  "shrinker_beetle": {
+    "hp": { "min": 38, "max": 40, "minAsc": 40, "maxAsc": 42 },
+    "moves": [
+      { "id": "SHRINKER", "intents": ["DEBUFF"], "powers": [{ "id": "SHRINK_POWER" }] },
+      { "id": "CHOMP", "intents": ["ATTACK"], "damage": 7, "damageAsc": 8 },
+      { "id": "STOMP", "intents": ["ATTACK"], "damage": 13, "damageAsc": 14 }
+    ]
+  },
+  "single_attack_move_monster": {
+    "hp": { "min": 999, "max": 999 },
+    "moves": [
+      { "id": "POKE", "intents": ["ATTACK"], "damage": 1 }
+    ]
+  },
+  "skulking_colony": {
+    "hp": { "min": 75, "minAsc": 80 },
+    "startingPowers": ["HARDENED_SHELL_POWER"],
+    "moves": [
+      { "id": "ZOOM", "intents": ["ATTACK"], "damage": 14, "damageAsc": 16 },
+      { "id": "ZOOM_MOVE_", "intents": ["ATTACK"], "damage": 14, "damageAsc": 16 },
+      { "id": "INERTIA", "intents": ["ATTACK", "BUFF"], "damage": 9, "damageAsc": 11, "powers": [{ "id": "STRENGTH_POWER", "value": 2, "valueAsc": 4 }] },
+      { "id": "PIERCING_STABS", "intents": ["ATTACK"], "damage": 7, "damageAsc": 8, "hits": 2 }
+    ]
+  },
+  "slimed_berserker": {
+    "hp": { "min": 261, "minAsc": 281 },
+    "moves": [
+      { "id": "VOMIT_ICHOR", "intents": ["STATUS"] },
+      { "id": "LEECHING_HUG", "intents": ["DEBUFF", "BUFF"], "powers": [{ "id": "WEAK_POWER" }, { "id": "STRENGTH_POWER" }] },
+      { "id": "SMOTHER", "intents": ["ATTACK"], "damage": 30, "damageAsc": 33 },
+      { "id": "FURIOUS_PUMMELING", "intents": ["ATTACK"], "damage": 4, "damageAsc": 5, "hits": 4 }
+    ]
+  },
+  "slithering_strangler": {
+    "hp": { "min": 53, "max": 55, "minAsc": 54, "maxAsc": 56 },
+    "moves": [
+      { "id": "CONSTRICT", "intents": ["DEBUFF"], "powers": [{ "id": "CONSTRICT_POWER" }] },
+      { "id": "THWACK", "intents": ["ATTACK", "DEFEND"], "damage": 7, "damageAsc": 8 },
+      { "id": "LASH", "intents": ["ATTACK"], "damage": 12, "damageAsc": 13 }
+    ]
+  },
+  "sludge_spinner": {
+    "hp": { "min": 37, "max": 39, "minAsc": 41, "maxAsc": 42 },
+    "moves": [
+      { "id": "OIL_SPRAY", "intents": ["ATTACK", "DEBUFF"], "damage": 8, "damageAsc": 9, "powers": [{ "id": "WEAK_POWER" }] },
+      { "id": "SLAM", "intents": ["ATTACK"], "damage": 11, "damageAsc": 12 },
+      { "id": "RAGE", "intents": ["ATTACK", "BUFF"], "damage": 6, "damageAsc": 7, "powers": [{ "id": "STRENGTH_POWER" }] }
+    ]
+  },
+  "slumbering_beetle": {
+    "hp": { "min": 86, "minAsc": 89 },
+    "startingPowers": ["PLATING_POWER", "SLUMBER_POWER"],
+    "moves": [
+      { "id": "SNORE", "intents": ["SLEEP"] },
+      { "id": "ROLL_OUT", "intents": ["ATTACK", "BUFF"], "damage": 16, "damageAsc": 18, "powers": [{ "id": "STRENGTH_POWER" }] }
+    ]
+  },
+  "snapping_jaxfruit": {
+    "hp": { "min": 31, "max": 33, "minAsc": 34, "maxAsc": 36 },
+    "moves": [
+      { "id": "ENERGY_ORB", "intents": ["ATTACK", "BUFF"], "damage": 3, "damageAsc": 4, "powers": [{ "id": "STRENGTH_POWER" }] }
+    ]
+  },
+  "sneaky_gremlin": {
+    "hp": { "min": 10, "max": 14, "minAsc": 11, "maxAsc": 15 },
+    "moves": [
+      { "id": "SPAWNED", "intents": ["STUN"] },
+      { "id": "TACKLE", "intents": ["ATTACK"], "damage": 9, "damageAsc": 10 }
+    ]
+  },
+  "soul_fysh": {
+    "hp": { "min": 211, "minAsc": 221 },
+    "moves": [
+      { "id": "BECKON", "intents": ["STATUS"] },
+      { "id": "DE_GAS", "intents": ["ATTACK"], "damage": 16, "damageAsc": 17 },
+      { "id": "GAZE", "intents": ["ATTACK", "STATUS"], "damage": 7, "damageAsc": 8 },
+      { "id": "FADE", "intents": ["BUFF"], "powers": [{ "id": "INTANGIBLE_POWER" }] },
+      { "id": "SCREAM", "intents": ["ATTACK", "DEBUFF"], "damage": 13, "damageAsc": 15, "powers": [{ "id": "VULNERABLE_POWER", "value": 3 }] }
+    ]
+  },
+  "soul_nexus": {
+    "hp": { "min": 234, "minAsc": 254 },
+    "moves": [
+      { "id": "SOUL_BURN", "intents": ["ATTACK"], "damage": 29, "damageAsc": 31 },
+      { "id": "MAELSTROM", "intents": ["ATTACK"], "damage": 6, "damageAsc": 7, "hits": 4 },
+      { "id": "DRAIN_LIFE", "intents": ["ATTACK", "DEBUFF"], "damage": 18, "damageAsc": 19, "powers": [{ "id": "VULNERABLE_POWER" }, { "id": "WEAK_POWER" }] }
+    ]
+  },
+  "spectral_knight": {
+    "hp": { "min": 93, "minAsc": 97 },
+    "moves": [
+      { "id": "HEX", "intents": ["DEBUFF"], "powers": [{ "id": "HEX_POWER" }] },
+      { "id": "SOUL_SLASH", "intents": ["ATTACK"], "damage": 15, "damageAsc": 17 },
+      { "id": "SOUL_FLAME", "intents": ["ATTACK"], "damage": 3, "damageAsc": 4, "hits": 3 }
+    ]
+  },
+  "spiny_toad": {
+    "hp": { "min": 116, "max": 119, "minAsc": 121, "maxAsc": 124 },
+    "moves": [
+      { "id": "PROTRUDING_SPIKES", "intents": ["BUFF"], "powers": [{ "id": "THORNS_POWER" }] },
+      { "id": "SPIKE_EXPLOSION", "intents": ["ATTACK"], "damage": 23, "damageAsc": 25, "powers": [{ "id": "THORNS_POWER" }] },
+      { "id": "TONGUE_LASH", "intents": ["ATTACK"], "damage": 17, "damageAsc": 19 }
+    ]
+  },
+  "stabbot": {
+    "hp": { "min": 18, "max": 23, "minAsc": 19, "maxAsc": 24 },
+    "moves": [
+      { "id": "STAB", "intents": ["ATTACK", "DEBUFF"], "damage": 11, "damageAsc": 12, "powers": [{ "id": "FRAIL_POWER" }] }
+    ]
+  },
+  "ten_hp_monster": {
+    "hp": { "min": 10, "max": 10 },
+    "moves": [
+      { "id": "NOTHING" }
+    ]
+  },
+  "terror_eel": {
+    "hp": { "min": 140, "minAsc": 150 },
+    "startingPowers": ["SHRIEK_POWER"],
+    "moves": [
+      { "id": "CRASH", "intents": ["ATTACK"], "damage": 16, "damageAsc": 18 },
+      { "id": "THRASH", "intents": ["ATTACK", "BUFF"], "damage": 3, "damageAsc": 4, "hits": 3, "powers": [{ "id": "VIGOR_POWER", "value": 3 }] },
+      { "id": "STUN", "intents": ["STUN"] },
+      { "id": "TERROR", "intents": ["DEBUFF"], "powers": [{ "id": "VULNERABLE_POWER" }] }
+    ]
+  },
+  "test_subject": {
+    "startingPowers": ["ADAPTABLE_POWER", "ENRAGE_POWER"],
+    "moves": [
+      { "id": "RESPAWN", "intents": ["HEAL", "BUFF"], "powers": [{ "id": "ADAPTABLE_POWER" }, { "id": "PAINFUL_STABS_POWER" }, { "id": "NEMESIS_POWER" }] },
+      { "id": "BITE", "intents": ["ATTACK"], "damage": 20, "damageAsc": 22 },
+      { "id": "SKULL_BASH", "intents": ["ATTACK", "DEBUFF"], "damage": 14, "damageAsc": 16, "powers": [{ "id": "VULNERABLE_POWER" }] },
+      { "id": "MULTI_CLAW", "intents": ["ATTACK"], "damage": 0, "hits": 10 },
+      { "id": "PHASE3_LACERATE", "intents": ["ATTACK"], "damage": 10, "damageAsc": 11, "hits": 3 },
+      { "id": "BIG_POUNCE", "intents": ["ATTACK"], "damage": 45 },
+      { "id": "BURNING_GROWL", "intents": ["STATUS", "BUFF"], "powers": [{ "id": "STRENGTH_POWER" }] }
+    ]
+  },
+  "the_adversary_mk_one": {
+    "hp": { "min": 100 },
+    "startingPowers": ["ARTIFACT_POWER"],
+    "moves": [
+      { "id": "SMASH", "intents": ["ATTACK"], "damage": 12 },
+      { "id": "BEAM", "intents": ["ATTACK"], "damage": 15 },
+      { "id": "BARRAGE", "intents": ["ATTACK", "BUFF"], "damage": 8, "hits": 2, "powers": [{ "id": "STRENGTH_POWER", "value": 2 }] }
+    ]
+  },
+  "the_adversary_mk_three": {
+    "hp": { "min": 300, "minAsc": 300 },
+    "startingPowers": ["ARTIFACT_POWER"],
+    "moves": [
+      { "id": "CRASH", "intents": ["ATTACK"], "damage": 15 },
+      { "id": "FLAME_BEAM", "intents": ["ATTACK"], "damage": 18 },
+      { "id": "BARRAGE", "intents": ["ATTACK", "BUFF"], "damage": 10, "hits": 2, "powers": [{ "id": "STRENGTH_POWER", "value": 2 }] }
+    ]
+  },
+  "the_adversary_mk_two": {
+    "hp": { "min": 200, "minAsc": 200 },
+    "startingPowers": ["ARTIFACT_POWER"],
+    "moves": [
+      { "id": "BASH", "intents": ["ATTACK"], "damage": 13 },
+      { "id": "FLAME_BEAM", "intents": ["ATTACK"], "damage": 16 },
+      { "id": "BARRAGE", "intents": ["ATTACK", "BUFF"], "damage": 9, "hits": 2, "powers": [{ "id": "STRENGTH_POWER", "value": 2 }] }
+    ]
+  },
+  "the_forgotten": {
+    "hp": { "min": 106, "minAsc": 111 },
+    "startingPowers": ["POSSESS_SPEED_POWER"],
+    "moves": [
+      { "id": "MIASMA", "intents": ["DEBUFF", "DEFEND", "BUFF"], "powers": [{ "id": "DEXTERITY_POWER" }] },
+      { "id": "DREAD", "intents": ["ATTACK"], "damage": 0 }
+    ]
+  },
+  "the_insatiable": {
+    "hp": { "min": 321, "minAsc": 341 },
+    "moves": [
+      { "id": "LIQUIFY_GROUND", "intents": ["BUFF", "STATUS"], "powers": [{ "id": "SANDPIT_POWER" }] },
+      { "id": "THRASH", "intents": ["ATTACK"], "damage": 8, "damageAsc": 9, "hits": 2 },
+      { "id": "THRASH_MOVE_", "intents": ["ATTACK"], "damage": 8, "damageAsc": 9, "hits": 2 },
+      { "id": "LUNGING_BITE", "intents": ["ATTACK"], "damage": 28, "damageAsc": 31 },
+      { "id": "SALIVATE", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER", "value": 2, "valueAsc": 3 }] }
+    ]
+  },
+  "the_lost": {
+    "hp": { "min": 93, "minAsc": 99 },
+    "startingPowers": ["POSSESS_STRENGTH_POWER"],
+    "moves": [
+      { "id": "DEBILITATING_SMOG", "intents": ["DEBUFF", "BUFF"], "powers": [{ "id": "STRENGTH_POWER" }] },
+      { "id": "EYE_LASERS", "intents": ["ATTACK"], "damage": 4, "damageAsc": 5, "hits": 2 }
+    ]
+  },
+  "the_obscura": {
+    "hp": { "min": 123, "minAsc": 129 },
+    "moves": [
+      { "id": "ILLUSION", "intents": ["SUMMON"] },
+      { "id": "PIERCING_GAZE", "intents": ["ATTACK"], "damage": 10, "damageAsc": 11 },
+      { "id": "SAIL", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER" }] },
+      { "id": "HARDENING_STRIKE", "intents": ["ATTACK", "DEFEND"], "damage": 6, "damageAsc": 7, "block": 6, "blockAsc": 7 }
+    ]
+  },
+  "thieving_hopper": {
+    "hp": { "min": 79, "minAsc": 84 },
+    "startingPowers": ["ESCAPE_ARTIST_POWER"],
+    "moves": [
+      { "id": "THIEVERY", "intents": ["ATTACK", "CARD_DEBUFF"], "damage": 17, "damageAsc": 19, "powers": [{ "id": "SWIPE_POWER" }] },
+      { "id": "NAB", "intents": ["ATTACK"], "damage": 14, "damageAsc": 16 },
+      { "id": "HAT_TRICK", "intents": ["ATTACK"], "damage": 21, "damageAsc": 23 },
+      { "id": "FLUTTER", "intents": ["BUFF"], "powers": [{ "id": "FLUTTER_POWER" }] },
+      { "id": "ESCAPE", "intents": ["ESCAPE"] }
+    ]
+  },
+  "toadpole": {
+    "hp": { "min": 21, "max": 25, "minAsc": 22, "maxAsc": 26 },
+    "moves": [
+      { "id": "SPIKE_SPIT", "intents": ["ATTACK"], "damage": 3, "damageAsc": 4, "hits": 3, "powers": [{ "id": "THORNS_POWER" }] },
+      { "id": "WHIRL", "intents": ["ATTACK"], "damage": 7, "damageAsc": 8 },
+      { "id": "SPIKEN", "intents": ["BUFF"], "powers": [{ "id": "THORNS_POWER", "value": 2 }] }
+    ]
+  },
+  "torch_head_amalgam": {
+    "hp": { "min": 199, "minAsc": 211 },
+    "startingPowers": ["MINION_POWER"],
+    "moves": [
+      { "id": "STRONG_TACKLE", "intents": ["ATTACK"], "damage": 26, "damageAsc": 32 },
+      { "id": "TACKLE_", "intents": ["ATTACK"], "damage": 18, "damageAsc": 22 },
+      { "id": "BEAM", "intents": ["ATTACK"], "damage": 8, "damageAsc": 8, "hits": 3 }
+    ]
+  },
+  "tough_egg": {
+    "hp": { "min": 14, "max": 18, "minAsc": 15, "maxAsc": 19 },
+    "startingPowers": ["HATCH_POWER"],
+    "moves": [
+      { "id": "HATCH", "intents": ["SUMMON"], "powers": [{ "id": "HATCH_POWER" }] },
+      { "id": "NIBBLE", "intents": ["ATTACK"], "damage": 4, "damageAsc": 5 }
+    ]
+  },
+  "tracker_ruby_raider": {
+    "hp": { "min": 21, "max": 25, "minAsc": 22, "maxAsc": 26 },
+    "moves": [
+      { "id": "TRACK", "intents": ["DEBUFF"], "powers": [{ "id": "FRAIL_POWER" }] },
+      { "id": "HOUNDS", "intents": ["ATTACK"], "damage": 1, "damageAsc": 1, "hits": 8 }
+    ]
+  },
+  "tunneler": {
+    "hp": { "min": 87, "minAsc": 92 },
+    "moves": [
+      { "id": "BITE", "intents": ["ATTACK"], "damage": 13, "damageAsc": 15 },
+      { "id": "BURROW", "intents": ["BUFF", "DEFEND"], "block": 32, "blockAsc": 37, "powers": [{ "id": "BURROWED_POWER" }] },
+      { "id": "BELOW", "intents": ["ATTACK"], "damage": 23, "damageAsc": 26 },
+      { "id": "DIZZY", "intents": ["STUN"] }
+    ]
+  },
+  "turret_operator": {
+    "hp": { "min": 41, "minAsc": 51 },
+    "moves": [
+      { "id": "UNLOAD", "intents": ["ATTACK"], "damage": 3, "damageAsc": 4, "hits": 5 },
+      { "id": "UNLOAD_MOVE_", "intents": ["ATTACK"], "damage": 3, "damageAsc": 4, "hits": 5 },
+      { "id": "RELOAD", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER" }] }
+    ]
+  },
+  "twig_slime_m": {
+    "hp": { "min": 26, "max": 28, "minAsc": 27, "maxAsc": 29 },
+    "moves": [
+      { "id": "POKEY_POUNCE", "intents": ["ATTACK"], "damage": 11, "damageAsc": 12 },
+      { "id": "STICKY_SHOT", "intents": ["STATUS"] }
+    ]
+  },
+  "twig_slime_s": {
+    "hp": { "min": 7, "max": 11, "minAsc": 8, "maxAsc": 12 },
+    "moves": [
+      { "id": "TACKLE", "intents": ["ATTACK"], "damage": 4, "damageAsc": 5 }
+    ]
+  },
+  "two_tailed_rat": {
+    "hp": { "min": 17, "max": 21, "minAsc": 18, "maxAsc": 22 },
+    "moves": [
+      { "id": "SCRATCH", "intents": ["ATTACK"], "damage": 8, "damageAsc": 9 },
+      { "id": "DISEASE_BITE", "intents": ["ATTACK"], "damage": 6, "damageAsc": 7 },
+      { "id": "SCREECH", "intents": ["DEBUFF"], "powers": [{ "id": "FRAIL_POWER" }] },
+      { "id": "CALL_FOR_BACKUP", "intents": ["SUMMON"] }
+    ]
+  },
+  "vantom": {
+    "hp": { "min": 173, "minAsc": 183 },
+    "startingPowers": ["SLIPPERY_POWER"],
+    "moves": [
+      { "id": "INK_BLOT", "intents": ["ATTACK"], "damage": 7, "damageAsc": 8 },
+      { "id": "INKY_LANCE", "intents": ["ATTACK"], "damage": 6, "damageAsc": 7, "hits": 2 },
+      { "id": "DISMEMBER", "intents": ["ATTACK", "STATUS"], "damage": 26, "damageAsc": 30 },
+      { "id": "PREPARE", "intents": ["BUFF"], "powers": [{ "id": "STRENGTH_POWER" }] }
+    ]
+  },
+  "vine_shambler": {
+    "hp": { "min": 61, "minAsc": 64 },
+    "moves": [
+      { "id": "GRASPING_VINES", "intents": ["ATTACK", "CARD_DEBUFF"], "damage": 8, "damageAsc": 9, "powers": [{ "id": "TANGLED_POWER" }] },
+      { "id": "SWIPE", "intents": ["ATTACK"], "damage": 6, "damageAsc": 7, "hits": 2 },
+      { "id": "CHOMP", "intents": ["ATTACK"], "damage": 16, "damageAsc": 18 }
+    ]
+  },
+  "waterfall_giant": {
+    "hp": { "min": 240, "minAsc": 250 },
+    "moves": [
+      { "id": "PRESSURIZE", "intents": ["BUFF"], "powers": [{ "id": "STEAM_ERUPTION_POWER", "value": 15, "valueAsc": 20 }] },
+      { "id": "STOMP", "intents": ["ATTACK", "DEBUFF", "BUFF"], "damage": 15, "damageAsc": 16, "powers": [{ "id": "WEAK_POWER" }, { "id": "STEAM_ERUPTION_POWER" }] },
+      { "id": "RAM", "intents": ["ATTACK", "BUFF"], "damage": 10, "damageAsc": 11, "powers": [{ "id": "STEAM_ERUPTION_POWER" }] },
+      { "id": "SIPHON", "intents": ["HEAL", "BUFF"], "powers": [{ "id": "STEAM_ERUPTION_POWER", "value": 10, "valueAsc": 15 }] },
+      { "id": "PRESSURE_GUN", "intents": ["ATTACK", "BUFF"], "damage": 0, "powers": [{ "id": "STEAM_ERUPTION_POWER", "value": 5 }] },
+      { "id": "PRESSURE_UP", "intents": ["ATTACK", "BUFF"], "damage": 13, "damageAsc": 14, "powers": [{ "id": "STEAM_ERUPTION_POWER" }] },
+      { "id": "ABOUT_TO_BLOW", "intents": ["STUN"], "powers": [{ "id": "STEAM_ERUPTION_POWER" }] },
+      { "id": "EXPLODE", "intents": ["DEATH_BLOW"] }
+    ]
+  },
+  "wriggler": {
+    "hp": { "min": 17, "max": 21, "minAsc": 18, "maxAsc": 22 },
+    "moves": [
+      { "id": "NASTY_BITE", "intents": ["ATTACK"], "damage": 6, "damageAsc": 7 },
+      { "id": "WRIGGLE", "intents": ["BUFF", "STATUS"], "powers": [{ "id": "STRENGTH_POWER" }] },
+      { "id": "SPAWNED", "intents": ["STUN"] }
+    ]
+  },
+  "zapbot": {
+    "hp": { "min": 18, "max": 23, "minAsc": 19, "maxAsc": 24 },
+    "startingPowers": ["HIGH_VOLTAGE_POWER"],
+    "moves": [
+      { "id": "ZAP", "intents": ["ATTACK"], "damage": 14, "damageAsc": 15 }
+    ]
+  }
+}

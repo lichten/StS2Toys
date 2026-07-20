@@ -1,0 +1,182 @@
+{
+  "DARV": {
+    "RelicPool": [
+      "ASTROLABE",
+      "BLACK_STAR",
+      "CALLING_BELL",
+      "ECTOPLASM",
+      "EMPTY_CAGE",
+      "PANDORAS_BOX",
+      "PHILOSOPHERS_STONE",
+      "RUNIC_PYRAMID",
+      "SNECKO_EYE",
+      "SOZU",
+      "VELVET_CHOKER"
+    ]
+  },
+  "NEOW": {
+    "CurseOptions": [
+      "DOWSING_ROD",
+      "HEFTY_TABLET",
+      "LARGE_CAPSULE",
+      "LEAFY_POULTICE",
+      "NEOWS_BONES",
+      "NEOWS_SACRIFICE",
+      "PRECARIOUS_SHEARS",
+      "SILKEN_TRESS",
+      "SILVER_CRUCIBLE"
+    ],
+    "LavaRockOption": [
+      "LAVA_ROCK"
+    ],
+    "NeowsTalismanOption": [
+      "NEOWS_TALISMAN"
+    ],
+    "NutritiousOysterOption": [
+      "NUTRITIOUS_OYSTER"
+    ],
+    "PomanderOption": [
+      "POMANDER"
+    ],
+    "PositiveOptions": [
+      "ARCANE_SCROLL",
+      "BOOMING_CONCH",
+      "FISHING_ROD",
+      "GOLDEN_PEARL",
+      "KALEIDOSCOPE",
+      "LEAD_PAPERWEIGHT",
+      "LOST_COFFER",
+      "MASSIVE_SCROLL",
+      "NEOWS_TORMENT",
+      "NEW_LEAF",
+      "PHIAL_HOLSTER",
+      "PRECISE_SCISSORS",
+      "SCROLL_BOXES",
+      "WINGED_BOOTS"
+    ],
+    "SmallCapsuleOption": [
+      "SMALL_CAPSULE"
+    ],
+    "StoneHumidifierOption": [
+      "STONE_HUMIDIFIER"
+    ]
+  },
+  "NONUPEIPE": {
+    "BeautifulBraceletEventOption": [
+      "BEAUTIFUL_BRACELET"
+    ],
+    "OptionPool": [
+      "BLESSED_ANTLER",
+      "BRILLIANT_SCARF",
+      "DELICATE_FROND",
+      "DIAMOND_DIADEM",
+      "FUR_COAT",
+      "GLITTER",
+      "JEWELRY_BOX",
+      "LOOMING_FRUIT",
+      "SIGNET_RING"
+    ]
+  },
+  "OROBAS": {
+    "OptionPool1": [
+      "ELECTRIC_SHRYMP",
+      "GLASS_EYE"
+    ],
+    "OptionPool2": [
+      "ALCHEMICAL_COFFER",
+      "DRIFTWOOD",
+      "RADIANT_PEARL",
+      "SAND_CASTLE"
+    ],
+    "OptionPool3": [
+      "ARCHAIC_TOOTH",
+      "TOUCH_OF_OROBAS"
+    ],
+    "PrismaticGemOption": [
+      "PRISMATIC_GEM"
+    ],
+    "SeaGlassOptions": [
+      "SEA_GLASS"
+    ]
+  },
+  "PAEL": {
+    "OptionPool1": [
+      "PAELS_FLESH",
+      "PAELS_HORN",
+      "PAELS_TEARS"
+    ],
+    "OptionPool2": [
+      "PAELS_WING"
+    ],
+    "OptionPool3": [
+      "PAELS_BLOOD",
+      "PAELS_EYE"
+    ],
+    "PaelsClawOption": [
+      "PAELS_CLAW"
+    ],
+    "PaelsGrowthOption": [
+      "PAELS_GROWTH"
+    ],
+    "PaelsLegionOption": [
+      "PAELS_LEGION"
+    ],
+    "PaelsToothOption": [
+      "PAELS_TOOTH"
+    ]
+  },
+  "TANX": {
+    "BaseOptionPool": [
+      "CLAWS",
+      "CROSSBOW",
+      "IRON_CLUB",
+      "MEAT_CLEAVER",
+      "SAI",
+      "SPIKED_GAUNTLETS",
+      "TANXS_WHISTLE",
+      "THROWING_AXE",
+      "WAR_HAMMER"
+    ],
+    "TriBoomerangOption": [
+      "TRI_BOOMERANG"
+    ]
+  },
+  "TEZCATARA": {
+    "NutritiousSoupOption": [
+      "NUTRITIOUS_SOUP"
+    ],
+    "OptionPool1": [
+      "VERY_HOT_COCOA",
+      "YUMMY_COOKIE"
+    ],
+    "OptionPool2": [
+      "BIIIG_HUG",
+      "STORYBOOK",
+      "TOASTY_MITTENS"
+    ],
+    "OptionPool3": [
+      "GOLDEN_COMPASS",
+      "PUMPKIN_CANDLE",
+      "SEAL_OF_GOLD",
+      "TOY_BOX"
+    ]
+  },
+  "VAKUU": {
+    "Pool1": [
+      "BLOOD_SOAKED_ROSE",
+      "FIDDLE",
+      "WHISPERING_EARRING"
+    ],
+    "Pool2": [
+      "DISTINGUISHED_CAPE",
+      "PRESERVED_FOG",
+      "SERE_TALON"
+    ],
+    "Pool3": [
+      "CHOICES_PARADOX",
+      "JEWELED_MASK",
+      "LORDS_PARASOL",
+      "MUSIC_BOX"
+    ]
+  }
+}

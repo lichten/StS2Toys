@@ -2195,17 +2195,30 @@ Console.WriteLine(upgKwOutPath);
         "{\n" + string.Join(",\n", pCharLines) + "\n}\n");
     Console.WriteLine(Path.Combine(outDirP, "potion_characters.json"));
 
-    // (6) potion_images.json（実ファイルスキャン。potions/ はサブフォルダ無し）
+    // (6) potion_images.json（実ファイルスキャン）
+    // v0.109.0 で本体画像が potions/ 直下から potions/large/ サブフォルダへ移動したため、
+    // relic_images.json と同じくルート優先＋サブディレクトリ探索にしている。
     var potionsImgDir = Path.Combine(repoRootP, "tools", "extracted", "images", "potions");
     if (Directory.Exists(potionsImgDir))
     {
+        var potionSearchDirs = new List<(string name, string full)> { ("", potionsImgDir) };
+        potionSearchDirs.AddRange(Directory.GetDirectories(potionsImgDir)
+            .Select(d => (name: Path.GetFileName(d)!, full: d)));
+
+        string? FindPotion(string raw)
+        {
+            foreach (var (name, full) in potionSearchDirs)
+                if (File.Exists(Path.Combine(full, raw + ".png.import")))
+                    return name.Length == 0 ? raw + ".png" : name + "/" + raw + ".png";
+            return null;
+        }
+
         var pImg = new SortedDictionary<string, string>(StringComparer.Ordinal);
         foreach (var cls in potionClasses)
         {
             var id = CamelToUpperSnake(cls);
-            var file = id.ToLowerInvariant() + ".png";
-            if (File.Exists(Path.Combine(potionsImgDir, file + ".import")))
-                pImg[id] = file;
+            var file = FindPotion(id.ToLowerInvariant());
+            if (file is not null) pImg[id] = file;
         }
         var pImgLines = pImg.Select(kv => $"  {JP(kv.Key)}: {JP(kv.Value)}");
         WriteJson(Path.Combine(outDirP, "potion_images.json"),

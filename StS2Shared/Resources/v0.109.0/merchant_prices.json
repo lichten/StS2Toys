@@ -1,0 +1,23 @@
+{
+  "card": {
+    "base": { "Rare": 150, "Uncommon": 75, "Common": 50 },
+    "colorlessMarkup": 1.15,
+    "saleMultiplier": 0.5,
+    "variance": { "min": 0.95, "max": 1.05 }
+  },
+  "potion": {
+    "base": { "Rare": 100, "Uncommon": 75, "Common": 50 },
+    "variance": { "min": 0.95, "max": 1.05 }
+  },
+  "relic": {
+    "base": { "Common": 175, "Uncommon": 225, "Rare": 275, "Shop": 200 },
+    "variance": { "min": 0.85, "max": 1.15 }
+  },
+  "cardRemoval": {
+    "ascensionThreshold": 6,
+    "baseCost": 100,
+    "baseCostAscension": 75,
+    "priceIncrease": 50,
+    "priceIncreaseAscension": 25
+  }
+}
