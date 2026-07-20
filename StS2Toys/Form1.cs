@@ -39,6 +39,9 @@ namespace StS2Toys
         /// <summary>検出結果リスト行に付与する、リンク生成用の種別＋ID。</summary>
         sealed record LinkTarget(string Kind, string Id);
 
+        /// <summary>デザイナ既定のウィンドウタイトル（バージョン付与前）。</summary>
+        readonly string _baseTitle;
+
         public Form1()
         {
             // 固定矩形レイアウト方式：画面ごとに固定座標を probe してカード・レリック・ポーションを検出。
@@ -48,6 +51,9 @@ namespace StS2Toys
             _loop.Updated += OnLoopUpdated;
 
             InitializeComponent();
+            // タイトルにバージョンを付け足すため、デザイナ既定のタイトルを基準として控えておく
+            // （UpdateTitle は複数回呼ばれるので、毎回ここから組み直して二重付与を防ぐ）。
+            _baseTitle = Text;
             Load += Form1_Load;
             FormClosing += Form1_FormClosing;
             _reloadTimer.Tick += (_, _) => { _reloadTimer.Stop(); ReloadCurrentFile(); };
@@ -61,6 +67,8 @@ namespace StS2Toys
         {
             RestoreWindowSettings();
             MaybeRunAssetSetup();
+            // ウィザードでデータバージョンが変わりうるため、MaybeRunAssetSetup の後に組み立てる。
+            UpdateTitle();
             var defaultPath = SaveDataService.GetDefaultSavePath();
             if (File.Exists(defaultPath))
             {
@@ -121,6 +129,18 @@ namespace StS2Toys
 
         const string DeclinedMarker = "declined";
 
+        /// <summary>
+        /// ウィンドウタイトルを「{既定タイトル} v{アプリ版}（データ v{ゲーム版}）」に組み直す。
+        /// データバージョンが解決できない（配布モードで未セットアップ）場合は括弧ごと省く。
+        /// </summary>
+        void UpdateTitle()
+        {
+            var data = DataVersionService.Current;
+            Text = data is null
+                ? $"{_baseTitle} v{AppVersion.Display}"
+                : $"{_baseTitle} v{AppVersion.Display}（データ {data}）";
+        }
+
         /// <summary>「画像アセット設定」ボタン：いつでもウィザードを手動起動する（スキップした人・更新したい人向け）。</summary>
         void BtnAssetSetup_Click(object? sender, EventArgs e)
         {
@@ -138,6 +158,7 @@ namespace StS2Toys
             if (wizard.Outcome == SetupWizardForm.SetupOutcome.Completed)
             {
                 SaveAssetState(installed: wizard.InstalledVersion, skipped: null);
+                UpdateTitle();   // 取り込んだデータバージョンをタイトルへ反映
                 MessageBox.Show(this,
                     "抽出が完了しました。画像の表示を反映するにはアプリを再起動してください。",
                     "画像アセット設定", MessageBoxButtons.OK, MessageBoxIcon.Information);

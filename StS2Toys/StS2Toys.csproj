@@ -9,6 +9,10 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- 配布バージョンの基準値。タイトルバーの表示（Services/AppVersion.cs）に使う。
+         リリース時は git タグ（v0.1.0 等）と揃えて更新すること。CI の release.yml は
+         -p:Version=<タグ由来> をコマンドラインで渡すため、そちらが優先される。 -->
+    <Version>0.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

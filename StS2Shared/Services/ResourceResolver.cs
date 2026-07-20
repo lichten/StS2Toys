@@ -31,6 +31,23 @@ internal static class ResourceResolver
             .FirstOrDefault();
     }
 
+    /// <summary>
+    /// 埋め込まれたバージョン別リソースのうち、最大バージョンのフォルダ名（例 "v0.109.0"）。無ければ null。
+    /// リソース名では数値セグメントが識別子化されて "v0._109._0" になるため、'_' を除去して復元する
+    /// （バージョン文字列自体に '_' は現れないため単純除去で安全）。
+    /// </summary>
+    public static string? LatestEmbeddedVersion(Assembly asm)
+    {
+        // "…\.Resources\.{バージョン}\.{英字で始まるファイル名 or サブフォルダ}" のみを対象にする。
+        var rx = new Regex(@"\.Resources\.(v[0-9_.]+?)\.(?=[A-Za-z])");
+        return asm.GetManifestResourceNames()
+            .Select(n => rx.Match(n))
+            .Where(m => m.Success)
+            .Select(m => m.Groups[1].Value.Replace("_", ""))
+            .OrderByDescending(VersionKey, StringComparer.Ordinal)
+            .FirstOrDefault();
+    }
+
     /// <summary>最新バージョンのリソースストリームを直接開く。該当が無ければ null。</summary>
     public static Stream? OpenVersioned(Assembly asm, string fileName)
         => ResolveVersioned(asm, fileName) is { } name ? asm.GetManifestResourceStream(name) : null;
