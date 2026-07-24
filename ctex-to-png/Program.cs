@@ -23,28 +23,6 @@ const int JpegWidth   = 300;
 const int JpegHeight  = 420;
 const int JpegQuality = 40;
 
-// Character mode: convert character select art to JPEG for website
-// Usage: dotnet run --project ctex-to-png -- characters
-if (args.Length == 1 && args[0] == "characters")
-{
-    var charIds   = new[] { "ironclad", "silent", "defect", "necrobinder", "regent" };
-    var outDir    = Path.GetFullPath(Path.Combine(toolsRoot, "..", "..", "StS2SiteBuilder", "dist", "images", "characters"));
-    Directory.CreateDirectory(outDir);
-
-    var charSelectDir = Path.Combine(toolsRoot, "images", "packed", "character_select");
-    foreach (var id in charIds)
-    {
-        var importPath = Path.Combine(charSelectDir, $"char_select_{id}.png.import");
-        var ctexRel    = ParseImportCtexPath(importPath);
-        if (ctexRel is null) { Console.WriteLine($"  not found: char_select_{id}"); continue; }
-        var ctexFull = Path.Combine(toolsRoot, ctexRel.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
-        var outPath  = Path.Combine(outDir, $"{id}.jpg");
-        ConvertCtexToJpeg(ctexFull, outPath, maxWidth: 0, quality: 85);
-        Console.WriteLine($"  characters/{id}.jpg");
-    }
-    return;
-}
-
 // Relic mode: convert relic .ctex → PNG into images/relics_png/ per relic_images.json
 // Usage: dotnet run --project ctex-to-png -- relics
 if (args.Length == 1 && args[0] == "relics")
@@ -174,6 +152,32 @@ if (args.Length == 1 && args[0] == "potions")
         catch (Exception ex) { Console.WriteLine($"  fail {rel}: {ex.Message}"); potMissing++; }
     }
     Console.WriteLine($"potions_png: converted={potConverted} skipped={potSkipped} missing={potMissing}");
+    return;
+}
+
+// Monster mode: render Spine idle animations → {id}.gif / {id}.png into images/monsters/
+// 出力は site3 が read-only マウントで直接参照する（クリーン展開後は必ず再実行すること）。
+// Usage: dotnet run --project ctex-to-png -- monsters
+if (args.Length == 1 && args[0] == "monsters")
+{
+    // 罠回避: RequireExtractedRoot は %LocalAppData% の配布キャッシュへフォールバックし得る。
+    // site3 が参照するのはリポジトリの tools/extracted なので、開発モード解決（walk-up）を必須にする。
+    if (!StS2Shared.Services.AssetLocator.HasDevExtracted())
+    {
+        Console.Error.WriteLine("リポジトリの tools/extracted が見つかりません。リポジトリ内から実行してください。");
+        Environment.Exit(1);
+        return;
+    }
+    var animationsDir = Path.Combine(toolsRoot, "animations", "monsters");
+    if (!Directory.Exists(animationsDir))
+    {
+        Console.Error.WriteLine($"animations/monsters がありません（展開が不完全）: {animationsDir}");
+        Environment.Exit(1);
+        return;
+    }
+    var monsterOutDir = Path.Combine(toolsRoot, "images", "monsters");
+    var withGif = MonsterGifGenerator.Generate(toolsRoot, monsterOutDir, Console.WriteLine);
+    Console.WriteLine($"Generated monsters (GIF {withGif.Count}) -> {monsterOutDir}");
     return;
 }
 
@@ -334,9 +338,6 @@ static void ConvertCtex(string srcPath, string outPath, bool verbose = true)
     if (verbose)
         Console.WriteLine("ok");
 }
-
-static void ConvertCtexToJpeg(string srcPath, string outPath, int maxWidth, int quality)
-    => CtexDecoder.ConvertToJpeg(srcPath, outPath, maxWidth, quality);
 
 static string? ParseImportCtexPath(string importPath) => CtexDecoder.ParseImportCtexPath(importPath);
 

@@ -36,12 +36,9 @@ static class UrlTemplateService
         JsonSerializer.Serialize(stream, templates, Options);
     }
 
-    /// <summary>初期テンプレート（ユーザ提示の例：公式サイト＋外部 Wiki）。</summary>
+    /// <summary>初期テンプレート（外部 Wiki のみ。旧自前サイトのテンプレートはサイト廃止に伴い撤去）。</summary>
     public static List<UrlTemplate> Defaults() => new()
     {
-        new("公式", "card", "https://lichtenlab.com/sts2/cards/{cardclass}/{idraw}.html"),
-        new("公式", "relic", "https://lichtenlab.com/sts2/relics/{idraw}.html"),
-        new("公式", "event", "https://lichtenlab.com/sts2/events/{idraw}.html"),
         new("Wiki", "any", "https://wikiwiki.jp/sts2/{jp}"),
     };
 }

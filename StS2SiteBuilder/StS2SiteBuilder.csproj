@@ -1,34 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Update="MainForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="MainForm.Designer.cs">
-      <DependentUpon>MainForm.cs</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <EmbeddedResource Update="MainForm.resx">
-      <DependentUpon>MainForm.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="BCnEncoder.NET" Version="2.1.0" />
-    <PackageReference Include="Markdig" Version="1.2.0" />
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3967.48" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
-    <PackageReference Include="SkiaSharp" Version="3.116.1" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.116.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\SpineRuntime\SpineRuntime.csproj" />
-    <ProjectReference Include="..\StS2Shared\StS2Shared.csproj" />
-    <ProjectReference Include="..\StS2Shared.Spine\StS2Shared.Spine.csproj" />
-  </ItemGroup>
 </Project>

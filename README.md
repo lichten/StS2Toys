@@ -116,7 +116,7 @@ dotnet build
 | アプリ | コマンド | 説明 |
 |--------|----------|------|
 | セーブデータビューア | `dotnet run --project SpireScope` | デッキ・レリックの閲覧 |
-| 静的サイトジェネレータ | `dotnet run --project StS2SiteBuilder` | ゲーム情報サイトの生成 |
+| 成果物インベントリ | `dotnet run --project StS2SiteBuilder` | ソリューション成果物の全体像 HTML（`out/artifacts.html`）の生成 |
 
 ---
 

@@ -41,5 +41,5 @@ deploy.sh
 # Card images (game-derived, not redistributable)
 card-images/
 
-# Site builder output
-StS2SiteBuilder/dist/
+# Artifact inventory output
+StS2SiteBuilder/out/

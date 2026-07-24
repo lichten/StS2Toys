@@ -11,5 +11,6 @@
   <ItemGroup>
     <ProjectReference Include="..\StS2Shared\StS2Shared.csproj" />
     <ProjectReference Include="..\StS2Shared.Assets\StS2Shared.Assets.csproj" />
+    <ProjectReference Include="..\StS2Shared.Spine\StS2Shared.Spine.csproj" />
   </ItemGroup>
 </Project>
